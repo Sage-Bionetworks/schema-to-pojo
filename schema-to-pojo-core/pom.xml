@@ -5,7 +5,7 @@
     <groupId>org.sagebionetworks</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.sagbionetworks</groupId>
+  <groupId>org.sagebionetworks</groupId>
   <artifactId>schema-to-pojo-core</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>schema-to-pojo-core</name>
