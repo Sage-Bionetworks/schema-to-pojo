@@ -23,5 +23,4 @@ public class CompareUtils {
 		// epsilon – absolute error.
 		return Math.abs(a-b) < ABSOLUTE_ERROR;
 	}
-
 }
