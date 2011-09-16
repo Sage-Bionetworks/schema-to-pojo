@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,15 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		
 		// Determine the type of this class
 		if(schema.getType() == null) throw new IllegalArgumentException("TYPE cannot be null");
+		
+		// First check to see if this is a date format
+		if(schema.getFormat() != null){
+			if(schema.getFormat().isDateFormat()){
+				// If the format is a date then the java type is a date.
+				return _package.owner().ref(Date.class);
+			}
+		}
+		
 		// Handle primitives
 		if(schema.getType().isPrimitive()){
 			// This is a primitive

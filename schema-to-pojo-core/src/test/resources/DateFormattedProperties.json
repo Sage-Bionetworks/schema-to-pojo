@@ -1,0 +1,21 @@
+{
+    "type" : "object",
+    "properties" : {
+        "stringAsDateTime" : {
+            "type" : "string",
+            "format" : "date-time"
+        },
+        "stringAsTime" : {
+            "type" : "string",
+            "format" : "time"
+        },
+        "stringAsDate" : {
+            "type" : "string",
+            "format" : "date"
+        },
+        "stringAsUtcMillisec" : {
+            "type" : "string",
+            "format" : "utc-millisec"
+        }
+    }
+}

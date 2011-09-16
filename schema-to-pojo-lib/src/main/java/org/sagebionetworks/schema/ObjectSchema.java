@@ -1,7 +1,5 @@
 package org.sagebionetworks.schema;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -329,7 +327,7 @@ public class ObjectSchema implements JSONEntity{
 	 * schema is defined to be that of the parent schema. The current URI of the
 	 * schema is also used to construct relative references such as for $ref.
 	 */
-	private URI id;
+	private String id;
 	/*
 	 * 5.28. $ref
 	 * 
@@ -341,7 +339,7 @@ public class ObjectSchema implements JSONEntity{
 	 * the instance. This URI MAY be relative or absolute, and relative URIs
 	 * SHOULD be resolved against the URI of the current schema.
 	 */
-	private URI ref;
+	private String ref;
 
 	/*
 	 * 5.29. $schema
@@ -358,7 +356,7 @@ public class ObjectSchema implements JSONEntity{
 	 * schema authors include this attribute in their schemas to prevent
 	 * conflicts with future JSON Schema specification changes.
 	 */
-	private URI schema;
+	private String schema;
 
 	/**
 	 * New Object of a given type.
@@ -379,7 +377,7 @@ public class ObjectSchema implements JSONEntity{
 	 * @param id
 	 * @return
 	 */
-	public static ObjectSchema createNewWithId(URI id){
+	public static ObjectSchema createNewWithId(String id){
 		if(id == null) throw new IllegalArgumentException("Id cannot be null");
 		ObjectSchema schema = new ObjectSchema();
 		schema.setId(id);
@@ -1211,7 +1209,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @return
 	 */
-	public URI getId() {
+	public String getId() {
 		return id;
 	}
 
@@ -1230,7 +1228,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @param id
 	 */
-	public void setId(URI id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -1247,7 +1245,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @return
 	 */
-	public URI getRef() {
+	public String getRef() {
 		return ref;
 	}
 
@@ -1264,7 +1262,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @param $ref
 	 */
-	public void setRef(URI $ref) {
+	public void setRef(String $ref) {
 		this.ref = $ref;
 	}
 
@@ -1285,7 +1283,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @return
 	 */
-	public URI getSchema() {
+	public String getSchema() {
 		return schema;
 	}
 
@@ -1306,7 +1304,7 @@ public class ObjectSchema implements JSONEntity{
 	 * 
 	 * @param $schema
 	 */
-	public void setSchema(URI $schema) {
+	public void setSchema(String $schema) {
 		this.schema = $schema;
 	}
 
@@ -1605,10 +1603,10 @@ public class ObjectSchema implements JSONEntity{
 			}
 		}
 		if(this.minimum != null){
-			copy.put("minimum", this.minimum);
+			putBasedOnType(copy, "minimum", this.minimum, type);
 		}
 		if(this.maximum != null){
-			copy.put("maximum", this.maximum);
+			putBasedOnType(copy, "maximum", this.maximum, type);
 		}
 		if(this.description != null){
 			copy.put("description", this.description);
@@ -1622,7 +1620,29 @@ public class ObjectSchema implements JSONEntity{
 		if(this._extends != null){
 			copy.put("extends", this._extends.writeToJSONObject(in));
 		}
+		if(this.format != null){
+			copy.put("format", this.format.getJSONValue());
+		}
 		return copy;
+	}
+	
+	/**
+	 * How we add values to the adapter depends on the object type for min and max.
+	 * @param copy
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @throws JSONObjectAdapterException
+	 */
+	private static void putBasedOnType(JSONObjectAdapter copy, String key, Number value, TYPE type) throws JSONObjectAdapterException{
+		if(type == null) throw new IllegalArgumentException("Type cannot be null");
+		if(TYPE.INTEGER == type){
+			copy.put(key, value.longValue());
+		}else if(TYPE.NUMBER == type){
+			copy.put(key, value.doubleValue());
+		}else{
+			throw new IllegalArgumentException("Unknown type: "+type+". Only numeric types can have minimum or maximum attributes");
+		}
 	}
 	
 	/**
@@ -1729,22 +1749,17 @@ public class ObjectSchema implements JSONEntity{
 			this.description = adapter.getString("description");
 		}
 		if(adapter.has("id")){
-			try {
-				this.id = new URI(adapter.getString("id"));
-			} catch (URISyntaxException e) {
-				throw new JSONObjectAdapterException(e);
-			}
+			this.id = adapter.getString("id");
 		}
 		if(adapter.has("$ref")){
-			try {
-				this.ref = new URI(adapter.getString("$ref"));
-			} catch (URISyntaxException e) {
-				throw new JSONObjectAdapterException(e);
-			}
+			this.ref = adapter.getString("$ref");
 		}
 		if(adapter.has("extends")){
 			JSONObjectAdapter ex = adapter.getJSONObject("extends");
 			this._extends = new ObjectSchema(ex);
+		}
+		if(adapter.has("format")){
+			this.format = FORMAT.getFormatForJSONValue(adapter.getString("format"));
 		}
 		return adapter;
 	}

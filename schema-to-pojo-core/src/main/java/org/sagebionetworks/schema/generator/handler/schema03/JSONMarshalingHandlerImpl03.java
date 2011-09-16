@@ -1,9 +1,11 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
@@ -14,10 +16,12 @@ import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
+import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JCommentPart;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
@@ -109,12 +113,18 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
             	// Now process this field
             	if(propSchema.getType() == null) throw new IllegalArgumentException("Property: '"+propSchema+"' has a null TYPE on class: "+classType.name());
             	TYPE type = propSchema.getType();
+            	if(type.isPrimitive()){
+            		body.assign(field, param.invoke(type.getMethodName()).arg(propName));
+            		continue;
+            	}
             	// Add an if
             	JConditional hasCondition = body._if(param.invoke("has").arg(propName));
             	JBlock thenBlock = hasCondition._then();
             	// For strings and primitives we can just assign the value right from the adapter.
-            	if(type.isPrimitive() || TYPE.STRING == type){
-            		thenBlock.assign(field, param.invoke(type.getMethodName()).arg(propName));
+            	if(TYPE.STRING == type){
+            		// The format determines how JSON strings are read.
+            		JExpression rhs = assignJSONStringToProperty(classType.owner(), param, propName, propSchema);
+            		thenBlock.assign(field, rhs);
             	}else if(TYPE.ARRAY == type){
             		// Determine the type of the field
         			JClass typeClass = (JClass)field.type();
@@ -156,6 +166,68 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         // Always return the param
         body._return(param);
 		return method;
+	}
+
+
+
+	/**
+	 * Assign a JSON String to a property.  The format determines how it will be treated.
+	 * @param param
+	 * @param propName
+	 * @param field
+	 * @param propertySchema
+	 * @param block
+	 */
+	protected JExpression assignJSONStringToProperty(JCodeModel model, JVar adapter, String propName, ObjectSchema propertySchema) {
+		// The format determines how to treat a string.
+		FORMAT format = propertySchema.getFormat();
+		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
+		if(format == null){
+			// Null format is treated as a simple string.
+			return stringFromAdapter;
+		}else{
+			// Each format is handled separately.
+			if(format == FORMAT.DATE_TIME || format == FORMAT.DATE || format == FORMAT.TIME){
+				// These are all date formats
+				// Use the adapter to adapter to convert from a string to a date
+				return adapter.invoke("convertStringToDate").arg(model.ref(FORMAT.class).staticInvoke("valueOf").arg(format.name())).arg(stringFromAdapter);
+			}else if(format == FORMAT.UTC_MILLISEC){
+				// Create a new date from the UTC string
+				return JExpr._new(model.ref(Date.class)).arg(model.ref(Long.class).staticInvoke("parseLong").arg(stringFromAdapter));
+			}else {
+				throw new IllegalArgumentException("Unsupporetd format: "+format);
+			}
+		}
+	}
+	
+	/**
+	 * Assign a property to a  JSON String.  The format determines how it will be treated.
+	 * @param param
+	 * @param propName
+	 * @param field
+	 * @param propertySchema
+	 * @param block
+	 */
+	protected JExpression assignPropertyToJSONString(JCodeModel model, JVar adapter, String propName, ObjectSchema propertySchema, JFieldVar field) {
+		// The format determines how to treat a string.
+		FORMAT format = propertySchema.getFormat();
+//		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
+		if(format == null){
+			// Null format is treated as a simple string.
+			return field;
+		}else{
+			// Each format is handled separately.
+			if(format == FORMAT.DATE_TIME || format == FORMAT.DATE || format == FORMAT.TIME){
+				// These are all date formats
+				// Use the adapter to adapter to convert from a string to a date
+				return adapter.invoke("convertDateToString").arg(model.ref(FORMAT.class).staticInvoke("valueOf").arg(format.name())).arg(field);
+			}else if(format == FORMAT.UTC_MILLISEC){
+				// Create a new date from the UTC string
+				return model.ref(Long.class).staticInvoke("toString").arg(field.invoke("getTime"));
+			}else{
+				throw new IllegalArgumentException("Unsupporetd format: "+format);
+			}
+		}
 	}
 	
 	protected JExpression createExpresssionToGetFromArray(JVar jsonArray, TYPE arrayType, JClass arrayTypeClass ,JVar index){
@@ -237,7 +309,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
             	// For strings and primitives we can just assign the value right from the adapter.
             	if(TYPE.STRING == type){
             		// call the set method using the field
-            		thenBlock.add(param.invoke("put").arg(field.name()).arg(field));
+            		JExpression valueToPut = assignPropertyToJSONString(classType.owner(), param, propName, propSchema, field);
+            		thenBlock.add(param.invoke("put").arg(field.name()).arg(valueToPut));
             	}else if(TYPE.ARRAY == type){
             		// Determine the type of the field
         			JClass typeClass = (JClass)field.type();

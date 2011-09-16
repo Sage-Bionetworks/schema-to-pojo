@@ -2,8 +2,6 @@ package org.sagebionetworks.schema;
 
 import static org.junit.Assert.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,11 +15,11 @@ import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 public class ObjectSchemaTest {
 	
 	@Test
-	public void testRoundTrip() throws JSONObjectAdapterException, JSONException, URISyntaxException{
+	public void testRoundTrip() throws JSONObjectAdapterException, JSONException{
 		// Create a ObjectModel from the spec example.
 		ObjectSchema example = new ObjectSchema();
 		example.setName("Product");
-		example.setId(new URI("someId"));
+		example.setId(new String("someId"));
 		// Add the properties
 		// id
 		ObjectSchema property = new ObjectSchema();
@@ -32,6 +30,7 @@ public class ObjectSchemaTest {
 		// Name
 		property = new ObjectSchema();
 		property.setType(TYPE.STRING);
+		property.setFormat(FORMAT.DATE_TIME);
 		property.setDescription("Name of the product");
 		property.setRequired(true);
 		example.putProperty("name", property);
@@ -76,10 +75,10 @@ public class ObjectSchemaTest {
 	}
 	
 	@Test
-	public void testRoundTripRef() throws JSONObjectAdapterException, JSONException, URISyntaxException{
+	public void testRoundTripRef() throws JSONObjectAdapterException, JSONException{
 		// Create a ObjectModel from the spec example.
 		ObjectSchema example = new ObjectSchema();
-		example.setRef(new URI("someId"));
+		example.setRef(new String("someId"));
 		
 		// Now go to the JSONString
 		String json = example.toJSONString( new JSONObjectAdapterImpl());
@@ -92,45 +91,45 @@ public class ObjectSchemaTest {
 	}
 	
 	@Test
-	public void testSubSchemaIterator() throws URISyntaxException{
-		Map<URI, ObjectSchema> expectedMap = new HashMap<URI, ObjectSchema>();
+	public void testSubSchemaIterator() {
+		Map<String, ObjectSchema> expectedMap = new HashMap<String, ObjectSchema>();
 		// The root schema to put objects into
 		ObjectSchema root = new ObjectSchema();
 		// Now add some sub-schema
 		
 		// Add a property sub-schema
-		URI uri = new URI("one");
+		String String = new String("one");
 		ObjectSchema sub = new ObjectSchema();
-		sub.setId(uri);
-		expectedMap.put(uri, sub);
+		sub.setId(String);
+		expectedMap.put(String, sub);
 		root.putProperty("someKey", sub);
 		
 		// Add an additionalProperty sub-schema
-		uri = new URI("two");
+		String = new String("two");
 		sub = new ObjectSchema();
-		sub.setId(uri);
-		expectedMap.put(uri, sub);
+		sub.setId(String);
+		expectedMap.put(String, sub);
 		root.putAdditionalProperty("addKey", sub);
 		
 		// Add an item sub
-		uri = new URI("three");
+		String = new String("three");
 		sub = new ObjectSchema();
-		sub.setId(uri);
-		expectedMap.put(uri, sub);
+		sub.setId(String);
+		expectedMap.put(String, sub);
 		root.setItems(sub);
 		
 		// Add an additional item
-		uri = new URI("four");
+		String = new String("four");
 		sub = new ObjectSchema();
-		sub.setId(uri);
-		expectedMap.put(uri, sub);
+		sub.setId(String);
+		expectedMap.put(String, sub);
 		root.setAdditionalItems(sub);
 		
 		// Extends
-		uri = new URI("five");
+		String = new String("five");
 		sub = new ObjectSchema();
-		sub.setId(uri);
-		expectedMap.put(uri, sub);
+		sub.setId(String);
+		expectedMap.put(String, sub);
 		root.setExtends(sub);
 		
 		//Now make sure we find all item with the iterator

@@ -1,6 +1,5 @@
 package org.sagebionetworks.schema.generator;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 
@@ -96,7 +94,7 @@ public class PojoGeneratorDriver {
 	 * @return
 	 */
 	List<ObjectSchema> preprocessSchemas(List<ObjectSchema> list) {
-		Map<URI, ObjectSchema> register = registerAllIdentifiedObjectSchemas(list);
+		Map<String, ObjectSchema> register = registerAllIdentifiedObjectSchemas(list);
 		// Use the register to replace all references with their concrete objects
 		list = findAndReplaceAllReferencesSchemas(register, list);
 		return list;
@@ -130,8 +128,8 @@ public class PojoGeneratorDriver {
 	 * @return
 	 * @throws IllegalArgumentException when duplicate ids are found.
 	 */
-	protected static Map<URI, ObjectSchema> registerAllIdentifiedObjectSchemas(List<ObjectSchema> list){
-		Map<URI, ObjectSchema> map = new HashMap<URI, ObjectSchema>();
+	protected static Map<String, ObjectSchema> registerAllIdentifiedObjectSchemas(List<ObjectSchema> list){
+		Map<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
 		// Walk over all schemas and build up the map.
 		for(ObjectSchema schema: list){
 			registerAllIdentifiedObjectSchemas(map, schema);
@@ -144,7 +142,7 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schemas
 	 */
-	protected static void registerAllIdentifiedObjectSchemas(Map<URI, ObjectSchema> map, ObjectSchema schema){
+	protected static void registerAllIdentifiedObjectSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
 		// first add this object to the map if it has an id
 		if(schema.getId() != null){
 			ObjectSchema duplicate = map.put(schema.getId(), schema);
@@ -165,7 +163,7 @@ public class PojoGeneratorDriver {
 	 * @param list
 	 * @throws IllegalArgumentException if a reference cannot be resolved.
 	 */
-	protected static List<ObjectSchema> findAndReplaceAllReferencesSchemas(Map<URI, ObjectSchema> map, List<ObjectSchema> list){
+	protected static List<ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, List<ObjectSchema> list){
 		List<ObjectSchema> results = new ArrayList<ObjectSchema>();
 		for(ObjectSchema schema: list){
 			// If this schema is a reference then replace it.
@@ -180,7 +178,7 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<URI, ObjectSchema> map, ObjectSchema schema){
+	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
 		// First replace for each child
 		Iterator<ObjectSchema> it = schema.getSubSchemaIterator();
 		while(it.hasNext()){
@@ -196,7 +194,7 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void findAndReplaceAllReferencesSchemas(Map<URI, ObjectSchema> map, ObjectSchema schema){
+	protected static void findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
 		// Properties
 		if(schema.getProperties() != null){
 			schema.setProperties(findAndReplaceAllReferencesSchemas(map, schema.getProperties(), schema));
@@ -226,7 +224,7 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static Map<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<URI, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
+	protected static Map<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
 		HashMap<String, ObjectSchema> newMap = new HashMap<String, ObjectSchema>();
 		Iterator<String> it = toCheck.keySet().iterator();
 		while(it.hasNext()){
@@ -245,7 +243,7 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static ObjectSchema replaceRefrence(Map<URI, ObjectSchema> registry, ObjectSchema toCheck, ObjectSchema self) {
+	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, ObjectSchema self) {
 		// Nothing to do if it is not a reference.
 		if (toCheck.getRef() == null)
 			return toCheck;

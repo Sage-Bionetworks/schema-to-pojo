@@ -1,11 +1,15 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 
@@ -54,11 +58,109 @@ public class TypeCreatorHandlerImpl03Test {
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		// Write to a string
 		String classString = declareToString(sampleClass);
-		System.out.println(classString);
+//		System.out.println(classString);
 		assertTrue(classString.indexOf(title) > 0);
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 	}
+	
+	@Test
+	public void testStringFormatedDateTime() throws ClassNotFoundException{
+		// String formated as date-time
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.DATE_TIME);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testStringFormatedDate() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.DATE);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testStringFormatedTime() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.TIME);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testStringFormatedUTC_MILLISEC() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.UTC_MILLISEC);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	
+	@Test
+	public void testIntegerFormatedDateTime() throws ClassNotFoundException{
+		// String formated as date-time
+		schema.setType(TYPE.INTEGER);
+		schema.setFormat(FORMAT.DATE_TIME);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testItegerFormatedDate() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.INTEGER);
+		schema.setFormat(FORMAT.DATE);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testIntegerFormatedTime() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.TIME);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	@Test
+	public void testIntegerFormatedUTC_MILLISEC() throws ClassNotFoundException{
+		// String formated as date
+		schema.setType(TYPE.STRING);
+		schema.setFormat(FORMAT.UTC_MILLISEC);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null);
+		assertNotNull(clazz);
+		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
 	
 	/**
 	 * Helper to declare a model object to string.

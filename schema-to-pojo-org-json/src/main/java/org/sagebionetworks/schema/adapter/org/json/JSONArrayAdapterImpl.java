@@ -10,17 +10,17 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  * An org.json.JSONObject Implementation of JSONObjectAdapter.
  * 
  * @author John
- *
+ * 
  */
 public class JSONArrayAdapterImpl implements JSONArrayAdapter {
-	
-	JSONArray wrapped;
-	
-	public JSONArrayAdapterImpl(){
+
+	protected JSONArray wrapped;
+
+	public JSONArrayAdapterImpl() {
 		wrapped = new JSONArray();
 	}
-	
-	public JSONArrayAdapterImpl(JSONArray array){
+
+	public JSONArrayAdapterImpl(JSONArray array) {
 		wrapped = array;
 	}
 
@@ -90,17 +90,6 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, Object value)
-			throws JSONObjectAdapterException {
-		try {
-			wrapped.put(index, value);
-			return this;
-		} catch (JSONException e) {
-			throw new JSONObjectAdapterException(e);
-		}
-	}
-
-	@Override
 	public JSONObjectAdapter getJSONObject(int index)
 			throws JSONObjectAdapterException {
 		try {
@@ -108,6 +97,114 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
 		}
+	}
+
+	@Override
+	public String toJSONString() {
+		return wrapped.toString();
+	}
+
+	@Override
+	public JSONObjectAdapter createNew() {
+		return new JSONObjectAdapterImpl();
+	}
+
+	@Override
+	public JSONArrayAdapter createNewArray() {
+		return new JSONArrayAdapterImpl();
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, JSONArrayAdapter value)
+			throws JSONObjectAdapterException {
+		JSONArrayAdapterImpl impl = (JSONArrayAdapterImpl) value;
+		try {
+			wrapped.put(index, impl.wrapped);
+			return this;
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, JSONObjectAdapter value)	throws JSONObjectAdapterException {
+		JSONObjectAdapterImpl impl = (JSONObjectAdapterImpl) value;
+		try {
+			wrapped.put(index, impl.wrapped);
+			return this;
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, String value)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, value);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, long value)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, value);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, double value)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, value);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, boolean value)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, value);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, int value)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, value);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		return wrapped.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return wrapped.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return wrapped.equals(obj);
 	}
 
 }

@@ -4,18 +4,19 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>parent-1.0</version>
 	</parent>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-integration-tests</artifactId>
 	<name>schema-to-pojo-integration-tests</name>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${schema-to-pojo-version}</version>
+	<packaging>jar</packaging>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.sagebionetworks</groupId>
 				<artifactId>schema-to-pojo-maven-plugin</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
+				<version>${schema-to-pojo-version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -34,7 +35,7 @@
 		<dependency>
 			<groupId>org.sagebionetworks</groupId>
 			<artifactId>schema-to-pojo-org-json</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${schema-to-pojo-version}</version>
 			<type>jar</type>
 		</dependency>
 	</dependencies>

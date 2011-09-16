@@ -1,6 +1,9 @@
 package org.sagebionetworks.schema.adapter;
 
+import java.util.Date;
 import java.util.Iterator;
+
+import org.sagebionetworks.schema.FORMAT;
 
 
 /**
@@ -11,31 +14,14 @@ import java.util.Iterator;
  * @author jmhill
  *
  */
-public interface JSONObjectAdapter {
+public interface JSONObjectAdapter extends JSONAdapter {
 	
-	/**
-	 * Create a new Object.
-	 * @return
-	 */
-	public JSONObjectAdapter createNew();
-	
-	/**
-	 * Create a new array.
-	 * @return
-	 */
-	public JSONArrayAdapter createNewArray();
-	
+
 	/**
 	 * Key iterator.
 	 * @return
 	 */
-	public Iterator keys(); 
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String toJSONString();
+	public Iterator<String> keys(); 
 
     /**
      * Get the string associated with a key.
@@ -66,7 +52,6 @@ public interface JSONObjectAdapter {
 	
 	public JSONObjectAdapter put(String key, JSONArrayAdapter value) throws JSONObjectAdapterException;
 	
-	public JSONObjectAdapter put(String key, Object value) throws JSONObjectAdapterException;
 	
     /**
      * Get the long value associated with a key. If the number value is too
@@ -145,6 +130,22 @@ public interface JSONObjectAdapter {
      */
 	public boolean isNull(String key);
 	
+	
+	/**
+	 * Convert a Date to a string of the given format.
+	 * @param format
+	 * @param toFormat
+	 * @return
+	 */
+	public String convertDateToString(FORMAT format, Date toFormat);
+	
+	/**
+	 * Convert a String to a Date of the given format.
+	 * @param format
+	 * @param toFormat
+	 * @return
+	 */
+	public Date convertStringToDate(FORMAT format, String toFormat);
 	
 	
 }

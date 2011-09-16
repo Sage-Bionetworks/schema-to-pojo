@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+	<!-- This defines this project as GWT module so it can be imported by GWT projects. -->
+	<inherits name="com.google.gwt.junit.JUnit"/>
+	<!-- We want all file in schema to be included in GWT client compile -->
+	<source path='schema' />
+	
+</module>

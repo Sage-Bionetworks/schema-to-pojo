@@ -1,9 +1,9 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +17,6 @@ import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
-import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 import org.sagebionetworks.schema.generator.handler.schema03.HandlerFactoryImpl03;
 
 import com.sun.codemodel.JCodeModel;
@@ -34,80 +33,80 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testRegisterAllIdentifiedObjectSchemasDuplicate() throws URISyntaxException{
+	public void testRegisterAllIdentifiedObjectSchemasDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		list.add(ObjectSchema.createNewWithId(new URI("one")));
-		list.add(ObjectSchema.createNewWithId(new URI("one")));
+		list.add(ObjectSchema.createNewWithId("one"));
+		list.add(ObjectSchema.createNewWithId("one"));
 		// This should fail due to the duplicate
 		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testRegisterAllIdentifiedObjectSchemasNestedDuplicate() throws URISyntaxException{
+	public void testRegisterAllIdentifiedObjectSchemasNestedDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		ObjectSchema root1 = ObjectSchema.createNewWithId(new URI("rootOne"));
+		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
 		list.add(root1);
-		ObjectSchema root2 = ObjectSchema.createNewWithId(new URI("rootTwo"));
+		ObjectSchema root2 = ObjectSchema.createNewWithId("rootTwo");
 		list.add(root2);
 		// Add a child to each with a duplicate name
-		root1.setItems(ObjectSchema.createNewWithId(new URI("child")));
+		root1.setItems(ObjectSchema.createNewWithId("child"));
 		// Add a child to each with a duplicate name
-		root2.setItems(ObjectSchema.createNewWithId(new URI("child")));
+		root2.setItems(ObjectSchema.createNewWithId("child"));
 		// This should fail due to the duplicate
 		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 	}
 	
 	@Test 
-	public void testRegisterAllIdentifiedObjectSchemasNested() throws URISyntaxException{
+	public void testRegisterAllIdentifiedObjectSchemasNested() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		ObjectSchema root1 = ObjectSchema.createNewWithId(new URI("rootOne"));
+		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
 		list.add(root1);
-		ObjectSchema root2 = ObjectSchema.createNewWithId(new URI("rootTwo"));
+		ObjectSchema root2 = ObjectSchema.createNewWithId("rootTwo");
 		list.add(root2);
 		// Add a child to each with a unique name
-		root1.setItems(ObjectSchema.createNewWithId(new URI("child1")));
+		root1.setItems(ObjectSchema.createNewWithId("child1"));
 		// Add a child to each with a unique name
-		root2.setItems(ObjectSchema.createNewWithId(new URI("child2")));
+		root2.setItems(ObjectSchema.createNewWithId("child2"));
 		// This should not fail this time.
-		Map<URI, ObjectSchema> map = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		Map<String, ObjectSchema> map = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		assertNotNull(map);
 		assertEquals(4, map.size());
-		assertEquals(root1, map.get(new URI("rootOne")));
-		assertEquals(root2, map.get(new URI("rootTwo")));
-		assertNotNull(map.get(new URI("child1")));
-		assertNotNull(map.get(new URI("child2")));
+		assertEquals(root1, map.get(new String("rootOne")));
+		assertEquals(root2, map.get(new String("rootTwo")));
+		assertNotNull(map.get(new String("child1")));
+		assertNotNull(map.get(new String("child2")));
 	}
 	
 	@Test
-	public void testReplaceRefrence() throws URISyntaxException{
+	public void testReplaceRefrence() {
 		// This is not a reference so the replace should just return it.
-		ObjectSchema root1 = ObjectSchema.createNewWithId(new URI("rootOne"));
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<URI, ObjectSchema>(), root1, null);
+		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), root1, null);
 		assertEquals(root1, replaced);
 	}
 	
 	@Test
-	public void testReplaceRefrenceSelf() throws URISyntaxException{
+	public void testReplaceRefrenceSelf() {
 		// This is not a reference so the replace should just return it.
-		ObjectSchema self = ObjectSchema.createNewWithId(new URI("rootOne"));
+		ObjectSchema self = ObjectSchema.createNewWithId("rootOne");
 		// Create a self self reference
 		ObjectSchema refrenceToSelf = new ObjectSchema();
-		refrenceToSelf.setRef(new URI(ObjectSchema.SELF_REFERENCE));
+		refrenceToSelf.setRef(ObjectSchema.SELF_REFERENCE);
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<URI, ObjectSchema>(), refrenceToSelf, self);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), refrenceToSelf, self);
 		// Should be replaced with self
 		assertEquals(self, replaced);
 	}
 	
 	@Test
-	public void testReplaceRefrenceRegistry() throws URISyntaxException{
+	public void testReplaceRefrenceRegistry() {
 		// This is not a reference so the replace should just return it.
-		URI referenceId = new URI("rootOne");
+		String referenceId = "rootOne";
 		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
-		HashMap<URI, ObjectSchema> registry = new HashMap<URI, ObjectSchema>();
+		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a self self reference
@@ -115,7 +114,7 @@ public class PojoGeneratorDriverTest {
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new URI("self"));
+		ObjectSchema self = ObjectSchema.createNewWithId("self");
 		
 		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, self);
 		// Should be replaced with referenced
@@ -123,28 +122,28 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
-	public void testReplaceRefrenceMissRegistry() throws URISyntaxException{
+	public void testReplaceRefrenceMissRegistry() {
 		// This is not a reference so the replace should just return it.
-		URI referenceId = new URI("rootOne");
+		String referenceId = new String("rootOne");
 		// This time the referenced is not in the register
-		HashMap<URI, ObjectSchema> registry = new HashMap<URI, ObjectSchema>();
+		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Create a self self reference
 		ObjectSchema referenceToOther = new ObjectSchema();
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new URI("self"));
+		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
 		// This should fail since the referenced is not in the register
 		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, self);
 	}
 	
 	@Test
-	public void testFindAndReplaceAllReferencesSchemas() throws URISyntaxException{
+	public void testFindAndReplaceAllReferencesSchemas() {
 		// Build up a map with one reference and one not
 		// This is not a reference so the replace should just return it.
-		URI referenceId = new URI("rootOne");
+		String referenceId = new String("rootOne");
 		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
-		HashMap<URI, ObjectSchema> registry = new HashMap<URI, ObjectSchema>();
+		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a self self reference
@@ -152,9 +151,9 @@ public class PojoGeneratorDriverTest {
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new URI("self"));
+		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
 		ObjectSchema refToSelf = new ObjectSchema();
-		refToSelf.setRef(new URI(ObjectSchema.SELF_REFERENCE));
+		refToSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
 		// Now add all three to the a map
 		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
 		map.put("one", referenced);
@@ -170,16 +169,16 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
-	public void testFindAndReplaceAllReferencesSchemasFull() throws URISyntaxException{
-		URI referenceId = new URI("rootOne");
+	public void testFindAndReplaceAllReferencesSchemasFull(){
+		String referenceId = new String("rootOne");
 		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
-		HashMap<URI, ObjectSchema> registry = new HashMap<URI, ObjectSchema>();
+		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new URI("self"));
+		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
 		ObjectSchema refToSelf = new ObjectSchema();
-		refToSelf.setRef(new URI(ObjectSchema.SELF_REFERENCE));
+		refToSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
 		
 		ObjectSchema referenceToOther = new ObjectSchema();
 		referenceToOther.setRef(referenceId);
@@ -202,11 +201,11 @@ public class PojoGeneratorDriverTest {
 	
 
 	@Test
-	public void testNestedObjects() throws JSONObjectAdapterException, URISyntaxException{
+	public void testNestedObjects() throws JSONObjectAdapterException{
 		// Create an object with nesting
 		ObjectSchema root = new ObjectSchema();
 		root.setName("Root");
-		root.setId(new URI("root"));
+		root.setId(new String("root"));
 		// Create a child class
 		ObjectSchema child = new ObjectSchema();
 		child.setName("Child");
@@ -216,7 +215,7 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema grand = new ObjectSchema();
 		grand.setName("Grand");
 		grand.setType(TYPE.OBJECT);
-		URI grandId = new URI("grand");
+		String grandId = new String("grand");
 		grand.setId(grandId);
 		child.putProperty("grandChildInstance1", grand);
 		ObjectSchema grandRef = new ObjectSchema();
@@ -231,7 +230,7 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(test);
 		assertEquals(grandId, test.getRef());
 		
-		Map<URI, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 		// Validate that the nest grand child reference is replaced
 		test = child.getProperties().get("grandChildInstance2");
@@ -241,40 +240,40 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
-	public void testNestedSelfObjects() throws JSONObjectAdapterException, URISyntaxException{
+	public void testNestedSelfObjects() throws JSONObjectAdapterException {
 		// Create an object with nesting
 		ObjectSchema root = new ObjectSchema();
 		root.setName("Root");
-		root.setId(new URI("root"));
+		root.setId(new String("root"));
 		// Create a child class
 		ObjectSchema child = new ObjectSchema();
-		URI childId = new URI("child");
+		String childId = new String("child");
 		child.setName("Child");
 		child.setId(childId);
 		child.setType(TYPE.OBJECT);
 		root.putProperty("childInstance1", child);
 		// Add a self reference child
 		ObjectSchema childSelf = new ObjectSchema();
-		childSelf.setRef(new URI(ObjectSchema.SELF_REFERENCE));
+		childSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
 		child.putProperty("selfRefrence", childSelf);
 		// Create a grand child
 
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		list.add(root);
-		Map<URI, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 	}
 	
 	@Test
-	public void testCycle() throws JSONObjectAdapterException, URISyntaxException{
+	public void testCycle() throws JSONObjectAdapterException {
 		// Create an object with nesting
 		ObjectSchema root = new ObjectSchema();
 		root.setName("Root");
-		URI rootId = new URI("root");
+		String rootId = new String("root");
 		root.setId(rootId);
 		// Create a child class
 		ObjectSchema child = new ObjectSchema();
-		URI childId = new URI("child");
+		String childId = new String("child");
 		child.setName("Child");
 		child.setId(childId);
 		child.setType(TYPE.OBJECT);
@@ -287,7 +286,7 @@ public class PojoGeneratorDriverTest {
 
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		list.add(root);
-		Map<URI, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 	}
 

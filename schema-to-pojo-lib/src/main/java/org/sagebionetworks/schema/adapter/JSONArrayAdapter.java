@@ -2,7 +2,7 @@ package org.sagebionetworks.schema.adapter;
 
 
 
-public interface JSONArrayAdapter {
+public interface JSONArrayAdapter extends JSONAdapter{
 	
     /**
      * Get the boolean value associated with an index.
@@ -11,7 +11,7 @@ public interface JSONArrayAdapter {
      * @param index The index must be between 0 and length() - 1.
      * @return      The truth.
      * @throws JSONObjectAdapterException If there is no value for the index or if the
-     *  value is not convertable to boolean.
+     *  value is not convertible to boolean.
      */
     public boolean getBoolean(int index) throws JSONObjectAdapterException;
     
@@ -63,7 +63,19 @@ public interface JSONArrayAdapter {
      * @return
      * @throws JSONObjectAdapterException
      */
-    public JSONArrayAdapter put(int index, Object value) throws JSONObjectAdapterException;
+    public JSONArrayAdapter put(int index, JSONArrayAdapter value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, JSONObjectAdapter value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, String value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, long value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, double value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, boolean value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, int value) throws JSONObjectAdapterException;
 
     /**
      * Get the JSONObject associated with an index.
@@ -104,6 +116,12 @@ public interface JSONArrayAdapter {
      * @return The length (or size).
      */
     public int length() ;
+    
+    /**
+     * Convert the array to a JSON String
+     * @return
+     */
+    public String toJSONString();
     
 
 }

@@ -1,9 +1,13 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import java.util.Date;
 import java.util.Iterator;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -16,7 +20,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  */
 public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	
-	JSONObject wrapped;
+	protected JSONObject wrapped;
 	
 	public JSONObjectAdapterImpl(){
 		wrapped = new JSONObject();
@@ -152,7 +156,7 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	}
 
 	@Override
-	public Iterator keys() {
+	public Iterator<String> keys() {
 		return wrapped.keys();
 	}
 
@@ -224,14 +228,57 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	}
 
 	@Override
-	public JSONObjectAdapter put(String key, Object value)
-			throws JSONObjectAdapterException {
-		try {
-			wrapped.put(key, value);
-			return this;
-		} catch (JSONException e) {
-			throw new JSONObjectAdapterException(e);
+	public String convertDateToString(FORMAT format, Date toFormat) {
+		if(format == null) throw new IllegalArgumentException("FORMAT cannot be null");
+		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
+		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
+		if(FORMAT.DATE_TIME == format){
+			DateTime dt = new DateTime(toFormat.getTime());
+			return ISODateTimeFormat.dateTime().print(dt);
+		}else if(FORMAT.DATE == format){
+			DateTime dt = new DateTime(toFormat.getTime());
+			return ISODateTimeFormat.date().print(dt);
+		}else if(FORMAT.TIME == format){
+			DateTime dt = new DateTime(toFormat.getTime());
+			return ISODateTimeFormat.time().print(dt);
+		}else{
+			throw new IllegalArgumentException("Unknown date format: "+format.name());
 		}
 	}
+
+	@Override
+	public Date convertStringToDate(FORMAT format, String toFormat) {
+		if(format == null) throw new IllegalArgumentException("FORMAT cannot be null");
+		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
+		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
+		if(FORMAT.DATE_TIME == format){
+			DateTime dt = ISODateTimeFormat.dateTime().parseDateTime(toFormat);
+			return dt.toDate();
+		}else if(FORMAT.DATE == format){
+			DateTime dt = ISODateTimeFormat.date().parseDateTime(toFormat);
+			return dt.toDate();
+		}else if(FORMAT.TIME == format){
+			DateTime dt = ISODateTimeFormat.time().parseDateTime(toFormat);
+			return dt.toDate();
+		}else{
+			throw new IllegalArgumentException("Unknown date format: "+format.name());
+		}
+	}
+
+	@Override
+	public String toString() {
+		return wrapped.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return wrapped.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return wrapped.equals(obj);
+	}
+	
 
 }

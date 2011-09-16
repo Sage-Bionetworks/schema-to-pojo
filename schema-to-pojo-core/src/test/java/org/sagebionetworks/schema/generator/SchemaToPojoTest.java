@@ -59,34 +59,7 @@ public class SchemaToPojoTest {
 		// Load the file string
 		String resultString = FileUtil.readToString(result);
 		System.out.println(resultString);
-		
-		// Compile the code
-		String path = result.getAbsolutePath().replaceAll("\\\\","/");
-//		CompilationResult compResults = compile(new String[]{"-source","1.6","-target","1.6","-verbose", path}, outputDir);
-//		CompilationResult compResults = compile(new String[]{"com/example/Product.java"}, outputDir);
-//		assertNotNull(compResults);
-//		assertNotNull(compResults.getErrors());
-//		StringBuilder errors = new StringBuilder();
-//		for(CompilationProblem problem: compResults.getErrors()){
-//			errors.append(problem.toString());
-//			errors.append("\n");
-//		}
-//		assertTrue(errors.toString(), compResults.getErrors().length == 0);
-
 	}
 
-//	public static CompilationResult compile(String[] toCompile, File outputDir) {
-//		JavaCompiler compiler = new JavaCompilerFactory()
-//				.createCompiler("eclipse");
-//
-//		JavaCompilerSettings compilerSettings = compiler
-//				.createDefaultSettings();
-//		compilerSettings.setSourceVersion("1.6");
-//		compilerSettings.setTargetVersion("1.6");
-//
-//		return compiler.compile(toCompile, new FileResourceReader(outputDir),
-//				new FileResourceStore(outputDir), Thread.currentThread()
-//						.getContextClassLoader(), compilerSettings);
-//	}
 
 }
