@@ -1,0 +1,35 @@
+{
+    "type":"object",
+    "properties":{
+        "stringProp":{
+            "type":"string"
+        },
+        "longProp":{
+            "type":"integer"
+        },
+        "stringAsDate":{
+            "type":"string",
+            "format":"date-time"
+        },
+        "doubleProp":{
+            "type":"number"
+        },
+        "booleanProp":{
+            "type":"boolean"
+        },
+        "listOfStrings":{
+            "type":"array",
+            "items":{
+                "type":"string"
+            }
+        },
+        "setOfStrings":{
+            "type":"array",
+            "uniqueItems":true,
+            "items":{
+                "type":"string"
+            }
+        },
+        
+    }
+}
