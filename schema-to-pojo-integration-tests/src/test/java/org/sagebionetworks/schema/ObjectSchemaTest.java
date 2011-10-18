@@ -42,6 +42,7 @@ public class ObjectSchemaTest {
 		// Add an array
 		property = new ObjectSchema();
 		property.setType(TYPE.ARRAY);
+		property.setUniqueItems(true);
 		ObjectSchema arrayType  = new ObjectSchema();
 		arrayType.setType(TYPE.INTEGER);
 		property.setAdditionalItems(arrayType);

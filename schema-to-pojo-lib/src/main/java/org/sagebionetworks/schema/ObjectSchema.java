@@ -1590,6 +1590,9 @@ public class ObjectSchema implements JSONEntity{
 		if(this.items != null){
 			copy.put("items", this.items.writeToJSONObject(in));
 		}
+		if(this.uniqueItems != null){
+			copy.put("uniqueItems", this.uniqueItems.booleanValue());
+		}
 		if(this.additionalItems != null){
 			copy.put("additionalItems", this.additionalItems.writeToJSONObject(in));
 		}
@@ -1731,6 +1734,11 @@ public class ObjectSchema implements JSONEntity{
 		if(adapter.has("items")){
 			JSONObjectAdapter items = adapter.getJSONObject("items");
 			this.items = new ObjectSchema(items);
+		}
+		if(adapter.has("uniqueItems")){
+			this.uniqueItems =  adapter.getBoolean("uniqueItems");
+		}else{
+			this.uniqueItems = null;
 		}
 		if(adapter.has("additionalItems")){
 			JSONObjectAdapter additionalItems = adapter.getJSONObject("additionalItems");
