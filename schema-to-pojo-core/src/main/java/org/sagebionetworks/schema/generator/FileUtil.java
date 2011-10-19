@@ -21,7 +21,7 @@ public class FileUtil {
 	/**
 	 * The recursive iterator can be used to walk all files in a directory tree.
 	 * Children will appear before parent directories so this can be used for
-	 * recurisve deletes.
+	 * recursive deletes.
 	 * 
 	 * @param root
 	 * @param filter
