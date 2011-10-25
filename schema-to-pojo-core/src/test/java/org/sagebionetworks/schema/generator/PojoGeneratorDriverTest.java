@@ -641,6 +641,35 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(fields.get("fromMe"));
 	}
 	
+	@Test
+	public void testLoadedInterfaceNoMembers() throws Exception{
+		String[] namesToLoad = new String[]{
+				"InterfaceA.json",
+				"AImpl.json",
+		};
+		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
+		for(String name: namesToLoad){
+			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
+			schemaList.add(schema);
+		}
+		JCodeModel codeModel = new JCodeModel();
+		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		// Get the class
+		JPackage _package = codeModel._package("org.sample");
+		JDefinedClass impl =  null;
+		try{
+			impl = _package._class("AImpl");
+		}catch (JClassAlreadyExistsException e) {
+			impl = e.getExistingClass();
+		} 
+		String classString = declareToString(impl);
+		System.out.println(classString);
+		Map<String, JFieldVar> fields = impl.fields();
+		assertNotNull(fields);
+		assertNotNull(fields.get("fromInterfaceA"));
+		assertNotNull(fields.get("alsoFromInterfaceA"));
+	}
 	
 	/**
 	 * Helper to declare a model object to string.

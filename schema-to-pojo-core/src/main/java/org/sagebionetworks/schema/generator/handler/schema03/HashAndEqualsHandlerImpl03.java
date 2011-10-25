@@ -61,50 +61,58 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		JVar temp = null;
 		// Now add all fields 
 		// Now process each property
-        if(classSchema.getProperties()!= null){
-        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-            Iterator<String> keyIt = fieldMap.keySet().iterator();
-            while(keyIt.hasNext()){
-            	String propName = keyIt.next();
-            	ObjectSchema propSchema = fieldMap.get(propName);
-            	// Look up the field for this property
-            	JFieldVar field = classType.fields().get(propName);
-            	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
-            	// Now process this field
-            	if(propSchema.getType() == null) throw new IllegalArgumentException("Property: '"+propSchema+"' has a null TYPE on class: "+classType.name());
-            	TYPE type = propSchema.getType();
-            	
-            	// For each type we need to setup the add expression
-            	JExpression addExpression = null;
-            	// For all non-primitives we can use "hashCode"
-            	if(TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type || TYPE.NULL == type || TYPE.OBJECT == type){
-            		// If the object is not null then use hashCode() else, 0;
-            		addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0), field.invoke("hashCode"));
-            	}else if(TYPE.NUMBER == type){
-            		// Double requires special treatment
-            		// Create or initialized the temp
-            		JInvocation staticInvoke = classType.owner().ref(Double.class).staticInvoke("doubleToLongBits").arg(field);
-            		if(temp == null){
-            			// Declare it the first time
-            			temp = body.decl(JMod.NONE, classType.owner().LONG, "temp", staticInvoke);
-            		}else{
-            			// Assign it all other times
-            			body.assign(temp, staticInvoke);
-            		}
-            		addExpression = shiftXORCastLong(classType, temp);
-            	}else if(TYPE.INTEGER == type){
-            		// Long requires special treatment
-            		addExpression = shiftXORCastLong(classType, field);
-            	}else if(TYPE.BOOLEAN == type){
-            		// boolean is also special
-            		addExpression = JOp.cond(field, JExpr.lit(1231), JExpr.lit(1237));;
-            	}else{
-            		throw new IllegalArgumentException("Unknown type: "+type);
-            	}
-            	// Put it all together
-            	body.assign(result, prime.mul(result).plus(addExpression));
-            }
-        }
+		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+		Iterator<String> keyIt = fieldMap.keySet().iterator();
+		while (keyIt.hasNext()) {
+			String propName = keyIt.next();
+			ObjectSchema propSchema = fieldMap.get(propName);
+			// Look up the field for this property
+			JFieldVar field = classType.fields().get(propName);
+			if (field == null)
+				throw new IllegalArgumentException(
+						"Failed to find the JFieldVar for property: '"
+								+ propName + "' on class: " + classType.name());
+			// Now process this field
+			if (propSchema.getType() == null)
+				throw new IllegalArgumentException("Property: '" + propSchema
+						+ "' has a null TYPE on class: " + classType.name());
+			TYPE type = propSchema.getType();
+
+			// For each type we need to setup the add expression
+			JExpression addExpression = null;
+			// For all non-primitives we can use "hashCode"
+			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
+					|| TYPE.NULL == type || TYPE.OBJECT == type) {
+				// If the object is not null then use hashCode() else, 0;
+				addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
+						field.invoke("hashCode"));
+			} else if (TYPE.NUMBER == type) {
+				// Double requires special treatment
+				// Create or initialized the temp
+				JInvocation staticInvoke = classType.owner().ref(Double.class)
+						.staticInvoke("doubleToLongBits").arg(field);
+				if (temp == null) {
+					// Declare it the first time
+					temp = body.decl(JMod.NONE, classType.owner().LONG, "temp",
+							staticInvoke);
+				} else {
+					// Assign it all other times
+					body.assign(temp, staticInvoke);
+				}
+				addExpression = shiftXORCastLong(classType, temp);
+			} else if (TYPE.INTEGER == type) {
+				// Long requires special treatment
+				addExpression = shiftXORCastLong(classType, field);
+			} else if (TYPE.BOOLEAN == type) {
+				// boolean is also special
+				addExpression = JOp.cond(field, JExpr.lit(1231),
+						JExpr.lit(1237));
+			} else {
+				throw new IllegalArgumentException("Unknown type: " + type);
+			}
+			// Put it all together
+			body.assign(result, prime.mul(result).plus(addExpression));
+		}
 
         body._return(result);
 		return method;
@@ -147,38 +155,53 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		JVar other = body.decl(JMod.NONE, classType, "other", JExpr.cast(classType, obj));
 		
 		// Now process each property
-        if(classSchema.getProperties()!= null){
-        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-            Iterator<String> keyIt = fieldMap.keySet().iterator();
-            while(keyIt.hasNext()){
-            	String propName = keyIt.next();
-            	ObjectSchema propSchema = fieldMap.get(propName);
-            	// Look up the field for this property
-            	JFieldVar field = classType.fields().get(propName);
-            	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
-            	// Now process this field
-            	if(propSchema.getType() == null) throw new IllegalArgumentException("Property: '"+propSchema+"' has a null TYPE on class: "+classType.name());
-            	TYPE type = propSchema.getType();
-            	
-            	// For all non-primitives we can use "hashCode"
-            	if(TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type || TYPE.NULL == type || TYPE.OBJECT == type){
-            		// just use equals() for all objects
-            		JConditional outerCon = body._if(JOp.eq(field, JExpr._null()));
-            		outerCon._then()._if(JOp.ne(JExpr.ref(other, field), JExpr._null()))._then()._return(JExpr.lit(false));
-            		outerCon._elseif(JOp.not(field.invoke("equals").arg(JExpr.ref(other, field))))._then()._return(JExpr.lit(false));
-            	}else if(TYPE.NUMBER == type){
-            		// doubles are special
-            		JClass doubleClass = classType.owner().ref(Double.class);
-            		body._if(JOp.ne(doubleClass.staticInvoke("doubleToLongBits").arg(field), doubleClass.staticInvoke("doubleToLongBits").arg(JExpr.ref(other, field))))._then()._return(JExpr.lit(false));
-            	}else if(TYPE.INTEGER == type || TYPE.BOOLEAN == type){
-            		// primitives are easy
-            		body._if(JOp.ne(field, JExpr.ref(other, field)))._then()._return(JExpr.lit(false));
-            	}else{
-            		throw new IllegalArgumentException("Unknown type: "+type);
-            	}
+		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+		Iterator<String> keyIt = fieldMap.keySet().iterator();
+		while (keyIt.hasNext()) {
+			String propName = keyIt.next();
+			ObjectSchema propSchema = fieldMap.get(propName);
+			// Look up the field for this property
+			JFieldVar field = classType.fields().get(propName);
+			if (field == null)
+				throw new IllegalArgumentException(
+						"Failed to find the JFieldVar for property: '"
+								+ propName + "' on class: " + classType.name());
+			// Now process this field
+			if (propSchema.getType() == null)
+				throw new IllegalArgumentException("Property: '" + propSchema
+						+ "' has a null TYPE on class: " + classType.name());
+			TYPE type = propSchema.getType();
 
-            }
-        }
+			// For all non-primitives we can use "hashCode"
+			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
+					|| TYPE.NULL == type || TYPE.OBJECT == type) {
+				// just use equals() for all objects
+				JConditional outerCon = body._if(JOp.eq(field, JExpr._null()));
+				outerCon._then()
+						._if(JOp.ne(JExpr.ref(other, field), JExpr._null()))
+						._then()._return(JExpr.lit(false));
+				outerCon._elseif(
+						JOp.not(field.invoke("equals").arg(
+								JExpr.ref(other, field))))._then()
+						._return(JExpr.lit(false));
+			} else if (TYPE.NUMBER == type) {
+				// doubles are special
+				JClass doubleClass = classType.owner().ref(Double.class);
+				body._if(
+						JOp.ne(doubleClass.staticInvoke("doubleToLongBits")
+								.arg(field),
+								doubleClass.staticInvoke("doubleToLongBits")
+										.arg(JExpr.ref(other, field))))._then()
+						._return(JExpr.lit(false));
+			} else if (TYPE.INTEGER == type || TYPE.BOOLEAN == type) {
+				// primitives are easy
+				body._if(JOp.ne(field, JExpr.ref(other, field)))._then()
+						._return(JExpr.lit(false));
+			} else {
+				throw new IllegalArgumentException("Unknown type: " + type);
+			}
+		}
+
         // Add the last return true
         body._return(JExpr.lit(true));
 		return method;

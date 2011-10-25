@@ -18,7 +18,6 @@ import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 
 import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDeclaration;
@@ -38,9 +37,11 @@ public class JSONMarshalingHandlerImpl03Test {
 	JCodeModel codeModel;
 	JPackage _package;
 	JDefinedClass sampleClass;
-	JDefinedClass sampleInterfance;
+	JDefinedClass sampleInterface;
 	JType type;
 	ObjectSchema schema;
+	ObjectSchema schemaInterface;
+
 
 	@Before
 	public void before() throws JClassAlreadyExistsException,
@@ -48,9 +49,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
-		sampleInterfance = _package._interface("SampleInterface");
+		sampleInterface = _package._interface("SampleInterface");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.OBJECT);
+		// Create a schema interface
+		schemaInterface = new ObjectSchema();
+		schemaInterface.setType(TYPE.INTERFACE);
+		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
 	}
 
 	@Test
@@ -769,7 +774,49 @@ public class JSONMarshalingHandlerImpl03Test {
 		ObjectSchema interfaceSchema = new ObjectSchema();
 		interfaceSchema.setType(TYPE.INTERFACE);
 		interfaceSchema.setName("SampleInterface");
-		handler.addJSONMarshaling(interfaceSchema, sampleInterfance);
+		handler.addJSONMarshaling(interfaceSchema, sampleInterface);
+	}
+	
+	@Test
+	public void testInitializeFromJSONForImplements() throws JClassAlreadyExistsException {
+		// For this case we want to use class that has the sample as a base class
+		ObjectSchema childSchema = new ObjectSchema();
+		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
+		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
+		childClasss._implements(sampleInterface);
+		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		// Now handle the
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(childSchema, childClasss);
+		assertNotNull(method);
+		JBlock body = method.body();
+		assertNotNull(body);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+//		System.out.println(methodString);
+		// Make sure there is a call to super.
+		assertTrue(methodString.indexOf("fromInterface = adapter.getBoolean(\"fromInterface\");") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectForImplements() throws JClassAlreadyExistsException {
+		// For this case we want to use class that has the sample as a base class
+		ObjectSchema childSchema = new ObjectSchema();
+		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
+		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
+		childClasss._implements(sampleInterface);
+		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		// Now handle the
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createWriteToJSONObject(childSchema, childClasss);
+		assertNotNull(method);
+		JBlock body = method.body();
+		assertNotNull(body);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+		// Make sure there is a call to super.
+		assertTrue(methodString.indexOf("adapter.put(\"fromInterface\", fromInterface);") > 0);
 	}
 
 	public void printClassToConsole(JDefinedClass classToPrint) {

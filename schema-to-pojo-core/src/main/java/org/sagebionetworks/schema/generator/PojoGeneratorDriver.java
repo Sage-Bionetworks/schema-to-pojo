@@ -70,17 +70,16 @@ public class PojoGeneratorDriver {
 		if(!(type instanceof JDefinedClass)) return null;
 		JDefinedClass classType = (JDefinedClass) type;
 		// Process the properties
-		if(schema.getProperties() != null){
-			Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
-			Iterator<String> it = fieldMap.keySet().iterator();
-			while(it.hasNext()){
-				String key = it.next();
-				ObjectSchema propertySchema  = fieldMap.get(key);
-				// Get type type for this property
-				JType propertyType = createOrGetType(_package, propertySchema);
-				// Create this property
-				factory.getPropertyHandler().createProperty(propertySchema, classType,key, propertyType);
-			}
+		Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
+		Iterator<String> it = fieldMap.keySet().iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			ObjectSchema propertySchema = fieldMap.get(key);
+			// Get type type for this property
+			JType propertyType = createOrGetType(_package, propertySchema);
+			// Create this property
+			factory.getPropertyHandler().createProperty(propertySchema,
+					classType, key, propertyType);
 		}
 		if(TYPE.INTERFACE != schema.getType()){
 			// Add the JSON marshaling

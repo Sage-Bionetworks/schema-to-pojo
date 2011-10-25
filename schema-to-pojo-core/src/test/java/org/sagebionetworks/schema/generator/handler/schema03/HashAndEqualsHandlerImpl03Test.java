@@ -27,8 +27,10 @@ public class HashAndEqualsHandlerImpl03Test {
 	JCodeModel codeModel;
 	JPackage _package;
 	JDefinedClass sampleClass;
+	JDefinedClass sampleInterface;
 	JType type;
 	ObjectSchema schema;
+	ObjectSchema schemaInterface;
 
 	@Before
 	public void before() throws JClassAlreadyExistsException,
@@ -36,8 +38,13 @@ public class HashAndEqualsHandlerImpl03Test {
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
+		sampleInterface = _package._interface("SampleInterface");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.OBJECT);
+		// Create a schema interface
+		schemaInterface = new ObjectSchema();
+		schemaInterface.setType(TYPE.INTERFACE);
+		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
 	}
 	
 	@Test
@@ -83,6 +90,27 @@ public class HashAndEqualsHandlerImpl03Test {
 		// Make sure there is a call to super.
 		assertTrue(methodString.indexOf("int result = super.hashCode();") > 0);
 //		printClassToConsole(childClasss);
+	}
+	
+	@Test
+	public void testHashImplements() throws JClassAlreadyExistsException {
+		// For this case we want to use class that has the sample as a base class
+		ObjectSchema childSchema = new ObjectSchema();
+		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
+		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
+		childClasss._implements(sampleInterface);
+		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		// Now handle the
+		HashAndEqualsHandlerImpl03 handler = new HashAndEqualsHandlerImpl03();
+		JMethod method = handler.addHashCode(childSchema, childClasss);
+		assertNotNull(method);
+		JBlock body = method.body();
+		assertNotNull(body);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+//		System.out.println(methodString);
+		// Make sure there is a call to super.
+		assertTrue(methodString.indexOf("result = ((prime*result)+(fromInterface? 1231 : 1237));") > 0);
 	}
 	
 	@Test
@@ -230,6 +258,26 @@ public class HashAndEqualsHandlerImpl03Test {
 //		printClassToConsole(childClasss);
 	}
 	
+	@Test
+	public void testEqualsImplements() throws JClassAlreadyExistsException {
+		// For this case we want to use class that has the sample as a base class
+		ObjectSchema childSchema = new ObjectSchema();
+		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
+		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
+		childClasss._implements(sampleInterface);
+		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		// Now handle the
+		HashAndEqualsHandlerImpl03 handler = new HashAndEqualsHandlerImpl03();
+		JMethod method = handler.addEquals(childSchema, childClasss);
+		assertNotNull(method);
+		JBlock body = method.body();
+		assertNotNull(body);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+//		System.out.println(methodString);
+		// Make sure there is a call to super.
+		assertTrue(methodString.indexOf("if (fromInterface!= other.fromInterface) ") > 0);
+	}
 	
 	@Test
 	public void testEqualsObject(){

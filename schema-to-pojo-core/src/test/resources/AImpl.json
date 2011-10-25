@@ -1,0 +1,10 @@
+{
+    "type":"object",
+    "id":"AImpl.json",
+    "name":"AImpl",
+    "implements":[
+        {
+            "$ref":"InterfaceA.json"
+        }
+    ]
+}

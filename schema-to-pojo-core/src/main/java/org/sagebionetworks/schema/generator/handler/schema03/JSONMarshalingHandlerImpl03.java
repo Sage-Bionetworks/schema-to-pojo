@@ -106,68 +106,99 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
         
 		// Now process each property
-        if(classSchema.getProperties()!= null){
-        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-            Iterator<String> keyIt = fieldMap.keySet().iterator();
-            while(keyIt.hasNext()){
-            	String propName = keyIt.next();
-            	ObjectSchema propSchema = fieldMap.get(propName);
-            	// Look up the field for this property
-            	JFieldVar field = classType.fields().get(propName);
-            	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
-            	// Now process this field
-            	if(propSchema.getType() == null) throw new IllegalArgumentException("Property: '"+propSchema+"' has a null TYPE on class: "+classType.name());
-            	TYPE type = propSchema.getType();
-            	if(type.isPrimitive()){
-            		body.assign(field, param.invoke(type.getMethodName()).arg(propName));
-            		continue;
-            	}
-            	// Add an if
-            	JConditional hasCondition = body._if(param.invoke("has").arg(propName));
-            	JBlock thenBlock = hasCondition._then();
-            	// For strings and primitives we can just assign the value right from the adapter.
-            	if(TYPE.STRING == type){
-            		// The format determines how JSON strings are read.
-            		JExpression rhs = assignJSONStringToProperty(classType.owner(), param, propName, propSchema);
-            		thenBlock.assign(field, rhs);
-            	}else if(TYPE.ARRAY == type){
-            		// Determine the type of the field
-        			JClass typeClass = (JClass)field.type();
-        			if(typeClass.getTypeParameters().size() != 1) throw new IllegalArgumentException("Cannot determine the type of an array: "+typeClass.fullName());
-        			JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
-        			ObjectSchema arrayTypeSchema = propSchema.getItems();
-        			if(arrayTypeSchema == null) throw new IllegalArgumentException("A property type is ARRAY but the getItems() returned null");
-        			TYPE arrayType = arrayTypeSchema.getType();
-        			if(arrayType == null) throw new IllegalArgumentException("TYPE cannot be null for an ObjectSchema");
-        			//Type arrayType = 
-            		if(!propSchema.getUniqueItems()){
-            			// Create a list
-            			thenBlock.assign(field, JExpr._new(classType.owner().ref(ArrayList.class).narrow(arrayTypeClass)));
-            		}else{
-            			// Create a set
-            			thenBlock.assign(field, JExpr._new(classType.owner().ref(HashSet.class).narrow(arrayTypeClass)));
-            		}
-        			// Create a local array
-        			JVar jsonArray = thenBlock.decl(classType.owner().ref(JSONArrayAdapter.class), "jsonArray", param.invoke("getJSONArray").arg(propName));
-        			JForLoop loop = thenBlock._for();
-        			JVar i = loop.init(classType.owner().INT, "i", JExpr.lit(0));
-        			loop.test(i.lt(jsonArray.invoke("length")));
-        			loop.update(i.incr());
-        			JBlock loopBody = loop.body();
-        			loopBody.add(field.invoke("add").arg(createExpresssionToGetFromArray(jsonArray, arrayType,arrayTypeClass, i)));
-            	}else{
-        			JClass typeClass = (JClass)field.type();
-            		thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke("getJSONObject").arg(propName)));
-            	}
-            	// throw an exception it this is a required fields
-            	if(propSchema.isRequired()){
-                	hasCondition._else()._throw(createIllegalArgumentException(classType, "Property: '"+propName+"' is required and cannot be null"));
-            	}else{
-            		// For non-require properties set the property to null
-            		hasCondition._else().assign(field, JExpr._null());
-            	}
-            }
-        }
+		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+		Iterator<String> keyIt = fieldMap.keySet().iterator();
+		while (keyIt.hasNext()) {
+			String propName = keyIt.next();
+			ObjectSchema propSchema = fieldMap.get(propName);
+			// Look up the field for this property
+			JFieldVar field = classType.fields().get(propName);
+			if (field == null)
+				throw new IllegalArgumentException(
+						"Failed to find the JFieldVar for property: '"
+								+ propName + "' on class: " + classType.name());
+			// Now process this field
+			if (propSchema.getType() == null)
+				throw new IllegalArgumentException("Property: '" + propSchema
+						+ "' has a null TYPE on class: " + classType.name());
+			TYPE type = propSchema.getType();
+			if (type.isPrimitive()) {
+				body.assign(field,
+						param.invoke(type.getMethodName()).arg(propName));
+				continue;
+			}
+			// Add an if
+			JConditional hasCondition = body._if(param.invoke("has").arg(
+					propName));
+			JBlock thenBlock = hasCondition._then();
+			// For strings and primitives we can just assign the value right
+			// from the adapter.
+			if (TYPE.STRING == type) {
+				// The format determines how JSON strings are read.
+				JExpression rhs = assignJSONStringToProperty(classType.owner(),
+						param, propName, propSchema);
+				thenBlock.assign(field, rhs);
+			} else if (TYPE.ARRAY == type) {
+				// Determine the type of the field
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 1)
+					throw new IllegalArgumentException(
+							"Cannot determine the type of an array: "
+									+ typeClass.fullName());
+				JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
+				ObjectSchema arrayTypeSchema = propSchema.getItems();
+				if (arrayTypeSchema == null)
+					throw new IllegalArgumentException(
+							"A property type is ARRAY but the getItems() returned null");
+				TYPE arrayType = arrayTypeSchema.getType();
+				if (arrayType == null)
+					throw new IllegalArgumentException(
+							"TYPE cannot be null for an ObjectSchema");
+				// Type arrayType =
+				if (!propSchema.getUniqueItems()) {
+					// Create a list
+					thenBlock.assign(
+							field,
+							JExpr._new(classType.owner().ref(ArrayList.class)
+									.narrow(arrayTypeClass)));
+				} else {
+					// Create a set
+					thenBlock.assign(
+							field,
+							JExpr._new(classType.owner().ref(HashSet.class)
+									.narrow(arrayTypeClass)));
+				}
+				// Create a local array
+				JVar jsonArray = thenBlock
+						.decl(classType.owner().ref(JSONArrayAdapter.class),
+								"jsonArray",
+								param.invoke("getJSONArray").arg(propName));
+				JForLoop loop = thenBlock._for();
+				JVar i = loop.init(classType.owner().INT, "i", JExpr.lit(0));
+				loop.test(i.lt(jsonArray.invoke("length")));
+				loop.update(i.incr());
+				JBlock loopBody = loop.body();
+				loopBody.add(field.invoke("add").arg(
+						createExpresssionToGetFromArray(jsonArray, arrayType,
+								arrayTypeClass, i)));
+			} else {
+				JClass typeClass = (JClass) field.type();
+				thenBlock.assign(
+						field,
+						JExpr._new(typeClass).arg(
+								param.invoke("getJSONObject").arg(propName)));
+			}
+			// throw an exception it this is a required fields
+			if (propSchema.isRequired()) {
+				hasCondition._else()
+						._throw(createIllegalArgumentException(classType,
+								"Property: '" + propName
+										+ "' is required and cannot be null"));
+			} else {
+				// For non-require properties set the property to null
+				hasCondition._else().assign(field, JExpr._null());
+			}
+		}
         // Always return the param
         body._return(param);
 		return method;
@@ -291,62 +322,93 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JVar param = method.params().get(0);
 		JBlock body = method.body();
 		// Now process each property
-        if(classSchema.getProperties()!= null){
-        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-            Iterator<String> keyIt = fieldMap.keySet().iterator();
-            while(keyIt.hasNext()){
-            	String propName = keyIt.next();
-            	ObjectSchema propSchema = fieldMap.get(propName);
-            	// Look up the field for this property
-            	JFieldVar field = classType.fields().get(propName);
-            	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
-            	// Now process this field
-            	if(propSchema.getType() == null) throw new IllegalArgumentException("Property: '"+propSchema+"' has a null TYPE on class: "+classType.name());
-            	TYPE type = propSchema.getType();
-            	
-            	// Primitives are easy, just assign them
-            	if(field.type().isPrimitive()){
-            		body.add(param.invoke("put").arg(field.name()).arg(field));
-            		continue;
-            	}
-            	// Add an if
-            	JConditional hasCondition = body._if(field.ne(JExpr._null()));
-            	JBlock thenBlock = hasCondition._then();
-            	// For strings and primitives we can just assign the value right from the adapter.
-            	if(TYPE.STRING == type){
-            		// call the set method using the field
-            		JExpression valueToPut = assignPropertyToJSONString(classType.owner(), param, propName, propSchema, field);
-            		thenBlock.add(param.invoke("put").arg(field.name()).arg(valueToPut));
-            	}else if(TYPE.ARRAY == type){
-            		// Determine the type of the field
-        			JClass typeClass = (JClass)field.type();
-        			if(typeClass.getTypeParameters().size() != 1) throw new IllegalArgumentException("Cannot determine the type of an array: "+typeClass.fullName());
-        			JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
-        			ObjectSchema arrayTypeSchema = propSchema.getItems();
-        			if(arrayTypeSchema == null) throw new IllegalArgumentException("A property type is ARRAY but the getItems() returned null");
-        			TYPE arrayType = arrayTypeSchema.getType();
-        			if(arrayType == null) throw new IllegalArgumentException("TYPE cannot be null for an ObjectSchema");
-        			// Create the new JSONArray
-        			JVar array =thenBlock.decl(JMod.NONE, classType.owner().ref(JSONArrayAdapter.class), "array", param.invoke("createNewArray"));
-        			JVar it = thenBlock.decl(JMod.NONE, classType.owner().ref(Iterator.class).narrow(arrayTypeClass), "it", field.invoke("iterator"));
-        			JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT, "index", JExpr.lit(0));
-        			// Create a local array
-        			JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
-        			JBlock loopBody = loop.body();
-        			loopBody.add(array.invoke("put").arg(index).arg(createExpresssionToSetFromArray(arrayType,arrayTypeClass, it, param)));
-        			loopBody.directStatement("index++;");
-        			// Now set the new array
-        			thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
-            	}else{
-            		// All others are treated as objects.
-            		thenBlock.add(param.invoke("put").arg(field.name()).arg(field.invoke("writeToJSONObject").arg(param.invoke("createNew"))));
-            	}
-            	// throw an exception it this is a required fields
-            	if(propSchema.isRequired()){
-                	hasCondition._else()._throw(createIllegalArgumentException(classType, "Property: '"+propName+"' is required and cannot be null"));
-            	}
-            }
-        }
+		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+		Iterator<String> keyIt = fieldMap.keySet().iterator();
+		while (keyIt.hasNext()) {
+			String propName = keyIt.next();
+			ObjectSchema propSchema = fieldMap.get(propName);
+			// Look up the field for this property
+			JFieldVar field = classType.fields().get(propName);
+			if (field == null)
+				throw new IllegalArgumentException(
+						"Failed to find the JFieldVar for property: '"
+								+ propName + "' on class: " + classType.name());
+			// Now process this field
+			if (propSchema.getType() == null)
+				throw new IllegalArgumentException("Property: '" + propSchema
+						+ "' has a null TYPE on class: " + classType.name());
+			TYPE type = propSchema.getType();
+
+			// Primitives are easy, just assign them
+			if (field.type().isPrimitive()) {
+				body.add(param.invoke("put").arg(field.name()).arg(field));
+				continue;
+			}
+			// Add an if
+			JConditional hasCondition = body._if(field.ne(JExpr._null()));
+			JBlock thenBlock = hasCondition._then();
+			// For strings and primitives we can just assign the value right
+			// from the adapter.
+			if (TYPE.STRING == type) {
+				// call the set method using the field
+				JExpression valueToPut = assignPropertyToJSONString(
+						classType.owner(), param, propName, propSchema, field);
+				thenBlock.add(param.invoke("put").arg(field.name())
+						.arg(valueToPut));
+			} else if (TYPE.ARRAY == type) {
+				// Determine the type of the field
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 1)
+					throw new IllegalArgumentException(
+							"Cannot determine the type of an array: "
+									+ typeClass.fullName());
+				JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
+				ObjectSchema arrayTypeSchema = propSchema.getItems();
+				if (arrayTypeSchema == null)
+					throw new IllegalArgumentException(
+							"A property type is ARRAY but the getItems() returned null");
+				TYPE arrayType = arrayTypeSchema.getType();
+				if (arrayType == null)
+					throw new IllegalArgumentException(
+							"TYPE cannot be null for an ObjectSchema");
+				// Create the new JSONArray
+				JVar array = thenBlock.decl(JMod.NONE,
+						classType.owner().ref(JSONArrayAdapter.class), "array",
+						param.invoke("createNewArray"));
+				JVar it = thenBlock.decl(
+						JMod.NONE,
+						classType.owner().ref(Iterator.class)
+								.narrow(arrayTypeClass), "it",
+						field.invoke("iterator"));
+				JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT,
+						"index", JExpr.lit(0));
+				// Create a local array
+				JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
+				JBlock loopBody = loop.body();
+				loopBody.add(array
+						.invoke("put")
+						.arg(index)
+						.arg(createExpresssionToSetFromArray(arrayType,
+								arrayTypeClass, it, param)));
+				loopBody.directStatement("index++;");
+				// Now set the new array
+				thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
+			} else {
+				// All others are treated as objects.
+				thenBlock.add(param
+						.invoke("put")
+						.arg(field.name())
+						.arg(field.invoke("writeToJSONObject").arg(
+								param.invoke("createNew"))));
+			}
+			// throw an exception it this is a required fields
+			if (propSchema.isRequired()) {
+				hasCondition._else()
+						._throw(createIllegalArgumentException(classType,
+								"Property: '" + propName
+										+ "' is required and cannot be null"));
+			}
+		}
         // Always return the param
         body._return(param);
         return method;
