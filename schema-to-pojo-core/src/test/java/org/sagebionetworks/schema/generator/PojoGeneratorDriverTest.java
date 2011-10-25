@@ -588,8 +588,8 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(type);
 		JDefinedClass def = (JDefinedClass) type;
 		String classDeffString = declareToString(def);
-		System.out.println(classDeffString);
-		assertTrue(classDeffString.indexOf("implements org.sample.ParentInterface") > 0);
+//		System.out.println(classDeffString);
+		assertTrue(classDeffString.indexOf("implements org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface") > 0);
 	}
 	
 	@Test
@@ -622,6 +622,7 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(it);
 		String intA = "InterfaceA";
 		String intB = "InterfaceB";
+		String jsonEntity = "JSONEntity";
 		Map<String, JClass> map = new HashMap<String, JClass>();
 		while(it.hasNext()){
 			JClass impClass = it.next();
@@ -629,9 +630,11 @@ public class PojoGeneratorDriverTest {
 				map.put(intA, impClass);
 			}else if(intB.equals(impClass.name())){
 				map.put(intB, impClass);
+			}else if(jsonEntity.equals(impClass.name())){
+				map.put(jsonEntity, impClass);
 			}
 		}
-		assertEquals("Should have implemented two interfaces",2, map.size());
+		assertEquals("Should have implemented two interfaces",3, map.size());
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
@@ -664,7 +667,7 @@ public class PojoGeneratorDriverTest {
 			impl = e.getExistingClass();
 		} 
 		String classString = declareToString(impl);
-		System.out.println(classString);
+//		System.out.println(classString);
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
 		assertNotNull(fields.get("fromInterfaceA"));

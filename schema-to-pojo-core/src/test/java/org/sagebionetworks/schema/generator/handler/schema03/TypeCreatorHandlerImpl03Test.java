@@ -120,7 +120,7 @@ public class TypeCreatorHandlerImpl03Test {
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
 //		System.out.println(classString);
-		assertTrue(classString.indexOf("implements org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
+		assertTrue(classString.indexOf("implements org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
 	}
 	
 	@Test
@@ -134,7 +134,8 @@ public class TypeCreatorHandlerImpl03Test {
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
 //		System.out.println(classString);
-		assertTrue(classString.indexOf("public interface Sample {") > 0);
+		assertTrue(classString.indexOf("public interface Sample") > 0);
+		assertTrue(classString.indexOf("extends org.sagebionetworks.schema.adapter.JSONEntity") > 0);
 	}
 	
 	@Test
@@ -148,9 +149,9 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
-//		System.out.println(classString);
+		System.out.println(classString);
 		assertTrue(classString.indexOf("public interface Sample") > 0);
-		assertTrue(classString.indexOf("extends org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
+		assertTrue(classString.indexOf("extends org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
 	}
 	
 	@Test

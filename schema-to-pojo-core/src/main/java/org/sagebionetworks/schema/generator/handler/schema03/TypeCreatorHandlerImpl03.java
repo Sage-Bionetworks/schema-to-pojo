@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
 import com.sun.codemodel.JClass;
@@ -87,6 +88,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				}else{
 					throw new IllegalArgumentException("Unknown type: "+schema.getType()); 
 				}
+				// Both classes and interfaces should implment JSONEntity:
+				newClass._implements(JSONEntity.class);
 				if(superType != null && TYPE.OBJECT == schema.getType()){
 					newClass._extends((JClass) superType);
 				}
