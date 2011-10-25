@@ -1,10 +1,8 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +55,12 @@ public class ObjectSchemaTest {
 		ObjectSchema _extends = new ObjectSchema(TYPE.OBJECT);
 		example.setExtends(_extends);
 		
+		// Implements
+		ObjectSchema[] _implements = new ObjectSchema[1];
+		example.setImplements(_implements);
+		_implements[0] = new ObjectSchema();
+		_implements[0].setType(TYPE.INTERFACE);
+		
 		// Add an array
 		property = new ObjectSchema();
 		property.setType(TYPE.ARRAY);
@@ -91,63 +95,7 @@ public class ObjectSchemaTest {
 		assertEquals(example, clone);
 	}
 	
-	@Test
-	public void testSubSchemaIterator() {
-		Map<String, ObjectSchema> expectedMap = new HashMap<String, ObjectSchema>();
-		// The root schema to put objects into
-		ObjectSchema root = new ObjectSchema();
-		// Now add some sub-schema
-		
-		// Add a property sub-schema
-		String String = new String("one");
-		ObjectSchema sub = new ObjectSchema();
-		sub.setId(String);
-		expectedMap.put(String, sub);
-		root.putProperty("someKey", sub);
-		
-		// Add an additionalProperty sub-schema
-		String = new String("two");
-		sub = new ObjectSchema();
-		sub.setId(String);
-		expectedMap.put(String, sub);
-		root.putAdditionalProperty("addKey", sub);
-		
-		// Add an item sub
-		String = new String("three");
-		sub = new ObjectSchema();
-		sub.setId(String);
-		expectedMap.put(String, sub);
-		root.setItems(sub);
-		
-		// Add an additional item
-		String = new String("four");
-		sub = new ObjectSchema();
-		sub.setId(String);
-		expectedMap.put(String, sub);
-		root.setAdditionalItems(sub);
-		
-		// Extends
-		String = new String("five");
-		sub = new ObjectSchema();
-		sub.setId(String);
-		expectedMap.put(String, sub);
-		root.setExtends(sub);
-		
-		//Now make sure we find all item with the iterator
-		Iterator<ObjectSchema> it = root.getSubSchemaIterator();
-		assertNotNull(it);
-		// Now check each value
-		while(it.hasNext()){
-			ObjectSchema subFromIt = it.next();
-			assertNotNull(subFromIt);
-			assertNotNull(subFromIt.getId());
-			ObjectSchema fromMap = expectedMap.remove(subFromIt.getId());
-			assertNotNull("The iterator had an unexpected sub-schema", fromMap);
-			assertEquals(fromMap, subFromIt);
-		}
-		// If all items were found the map should be empty
-		assertEquals("The iterator missed: "+expectedMap.size()+" sub-scheams", 0, expectedMap.size());
-	}
+
 	
 	@Test
 	public void testGetNumberBasedOnType() throws JSONException, JSONObjectAdapterException{

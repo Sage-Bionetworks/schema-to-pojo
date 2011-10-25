@@ -26,6 +26,7 @@ public class PropertyHandlerImpl03Test {
 	JCodeModel codeModel;
 	JPackage _package;
 	JDefinedClass sampleClass;
+	JDefinedClass sampleInterfance;
 	JType type;
 	ObjectSchema schema;
 	
@@ -33,7 +34,8 @@ public class PropertyHandlerImpl03Test {
 	public void before() throws JClassAlreadyExistsException{
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
-		sampleClass = codeModel._class("Sample");
+		sampleClass = _package._class("Sample");
+		sampleInterfance = _package._interface("SampleInterface");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.STRING);
 		// Create a string property
@@ -91,6 +93,15 @@ public class PropertyHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreatePropertyInterfance() throws JClassAlreadyExistsException{
+		// Now handle the 
+		PropertyHandler handler = new PropertyHandlerImpl03();
+		JFieldVar field = handler.createProperty(schema, sampleInterfance, "name", type);
+		// Interfaces have not fields
+		assertNull(field);
+	}
+	
+	@Test
 	public void testCreatePropertyGetter() throws JClassAlreadyExistsException{
 		// Now handle the 
 		PropertyHandler handler = new PropertyHandlerImpl03();
@@ -117,6 +128,38 @@ public class PropertyHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreatePropertyGetterInterfance() throws JClassAlreadyExistsException{
+		// Now handle the 
+		PropertyHandler handler = new PropertyHandlerImpl03();
+		handler.createProperty(schema, sampleInterfance, "name", type);
+		// Make sure there is a getter
+		 Collection<JMethod> methods =  sampleInterfance.methods();
+		 assertNotNull(methods);
+		 assertTrue(methods.size() > 0);
+		 // Find the getter
+		 JMethod getName = null;
+		 for(JMethod method: methods){
+			 if("getName".equals(method.name())){
+				 getName = method;
+				 break;
+			 }
+		 }
+		 assertNotNull("Failed to find the getter method", getName);
+		 // It should be public
+		 assertEquals(JMod.PUBLIC, getName.mods().getValue());
+		 assertEquals(type, getName.type());
+		 assertNotNull(getName.params());
+		 assertEquals(0, getName.params().size());
+		 // Make sure the getter has no body.
+		 StringWriter writer = new StringWriter();
+		 JFormatter formatter = new JFormatter(writer);
+		 getName.declare(formatter);
+//		 System.out.println(writer.toString());
+		 String methodString = writer.toString();
+		 assertTrue(methodString.indexOf("public java.lang.String getName();") > 0);;
+	}
+	
+	@Test
 	public void testCreatePropertySetter() throws JClassAlreadyExistsException{
 		// Now handle the 
 		PropertyHandler handler = new PropertyHandlerImpl03();
@@ -139,6 +182,37 @@ public class PropertyHandlerImpl03Test {
 		 assertEquals(codeModel.VOID, setName.type());
 		 assertNotNull(setName.params());
 		 assertEquals(1, setName.params().size());
+	}
+	
+	@Test
+	public void testCreatePropertySetterInterfance() throws JClassAlreadyExistsException{
+		// Now handle the 
+		PropertyHandler handler = new PropertyHandlerImpl03();
+		handler.createProperty(schema, sampleInterfance, "name", type);
+		// Make sure there is a getter
+		 Collection<JMethod> methods =  sampleInterfance.methods();
+		 assertNotNull(methods);
+		 assertTrue(methods.size() > 0);
+		 // Find the getter
+		 JMethod setName = null;
+		 for(JMethod method: methods){
+			 if("setName".equals(method.name())){
+				 setName = method;
+				 break;
+			 }
+		 }
+		 assertNotNull("Failed to find the setter method", setName);
+		 // It should be public
+		 assertEquals(JMod.PUBLIC, setName.mods().getValue());
+		 assertEquals(codeModel.VOID, setName.type());
+		 assertNotNull(setName.params());
+		 assertEquals(1, setName.params().size());
+		 StringWriter writer = new StringWriter();
+		 JFormatter formatter = new JFormatter(writer);
+		 setName.declare(formatter);
+		 System.out.println(writer.toString());
+		 String methodString = writer.toString();
+		 assertTrue(methodString.indexOf("public void setName(java.lang.String name);") > 0);;
 	}
 	
 	@Test
@@ -221,4 +295,5 @@ public class PropertyHandlerImpl03Test {
 		 assertTrue(methodString.indexOf("This is a longer description that should come after the title") > 0);
 		 assertTrue(methodString.indexOf("@return") > 0);
 	}
+	
 }

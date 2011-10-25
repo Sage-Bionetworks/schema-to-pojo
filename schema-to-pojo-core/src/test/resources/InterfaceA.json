@@ -1,0 +1,13 @@
+{
+    "type":"interface",
+    "id":"InterfaceA.json",
+    "name":"InterfaceA",
+    "properties":{
+        "fromInterfaceA":{
+            "type":"string"
+        },
+        "alsoFromInterfaceA":{
+            "type":"number"
+        }
+    }
+}

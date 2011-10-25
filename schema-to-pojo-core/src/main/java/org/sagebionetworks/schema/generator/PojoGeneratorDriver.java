@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.JCodeModel;
@@ -70,20 +71,24 @@ public class PojoGeneratorDriver {
 		JDefinedClass classType = (JDefinedClass) type;
 		// Process the properties
 		if(schema.getProperties() != null){
-			Iterator<String> it = schema.getProperties().keySet().iterator();
+			Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
+			Iterator<String> it = fieldMap.keySet().iterator();
 			while(it.hasNext()){
 				String key = it.next();
-				ObjectSchema propertySchema  = schema.getProperties().get(key);
+				ObjectSchema propertySchema  = fieldMap.get(key);
 				// Get type type for this property
 				JType propertyType = createOrGetType(_package, propertySchema);
 				// Create this property
 				factory.getPropertyHandler().createProperty(propertySchema, classType,key, propertyType);
 			}
 		}
-		// Add the JSON marshaling
-		factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType);
-		// Add hash and equals
-		factory.getHashAndEqualsHandler().addHashAndEquals(schema, classType);
+		if(TYPE.INTERFACE != schema.getType()){
+			// Add the JSON marshaling
+			factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType);
+			// Add hash and equals
+			factory.getHashAndEqualsHandler().addHashAndEquals(schema, classType);
+		}
+
 		return classType;
 	}
 
@@ -113,12 +118,19 @@ public class PojoGeneratorDriver {
 		if (schema.getExtends() != null) {
 			superType = createOrGetType(_package, schema.getExtends());
 		}
+		JType[] implementsArray = null;
+		if(schema.getImplements() != null){
+			implementsArray = new JType[schema.getImplements().length];
+			for(int i=0; i<schema.getImplements().length; i++){
+				implementsArray[i] = createOrGetType(_package, schema.getImplements()[i]);
+			}
+		}
 		JType arrayType = null;
 		if( schema.getItems() != null){
 			arrayType = createOrGetType(_package, schema.getItems());
 		}
 		// Let the handler do most of the work.
-		return factory.getTypeCreatorHandler().handelCreateType(_package, schema, superType, arrayType);
+		return factory.getTypeCreatorHandler().handelCreateType(_package, schema, superType, arrayType, implementsArray);
 	}
 	
 	/**
@@ -214,6 +226,12 @@ public class PojoGeneratorDriver {
 		// Extends
 		if(schema.getExtends() != null){
 			schema.setExtends(replaceRefrence(map, schema.getExtends(), schema));
+		}
+		// Implements
+		if(schema.getImplements() != null){
+			for(int i=0; i<schema.getImplements().length; i++){
+				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], schema);
+			}
 		}
 	}
 	

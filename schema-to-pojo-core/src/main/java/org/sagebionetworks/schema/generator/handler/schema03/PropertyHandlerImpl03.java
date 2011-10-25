@@ -28,7 +28,11 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 	@Override
 	public JFieldVar createProperty(ObjectSchema propertySchema, JDefinedClass classType, String propertyName, JType propertyType) {
 		// Create a private field for this property.
-		JFieldVar field = classType.field(JMod.PRIVATE, propertyType, propertyName);
+		JFieldVar field = null;
+		if(!classType.isInterface()){
+			// Create a field if this is not an interface
+			field = classType.field(JMod.PRIVATE, propertyType, propertyName);
+		}
 		// If there is a title then add it to the feild
 		if(propertySchema.getTitle() != null){
 			JDocComment doc = field.javadoc();
@@ -51,8 +55,11 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 		// Create the name
 		String methodName = getterName(propertyName);
 		JMethod method = classType.method(JMod.PUBLIC, propertyType, methodName);
-        JBlock body = method.body();
-        body._return(field);
+		// Create a method body if this is not an interface
+		if(!classType.isInterface()){
+	        JBlock body = method.body();
+	        body._return(field);
+		}
         // Add the java doc
         JDocComment doc = method.javadoc();
         setCommentTileAndDescription(propertySchema, doc);
@@ -73,16 +80,19 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 		JMethod method = classType.method(JMod.PUBLIC, classType.owner().VOID, methodName);
 		// Add the parameter
 		JVar param = method.param(propertyType, propertyName);
-        JBlock body = method.body();
-        // Is this a required field?
-        if(propertySchema.isRequired() && !propertyType.isPrimitive()){
-        	// Since it is required throw an exception if set to null.
-        	JConditional conditional = body._if(param.eq(JExpr._null()));
-        	JInvocation invoke = JExpr._new(classType.owner().ref(IllegalArgumentException.class));
-        	invoke.arg(propertyName+" is required and cannot be set to null");
-        	conditional._then()._throw(invoke);
-        }
-        body.assign(JExpr._this().ref(field), param);
+		// Create a method body if this is not an interface
+		if(!classType.isInterface()){
+	        JBlock body = method.body();
+	        // Is this a required field?
+	        if(propertySchema.isRequired() && !propertyType.isPrimitive()){
+	        	// Since it is required throw an exception if set to null.
+	        	JConditional conditional = body._if(param.eq(JExpr._null()));
+	        	JInvocation invoke = JExpr._new(classType.owner().ref(IllegalArgumentException.class));
+	        	invoke.arg(propertyName+" is required and cannot be set to null");
+	        	conditional._then()._throw(invoke);
+	        }
+	        body.assign(JExpr._this().ref(field), param);
+		}
         // Add the java doc
         JDocComment doc = method.javadoc();
         setCommentTileAndDescription(propertySchema, doc);

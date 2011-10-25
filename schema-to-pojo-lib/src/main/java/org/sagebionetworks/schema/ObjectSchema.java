@@ -313,6 +313,12 @@ public class ObjectSchema implements JSONEntity{
 	 * "extends":"person" }
 	 */
 	private ObjectSchema _extends;
+	
+	/*
+	 * This is a custom field that is not part of the spec.  It is used to 
+	 * indicate interfaces that should be implemented.
+	 */
+	private ObjectSchema[] _implements;
 
 	/*
 	 * 5.27. id
@@ -1193,6 +1199,14 @@ public class ObjectSchema implements JSONEntity{
 	public void setExtends(ObjectSchema _extends) {
 		this._extends = _extends;
 	}
+	
+	public void setImplements(ObjectSchema[] impSchemas){
+		this._implements = impSchemas;
+	}
+	
+	public ObjectSchema[] getImplements(){
+		return _implements;
+	}
 
 	/**
 	 * 5.27. id
@@ -1312,13 +1326,12 @@ public class ObjectSchema implements JSONEntity{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((ref == null) ? 0 : ref.hashCode());
-		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
 		result = prime * result
 				+ ((_default == null) ? 0 : _default.hashCode());
 		result = prime * result + Arrays.hashCode(_enum);
 		result = prime * result
 				+ ((_extends == null) ? 0 : _extends.hashCode());
+		result = prime * result + Arrays.hashCode(_implements);
 		result = prime * result
 				+ ((additionalItems == null) ? 0 : additionalItems.hashCode());
 		result = prime
@@ -1355,8 +1368,10 @@ public class ObjectSchema implements JSONEntity{
 		result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
 		result = prime * result
 				+ ((properties == null) ? 0 : properties.hashCode());
+		result = prime * result + ((ref == null) ? 0 : ref.hashCode());
 		result = prime * result
 				+ ((required == null) ? 0 : required.hashCode());
+		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result
@@ -1373,16 +1388,6 @@ public class ObjectSchema implements JSONEntity{
 		if (getClass() != obj.getClass())
 			return false;
 		ObjectSchema other = (ObjectSchema) obj;
-		if (ref == null) {
-			if (other.ref != null)
-				return false;
-		} else if (!ref.equals(other.ref))
-			return false;
-		if (schema == null) {
-			if (other.schema != null)
-				return false;
-		} else if (!schema.equals(other.schema))
-			return false;
 		if (_default == null) {
 			if (other._default != null)
 				return false;
@@ -1394,6 +1399,8 @@ public class ObjectSchema implements JSONEntity{
 			if (other._extends != null)
 				return false;
 		} else if (!_extends.equals(other._extends))
+			return false;
+		if (!Arrays.equals(_implements, other._implements))
 			return false;
 		if (additionalItems == null) {
 			if (other.additionalItems != null)
@@ -1486,10 +1493,20 @@ public class ObjectSchema implements JSONEntity{
 				return false;
 		} else if (!properties.equals(other.properties))
 			return false;
+		if (ref == null) {
+			if (other.ref != null)
+				return false;
+		} else if (!ref.equals(other.ref))
+			return false;
 		if (required == null) {
 			if (other.required != null)
 				return false;
 		} else if (!required.equals(other.required))
+			return false;
+		if (schema == null) {
+			if (other.schema != null)
+				return false;
+		} else if (!schema.equals(other.schema))
 			return false;
 		if (title == null) {
 			if (other.title != null)
@@ -1508,22 +1525,23 @@ public class ObjectSchema implements JSONEntity{
 
 	@Override
 	public String toString() {
-		return "ObjectModel [type=" + type + ", properties=" + properties
-				+ ", additionalProperties=" + additionalProperties + ", items="
-				+ items + ", additionalItems=" + additionalItems
-				+ ", required=" + required + ", dependencies="
-				+ Arrays.toString(dependencies) + ", minimum=" + minimum
-				+ ", maximum=" + maximum + ", exclusiveMinimum="
-				+ exclusiveMinimum + ", exclusiveMaximum=" + exclusiveMaximum
-				+ ", minItems=" + minItems + ", maxItems=" + maxItems
-				+ ", uniqueItems=" + uniqueItems + ", pattern=" + pattern
-				+ ", minLength=" + minLength + ", maxLength=" + maxLength
-				+ ", _enum=" + Arrays.toString(_enum) + ", _default="
-				+ _default + ", title=" + title + ", description="
-				+ description + ", format=" + format + ", divisibleBy="
-				+ divisibleBy + ", disallow=" + disallow + ", _extends="
-				+ _extends + ", id=" + id + ", $ref=" + ref + ", $schema="
-				+ schema + "]";
+		return "ObjectSchema [name=" + name + ", type=" + type
+				+ ", properties=" + properties + ", additionalProperties="
+				+ additionalProperties + ", items=" + items
+				+ ", additionalItems=" + additionalItems + ", required="
+				+ required + ", dependencies=" + Arrays.toString(dependencies)
+				+ ", minimum=" + minimum + ", maximum=" + maximum
+				+ ", exclusiveMinimum=" + exclusiveMinimum
+				+ ", exclusiveMaximum=" + exclusiveMaximum + ", minItems="
+				+ minItems + ", maxItems=" + maxItems + ", uniqueItems="
+				+ uniqueItems + ", pattern=" + pattern + ", minLength="
+				+ minLength + ", maxLength=" + maxLength + ", _enum="
+				+ Arrays.toString(_enum) + ", _default=" + _default
+				+ ", title=" + title + ", description=" + description
+				+ ", format=" + format + ", divisibleBy=" + divisibleBy
+				+ ", disallow=" + disallow + ", _extends=" + _extends
+				+ ", _implements=" + Arrays.toString(_implements) + ", id="
+				+ id + ", ref=" + ref + ", schema=" + schema + "]";
 	}
 	
 	public String toJSONString(JSONObjectAdapter adapter) throws JSONObjectAdapterException{
@@ -1605,6 +1623,13 @@ public class ObjectSchema implements JSONEntity{
 				array.put(i, dependencies[i]);
 			}
 		}
+		if(_implements != null){
+			JSONArrayAdapter array = in.createNewArray();
+			copy.put("implements", array);
+			for(int i=0; i<_implements.length; i++){
+				array.put(i, _implements[i].writeToJSONObject(in));
+			}
+		}
 		if(this.minimum != null){
 			putBasedOnType(copy, "minimum", this.minimum, type);
 		}
@@ -1628,6 +1653,7 @@ public class ObjectSchema implements JSONEntity{
 		}
 		return copy;
 	}
+	
 	
 	/**
 	 * How we add values to the adapter depends on the object type for min and max.
@@ -1673,7 +1699,49 @@ public class ObjectSchema implements JSONEntity{
 		if(this._extends != null){
 			list.add(this._extends);
 		}
+		if(this._implements != null){
+			for(ObjectSchema imp: this._implements){
+				list.add(imp);
+			}
+		}
 		return list.iterator();
+	}
+	
+	/**
+	 * The fields that make up the final object are from a combination 
+	 * of the properties of this schema plus the properties of any interface
+	 * schema that this implemented by this schema.
+	 * @return
+	 */
+	public Map<String, ObjectSchema> getObjectFieldMap(){
+		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
+		// First add all of the properties from the interfaces.
+		recursivelyAddAllInterfaceProperties(map, this);
+		// Now add all of the properties from this object.
+		// Note: The order we add the properties to the map is deliberate.
+		// By replacing any duplicates from the interfaces with the properties of
+		// this class, we will get a compile time error is the types do not match
+		// types defined in the interface.
+		if(this.properties != null){
+			map.putAll(this.properties);
+		}
+		return map;
+	}
+	
+	/**
+	 * Recursively AddAllInterfaceProperties
+	 * @param map
+	 * @param schema
+	 */
+	private static void recursivelyAddAllInterfaceProperties(HashMap<String, ObjectSchema> map, ObjectSchema schema){
+		if(schema._implements != null){
+			for(ObjectSchema implSchema: schema._implements){
+				recursivelyAddAllInterfaceProperties(map, implSchema);
+				if(implSchema.properties != null){
+					map.putAll(implSchema.properties);
+				}
+			}
+		}
 	}
 	
 	
@@ -1758,6 +1826,13 @@ public class ObjectSchema implements JSONEntity{
 		}
 		if(adapter.has("id")){
 			this.id = adapter.getString("id");
+		}
+		if(adapter.has("implements")){
+			JSONArrayAdapter array = adapter.getJSONArray("implements");
+			this._implements = new ObjectSchema[array.length()];
+			for(int i=0; i<array.length(); i++){
+				this._implements[i] = new ObjectSchema(array.getJSONObject(i));
+			}
 		}
 		if(adapter.has("$ref")){
 			this.ref = adapter.getString("$ref");

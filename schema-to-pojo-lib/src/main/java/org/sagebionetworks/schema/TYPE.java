@@ -45,10 +45,16 @@ public enum TYPE {
 	/*
 	 * Value MAY be of any type including null.
 	 */
-	ANY("any", false, "any", "getJSONObject"), ;
+	ANY("any", false, "any", "getJSONObject"),
+	
+	/*
+	 * This is a custom type used to indicate the schema describes an interface. 
+	 */
+	INTERFACE("interface", false, "Interface", null)
+	;
 
 	/*
-	 * The value that this type is refered to in the schema.
+	 * The value that this type is as it appears in the JSON.
 	 */
 	private String jsonValue;
 	private String javaType;

@@ -1,6 +1,7 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
@@ -23,6 +24,10 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 
 	@Override
 	public void addHashAndEquals(ObjectSchema classSchema,	JDefinedClass classType) {
+		// There is nothing to do for interfaces.
+		if(TYPE.INTERFACE == classSchema.getType()){
+			throw new IllegalArgumentException("Cannot add hash and equals to an interface");
+		}
 		// Add the hash
 		addHashCode(classSchema, classType);
 		// Add equals
@@ -57,10 +62,11 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		// Now add all fields 
 		// Now process each property
         if(classSchema.getProperties()!= null){
-            Iterator<String> keyIt = classSchema.getProperties().keySet().iterator();
+        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+            Iterator<String> keyIt = fieldMap.keySet().iterator();
             while(keyIt.hasNext()){
             	String propName = keyIt.next();
-            	ObjectSchema propSchema = classSchema.getProperties().get(propName);
+            	ObjectSchema propSchema = fieldMap.get(propName);
             	// Look up the field for this property
             	JFieldVar field = classType.fields().get(propName);
             	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
@@ -142,10 +148,11 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		
 		// Now process each property
         if(classSchema.getProperties()!= null){
-            Iterator<String> keyIt = classSchema.getProperties().keySet().iterator();
+        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+            Iterator<String> keyIt = fieldMap.keySet().iterator();
             while(keyIt.hasNext()){
             	String propName = keyIt.next();
-            	ObjectSchema propSchema = classSchema.getProperties().get(propName);
+            	ObjectSchema propSchema = fieldMap.get(propName);
             	// Look up the field for this property
             	JFieldVar field = classType.fields().get(propName);
             	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,13 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.schema03.HandlerFactoryImpl03;
 
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDeclaration;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 
@@ -188,6 +195,7 @@ public class PojoGeneratorDriverTest {
 		self.putAdditionalProperty("two", referenceToOther);
 		self.setItems(refToSelf);
 		self.setAdditionalItems(refToSelf);
+		self.setImplements(new ObjectSchema[]{referenceToOther});
 		
 		// find and replace
 		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry, self);
@@ -545,6 +553,105 @@ public class PojoGeneratorDriverTest {
 		JType type = driver.createOrGetType(_package, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Object.class.getName()+">", type.fullName());
+	}
+	
+	@Test
+	public void testCreateOrGetTypeExtends() throws ClassNotFoundException{
+		JCodeModel codeModel = new JCodeModel();
+		ObjectSchema parent = new ObjectSchema();
+		parent.setType(TYPE.OBJECT);
+		parent.setName("ParentClass");
+		ObjectSchema schema = new ObjectSchema();
+		schema.setExtends(parent);
+		schema.setType(TYPE.OBJECT);
+		schema.setName("ChildClass");
+		JPackage _package = codeModel._package("org.sample");
+		JType type = driver.createOrGetType(_package, schema);
+		assertNotNull(type);
+		JDefinedClass def = (JDefinedClass) type;
+		String classDeffString = declareToString(def);
+		assertTrue(classDeffString.indexOf("extends org.sample.ParentClass") > 0);
+	}
+	
+	@Test
+	public void testCreateOrGetTypeImplements() throws ClassNotFoundException{
+		JCodeModel codeModel = new JCodeModel();
+		ObjectSchema parent = new ObjectSchema();
+		parent.setType(TYPE.INTERFACE);
+		parent.setName("ParentInterface");
+		ObjectSchema schema = new ObjectSchema();
+		schema.setImplements(new ObjectSchema[]{parent});
+		schema.setType(TYPE.OBJECT);
+		schema.setName("ChildClass");
+		JPackage _package = codeModel._package("org.sample");
+		JType type = driver.createOrGetType(_package, schema);
+		assertNotNull(type);
+		JDefinedClass def = (JDefinedClass) type;
+		String classDeffString = declareToString(def);
+		System.out.println(classDeffString);
+		assertTrue(classDeffString.indexOf("implements org.sample.ParentInterface") > 0);
+	}
+	
+	@Test
+	public void testLoadedInterfaces() throws Exception{
+		String[] namesToLoad = new String[]{
+				"InterfaceA.json",
+				"InterfaceB.json",
+				"ABImpl.json",
+		};
+		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
+		for(String name: namesToLoad){
+			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
+//			schema.setName(name);
+			schemaList.add(schema);
+		}
+		JCodeModel codeModel = new JCodeModel();
+		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		// Get the class
+		JPackage _package = codeModel._package("org.sample");
+		JDefinedClass impl =  null;
+		try{
+			impl = _package._class("ABImpl");
+		}catch (JClassAlreadyExistsException e) {
+			impl = e.getExistingClass();
+		} 
+		String classString = declareToString(impl);
+//		System.out.println(classString);
+		Iterator<JClass> it = impl._implements();
+		assertNotNull(it);
+		String intA = "InterfaceA";
+		String intB = "InterfaceB";
+		Map<String, JClass> map = new HashMap<String, JClass>();
+		while(it.hasNext()){
+			JClass impClass = it.next();
+			if(intA.equals(impClass.name())){
+				map.put(intA, impClass);
+			}else if(intB.equals(impClass.name())){
+				map.put(intB, impClass);
+			}
+		}
+		assertEquals("Should have implemented two interfaces",2, map.size());
+		// Now get the fields from the object an confirm they are all there
+		Map<String, JFieldVar> fields = impl.fields();
+		assertNotNull(fields);
+		assertEquals(5, fields.size());
+		assertNotNull(fields.get("fromInterfaceA"));
+		assertNotNull(fields.get("alsoFromInterfaceB"));
+		assertNotNull(fields.get("fromMe"));
+	}
+	
+	
+	/**
+	 * Helper to declare a model object to string.
+	 * @param toDeclare
+	 * @return
+	 */
+	public String declareToString(JDeclaration toDeclare){
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		toDeclare.declare(formatter);
+		return writer.toString();
 	}
 	
 }

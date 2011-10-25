@@ -1,0 +1,19 @@
+{
+    "type":"interface",
+    "id":"InterfaceB.json",
+    "properties":{
+        "fromInterfaceB":{
+            "type":"string"
+        },
+        "alsoFromInterfaceB":{
+            "type":"string",
+            "format":"date-time"
+        }
+    },
+    "implements":[
+        {
+            "$ref":"InterfaceA.json",
+            "type":"interface"
+        }
+    ]
+}

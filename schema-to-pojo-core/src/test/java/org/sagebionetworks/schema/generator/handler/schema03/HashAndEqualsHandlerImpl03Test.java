@@ -226,6 +226,7 @@ public class HashAndEqualsHandlerImpl03Test {
 		// Make sure there is a call to super.
 		assertTrue(methodString.indexOf("if (!super.equals(obj)) {") > 0);
 		assertFalse(methodString.indexOf("if (obj == null) {") > 0);
+		assertTrue(methodString.indexOf("ChildOfSample other = ((ChildOfSample) obj);") > 0);
 //		printClassToConsole(childClasss);
 	}
 	

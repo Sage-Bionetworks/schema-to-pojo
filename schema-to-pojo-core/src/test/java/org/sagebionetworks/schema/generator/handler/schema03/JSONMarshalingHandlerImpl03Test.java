@@ -38,6 +38,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	JCodeModel codeModel;
 	JPackage _package;
 	JDefinedClass sampleClass;
+	JDefinedClass sampleInterfance;
 	JType type;
 	ObjectSchema schema;
 
@@ -47,6 +48,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
+		sampleInterfance = _package._interface("SampleInterface");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.OBJECT);
 	}
@@ -759,6 +761,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("array.put(index, it.next().writeToJSONObject(adapter.createNew()));") > 0);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testAddJSONMarshalingInterfance(){
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		ObjectSchema interfaceSchema = new ObjectSchema();
+		interfaceSchema.setType(TYPE.INTERFACE);
+		interfaceSchema.setName("SampleInterface");
+		handler.addJSONMarshaling(interfaceSchema, sampleInterfance);
 	}
 
 	public void printClassToConsole(JDefinedClass classToPrint) {

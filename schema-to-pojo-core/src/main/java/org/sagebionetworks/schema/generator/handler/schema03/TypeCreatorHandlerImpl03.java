@@ -28,7 +28,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 
 	@Override
-	public JType handelCreateType(JPackage _package, ObjectSchema schema, JType superType, JType arrayType) throws ClassNotFoundException {
+	public JType handelCreateType(JPackage _package, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException {
 		if(superType.isPrimitive()) return superType;
 		
 		// Determine the type of this class
@@ -72,16 +72,28 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			}
 		}
 		// The last category is objects.
-		if(TYPE.OBJECT == schema.getType()){
+		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){
 			// A named object is a new class while a null name is a generic object
 			if(schema.getName() == null){
 				return _package.owner().ref(Object.class);
 			}
 			// Create a new class with this name
 			try {
-				JDefinedClass newClass = _package._class(schema.getName());
-				if(superType != null){
+				JDefinedClass newClass = null;
+				if(TYPE.OBJECT == schema.getType()){
+					newClass = _package._class(schema.getName());
+				}else if(TYPE.INTERFACE == schema.getType()){
+					newClass = _package._interface(schema.getName());
+				}else{
+					throw new IllegalArgumentException("Unknown type: "+schema.getType()); 
+				}
+				if(superType != null && TYPE.OBJECT == schema.getType()){
 					newClass._extends((JClass) superType);
+				}
+				if(interfanceTypes != null){
+					for(JType interfacesType: interfanceTypes){
+						newClass._implements((JClass)interfacesType);
+					}
 				}
 				// Add the comments to the class
 				JDocComment docs = newClass.javadoc();

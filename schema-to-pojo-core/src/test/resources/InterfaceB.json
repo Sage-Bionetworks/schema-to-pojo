@@ -1,0 +1,14 @@
+{
+    "type":"interface",
+    "id":"InterfaceB.json",
+    "name":"InterfaceB",
+    "properties":{
+        "fromInterfaceB":{
+            "type":"string"
+        },
+        "alsoFromInterfaceB":{
+            "type":"string",
+            "format":"date"
+        }
+    }
+}

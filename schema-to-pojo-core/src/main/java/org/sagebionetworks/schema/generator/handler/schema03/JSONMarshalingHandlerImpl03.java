@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -21,7 +22,6 @@ import com.sun.codemodel.JCommentPart;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
-import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
@@ -36,6 +36,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
 	@Override
 	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType) {
+		// There is nothing to do for interfaces.
+		if(TYPE.INTERFACE == classSchema.getType()){
+			throw new IllegalArgumentException("Cannot add marshaling to an interface");
+		}
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
 		// Create the init method
@@ -103,10 +107,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         
 		// Now process each property
         if(classSchema.getProperties()!= null){
-            Iterator<String> keyIt = classSchema.getProperties().keySet().iterator();
+        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+            Iterator<String> keyIt = fieldMap.keySet().iterator();
             while(keyIt.hasNext()){
             	String propName = keyIt.next();
-            	ObjectSchema propSchema = classSchema.getProperties().get(propName);
+            	ObjectSchema propSchema = fieldMap.get(propName);
             	// Look up the field for this property
             	JFieldVar field = classType.fields().get(propName);
             	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
@@ -287,10 +292,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
 		// Now process each property
         if(classSchema.getProperties()!= null){
-            Iterator<String> keyIt = classSchema.getProperties().keySet().iterator();
+        	Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
+            Iterator<String> keyIt = fieldMap.keySet().iterator();
             while(keyIt.hasNext()){
             	String propName = keyIt.next();
-            	ObjectSchema propSchema = classSchema.getProperties().get(propName);
+            	ObjectSchema propSchema = fieldMap.get(propName);
             	// Look up the field for this property
             	JFieldVar field = classType.fields().get(propName);
             	if(field == null) throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+propName+"' on class: "+classType.name());
