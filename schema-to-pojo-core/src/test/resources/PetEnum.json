@@ -1,0 +1,9 @@
+{
+    "type":"string",
+    "name":"PetEnum",
+    "enum":[
+        "CAT",
+        "DOG",
+        "FISH",
+    ],
+}

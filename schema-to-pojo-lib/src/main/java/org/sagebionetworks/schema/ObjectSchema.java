@@ -1651,6 +1651,13 @@ public class ObjectSchema implements JSONEntity{
 		if(this.format != null){
 			copy.put("format", this.format.getJSONValue());
 		}
+		if(this._enum != null){
+			JSONArrayAdapter array = in.createNewArray();
+			copy.put("enum", array);
+			for(int i=0; i<_enum.length; i++){
+				array.put(i, _enum[i]);
+			}
+		}
 		return copy;
 	}
 	
@@ -1843,6 +1850,13 @@ public class ObjectSchema implements JSONEntity{
 		}
 		if(adapter.has("format")){
 			this.format = FORMAT.getFormatForJSONValue(adapter.getString("format"));
+		}
+		if(adapter.has("enum")){
+			JSONArrayAdapter array = adapter.getJSONArray("enum");
+			this._enum = new String[array.length()];
+			for(int i=0; i<array.length(); i++){
+				this._enum[i] = array.getString(i);
+			}
 		}
 		return adapter;
 	}

@@ -30,6 +30,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 	@Override
 	public JType handelCreateType(JPackage _package, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException {
+		// Is this an enumeration
+		if(schema.getEnum() != null){
+			// Create or get the enumeration class.
+			return createOrGetEnum(_package, schema);
+		}
 		if(superType.isPrimitive()) return superType;
 		
 		// Determine the type of this class
@@ -48,6 +53,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			// This is a primitive
 			return _package.owner().parseType(schema.getType().getJavaType());
 		}
+
 		// Strings
 		if(TYPE.STRING == schema.getType()){
 			return _package.owner().ref(String.class);
@@ -74,49 +80,93 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		}
 		// The last category is objects.
 		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){
-			// A named object is a new class while a null name is a generic object
-			if(schema.getName() == null){
-				return _package.owner().ref(Object.class);
-			}
-			// Create a new class with this name
-			try {
-				JDefinedClass newClass = null;
-				if(TYPE.OBJECT == schema.getType()){
-					newClass = _package._class(schema.getName());
-				}else if(TYPE.INTERFACE == schema.getType()){
-					newClass = _package._interface(schema.getName());
-				}else{
-					throw new IllegalArgumentException("Unknown type: "+schema.getType()); 
-				}
-				// Both classes and interfaces should implment JSONEntity:
-				newClass._implements(JSONEntity.class);
-				if(superType != null && TYPE.OBJECT == schema.getType()){
-					newClass._extends((JClass) superType);
-				}
-				if(interfanceTypes != null){
-					for(JType interfacesType: interfanceTypes){
-						newClass._implements((JClass)interfacesType);
-					}
-				}
-				// Add the comments to the class
-				JDocComment docs = newClass.javadoc();
-				if(schema.getTitle() != null){
-					docs.add(schema.getTitle());
-					docs.add("\n\n");
-				}
-				if(schema.getDescription() != null){
-					docs.add(schema.getDescription());
-					docs.add("\n\n");
-				}
-				// Add the auto-generated message
-				docs.add(AUTO_GENERATED_MESSAGE);
-				return newClass;
-			} catch (JClassAlreadyExistsException e) {
-				return e.getExistingClass();
-			}
+			return createOrGetClassAndInterface(_package, schema, superType,
+					interfanceTypes);
 		}
 		// Any other type is a failure
 		throw new IllegalArgumentException("Unknown type: "+schema.getType());
+	}
+
+
+	/**
+	 * Create or get a class or interface for the given schema.
+	 * @param _package
+	 * @param schema
+	 * @param superType
+	 * @param interfanceTypes
+	 * @return
+	 */
+	private JType createOrGetClassAndInterface(JPackage _package, ObjectSchema schema, JType superType, JType[] interfanceTypes) {
+		// A named object is a new class while a null name is a generic object
+		if(schema.getName() == null){
+			return _package.owner().ref(Object.class);
+		}
+		// Create a new class with this name
+		try {
+			JDefinedClass newClass = null;
+			if(TYPE.OBJECT == schema.getType()){
+				newClass = _package._class(schema.getName());
+			}else if(TYPE.INTERFACE == schema.getType()){
+				newClass = _package._interface(schema.getName());
+			}else{
+				throw new IllegalArgumentException("Unknown type: "+schema.getType()); 
+			}
+			// Both classes and interfaces should implment JSONEntity:
+			newClass._implements(JSONEntity.class);
+			if(superType != null && TYPE.OBJECT == schema.getType()){
+				newClass._extends((JClass) superType);
+			}
+			if(interfanceTypes != null){
+				for(JType interfacesType: interfanceTypes){
+					newClass._implements((JClass)interfacesType);
+				}
+			}
+			// Add all of the comments
+			addComments(schema, newClass);
+			return newClass;
+		} catch (JClassAlreadyExistsException e) {
+			return e.getExistingClass();
+		}
+	}
+
+
+	public void addComments(ObjectSchema schema, JDefinedClass newClass) {
+		// Add the comments to the class
+		JDocComment docs = newClass.javadoc();
+		if(schema.getTitle() != null){
+			docs.add(schema.getTitle());
+			docs.add("\n\n");
+		}
+		if(schema.getDescription() != null){
+			docs.add(schema.getDescription());
+			docs.add("\n\n");
+		}
+		// Add the auto-generated message
+		docs.add(AUTO_GENERATED_MESSAGE);
+	}
+
+
+	/**
+	 * Create or get an Enum class.
+	 * @param _package
+	 * @param schema
+	 * @return
+	 */
+	private JType createOrGetEnum(JPackage _package, ObjectSchema schema) {
+		if(TYPE.STRING != schema.getType()) throw new IllegalArgumentException("Enumerations cannot be of type: "+schema.getType()+".  Enumerations can only be of type: "+TYPE.STRING);
+		if(schema.getName() == null) throw new IllegalArgumentException("Enumerations must have a name");
+		try {
+			JDefinedClass enumClass = _package._enum(schema.getName());
+			// Generate the enum constants
+			for(String enumName: schema.getEnum()){
+				enumClass.enumConstant(enumName);
+			}
+			// Add all of the comments
+			addComments(schema, enumClass);
+			return enumClass;
+		} catch (JClassAlreadyExistsException e) {
+			return e.getExistingClass();
+		}
 	}
 
 }

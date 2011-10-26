@@ -462,6 +462,28 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreateMethodInitializeFromJSONObjectEnum() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setEnum(new String[]{"A","B",});
+		propertySchema.setName("SomeEnum");
+		String propName = "enumName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		JDefinedClass enumCalss = _package._enum("SomeEnum");
+		enumCalss.enumConstant("A");
+		enumCalss.enumConstant("B");
+		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
+	}
+	
+	@Test
 	public void testWriteToJSONObjectStringProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
 		ObjectSchema propertySchema = new ObjectSchema();
@@ -766,6 +788,29 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("array.put(index, it.next().writeToJSONObject(adapter.createNew()));") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectEnum() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setEnum(new String[]{"A","B",});
+		propertySchema.setName("SomeEnum");
+		String propName = "enumName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		JDefinedClass enumCalss = _package._enum("SomeEnum");
+		enumCalss.enumConstant("A");
+		enumCalss.enumConstant("B");
+		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+//		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("adapter.put(\"enumName\", enumName.name());") > 0);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)

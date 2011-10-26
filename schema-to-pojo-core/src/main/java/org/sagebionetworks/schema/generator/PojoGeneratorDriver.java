@@ -69,6 +69,10 @@ public class PojoGeneratorDriver {
 		JType type = createOrGetType(_package, schema);
 		if(!(type instanceof JDefinedClass)) return null;
 		JDefinedClass classType = (JDefinedClass) type;
+		// If this is an enumeration then there is nothing left to add.
+		if(schema.getEnum() != null){
+			return classType;
+		}
 		// Process the properties
 		Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
 		Iterator<String> it = fieldMap.keySet().iterator();

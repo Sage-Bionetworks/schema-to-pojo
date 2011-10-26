@@ -69,6 +69,9 @@ public class ObjectSchemaTest {
 		property.setAdditionalItems(arrayType);
 		example.putAdditionalProperty("array", property);
 		
+		// An enum
+		example.setEnum(new String[]{"a","b","c"});
+		
 		// Now go to the JSONString
 		String json = example.toJSONString( new JSONObjectAdapterImpl());
 		System.out.println(json);

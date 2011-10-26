@@ -20,7 +20,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<schema-to-pojo-version>0.0.7</schema-to-pojo-version>
+		<schema-to-pojo-version>0.0.8</schema-to-pojo-version>
 	</properties>
 	<modules>
 		<module>schema-to-pojo-lib</module>

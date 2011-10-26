@@ -135,8 +135,15 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// from the adapter.
 			if (TYPE.STRING == type) {
 				// The format determines how JSON strings are read.
-				JExpression rhs = assignJSONStringToProperty(classType.owner(),
-						param, propName, propSchema);
+				JExpression rhs = null;
+				if(propSchema.getEnum() != null){
+					// Assign an enum
+					rhs = assignJSONStringToEnumProperty(param, propName, field);
+				}else{
+					// This is just a string.
+					rhs = assignJSONStringToProperty(classType.owner(),
+							param, propName, propSchema);
+				}
 				thenBlock.assign(field, rhs);
 			} else if (TYPE.ARRAY == type) {
 				// Determine the type of the field
@@ -234,6 +241,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				throw new IllegalArgumentException("Unsupporetd format: "+format);
 			}
 		}
+	}
+	
+	/**
+	 * Assign a JSON String to a property.  The format determines how it will be treated.
+	 * @param param
+	 * @param propName
+	 * @param field
+	 * @param propertySchema
+	 * @param block
+	 */
+	protected JExpression assignJSONStringToEnumProperty(JVar adapter, String propName, JFieldVar field) {
+		// The format determines how to treat a string.
+		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
+		JClass enumClass = (JClass) field.type();
+		return enumClass.staticInvoke("valueOf").arg(stringFromAdapter);
 	}
 	
 	/**
@@ -351,8 +373,15 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// from the adapter.
 			if (TYPE.STRING == type) {
 				// call the set method using the field
-				JExpression valueToPut = assignPropertyToJSONString(
-						classType.owner(), param, propName, propSchema, field);
+				JExpression valueToPut = null;
+				if(propSchema.getEnum() != null){
+					// Write the enum as a JSON string
+					valueToPut = field.invoke("name");;
+				}else{
+					// This is just a string
+					valueToPut = assignPropertyToJSONString(
+							classType.owner(), param, propName, propSchema, field);
+				}
 				thenBlock.add(param.invoke("put").arg(field.name())
 						.arg(valueToPut));
 			} else if (TYPE.ARRAY == type) {

@@ -1,11 +1,13 @@
 package org.sagebionetworks.schema.generator;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +29,7 @@ import com.sun.codemodel.JDeclaration;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
+import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 
@@ -674,6 +677,41 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(fields.get("alsoFromInterfaceA"));
 	}
 	
+	@Test
+	public void testCreateAllClassesEnum() throws Exception{
+		String[] namesToLoad = new String[]{
+				"PetEnum.json",
+		};
+		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
+		for(String name: namesToLoad){
+			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
+			schemaList.add(schema);
+		}
+		JCodeModel codeModel = new JCodeModel();
+		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		// Get the class
+		JPackage _package = codeModel._package("org.sample");
+		JDefinedClass impl =  null;
+		try{
+			impl = _package._class("PetEnum");
+		}catch (JClassAlreadyExistsException e) {
+			impl = e.getExistingClass();
+		} 
+		String classString = declareToString(impl);
+		System.out.println(classString);
+		
+		Map<String, JFieldVar> fields = impl.fields();
+		assertNotNull(fields);
+		// Enums should have no fields
+		assertEquals(0, fields.size());
+		Collection<JMethod> methods = impl.methods();
+		assertNotNull(methods);
+		// enums should have no methods
+		assertEquals(0, methods.size());
+		// Enums should have no constructors
+		assertFalse(impl.constructors().hasNext());
+	}
 	/**
 	 * Helper to declare a model object to string.
 	 * @param toDeclare

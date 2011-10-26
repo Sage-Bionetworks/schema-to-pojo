@@ -1,0 +1,15 @@
+{
+    "properties":{
+        "someEnum":{
+            "type":"string",
+            "name":"ValidPets",
+            "enum":[
+                "CAT",
+                "DOG",
+                "FISH"
+            ],
+            "description":"The property is constrained by an enumeration",
+            "required":true
+        },
+    }
+}

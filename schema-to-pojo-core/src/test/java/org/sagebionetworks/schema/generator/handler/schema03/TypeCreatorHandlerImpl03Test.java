@@ -93,7 +93,6 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(classString.indexOf(title) > 0);
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
-		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 	}
 	
 	@Test
@@ -149,7 +148,7 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
-		System.out.println(classString);
+//		System.out.println(classString);
 		assertTrue(classString.indexOf("public interface Sample") > 0);
 		assertTrue(classString.indexOf("extends org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
 	}
@@ -249,6 +248,54 @@ public class TypeCreatorHandlerImpl03Test {
 		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
+	}
+	
+	/**
+	 * Enumerations must have a type of string.
+	 * @throws ClassNotFoundException
+	 */
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateEnumerationNotString() throws ClassNotFoundException{
+		schema.setType(TYPE.BOOLEAN);
+		schema.setEnum(new String[]{"one","two","three"});
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateEnumerationNullName() throws ClassNotFoundException{
+		schema.setType(TYPE.STRING);
+		schema.setEnum(new String[]{"one","two","three"});
+		schema.setName(null);
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+	}
+	
+	@Test
+	public void testCreateEnumeration() throws ClassNotFoundException{
+		String title = "This is the title";
+		String description = "Add a description";
+		schema.setTitle(title);
+		schema.setDescription(description);
+		schema.setType(TYPE.STRING);
+		schema.setEnum(new String[]{"one","two","three"});
+		schema.setName("SampleEnum");
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		assertNotNull(clazz);
+		assertTrue(clazz instanceof JDefinedClass);
+		JDefinedClass sampleClass = (JDefinedClass)clazz;
+		String classString = declareToString(sampleClass);
+		System.out.println(classString);
+		assertTrue(classString.indexOf("one,") > 0);
+		assertTrue(classString.indexOf("two,") > 0);
+		assertTrue(classString.indexOf("three;") > 0);
+		assertTrue(classString.indexOf(title) > 0);
+		assertTrue(classString.indexOf(description) > 0);
+		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 	}
 	
 	
