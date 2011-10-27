@@ -4,11 +4,10 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>parent-1.0</version>
+		<version>0.0.9</version>
 	</parent>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-lib</artifactId>
-	<version>${schema-to-pojo-version}</version>
 	<name>schema-to-pojo-lib</name>
 	<packaging>jar</packaging>
 	<description>Basic dependencies for auto-generated classes</description>

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
-	<version>parent-1.0</version>
+	<version>0.0.9</version>
 	<packaging>pom</packaging>
 	<name>schema-to-pojo</name>
 	<description>Container for the rest of the sub-projects</description>
@@ -19,9 +19,6 @@
 			<url>http://sagebionetworks.artifactoryonline.com/sagebionetworks/ext-releases-local</url>
 		</repository>
 	</repositories>
-	<properties>
-		<schema-to-pojo-version>0.0.8</schema-to-pojo-version>
-	</properties>
 	<modules>
 		<module>schema-to-pojo-lib</module>
 		<module>schema-to-pojo-org-json</module>

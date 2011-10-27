@@ -4,19 +4,18 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>parent-1.0</version>
+		<version>0.0.9</version>
 	</parent>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-org-json</artifactId>
 	<name>schema-to-pojo-org-json</name>
-	<version>${schema-to-pojo-version}</version>
 	<packaging>jar</packaging>
 	<description>The org.json implementation of the JSONObjectAdapter</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.sagebionetworks</groupId>
 			<artifactId>schema-to-pojo-lib</artifactId>
-			<version>${schema-to-pojo-version}</version>
+			<version>${project.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
