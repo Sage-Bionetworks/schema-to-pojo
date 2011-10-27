@@ -641,7 +641,7 @@ public class PojoGeneratorDriverTest {
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(5, fields.size());
+		assertEquals(6, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
@@ -704,7 +704,7 @@ public class PojoGeneratorDriverTest {
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
 		// Enums should have no fields
-		assertEquals(0, fields.size());
+		assertEquals(1, fields.size());
 		Collection<JMethod> methods = impl.methods();
 		assertNotNull(methods);
 		// enums should have no methods

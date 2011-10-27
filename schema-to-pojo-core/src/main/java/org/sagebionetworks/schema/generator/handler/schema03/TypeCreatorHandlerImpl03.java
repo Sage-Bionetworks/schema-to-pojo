@@ -7,12 +7,17 @@ import java.util.Set;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.generator.EffectiveSchemaUtil;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 
@@ -122,7 +127,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				}
 			}
 			// Add all of the comments
-			addComments(schema, newClass);
+			addCommentsAndEffectiveSchema(schema, newClass);
 			return newClass;
 		} catch (JClassAlreadyExistsException e) {
 			return e.getExistingClass();
@@ -130,7 +135,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 	}
 
 
-	public void addComments(ObjectSchema schema, JDefinedClass newClass) {
+	public void addCommentsAndEffectiveSchema(ObjectSchema schema, JDefinedClass newClass) {
+		try {
+			newClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, newClass.owner()._ref(String.class), "EFFECTIVE_SCHEMA", JExpr.lit(EffectiveSchemaUtil.generateJSONofEffectiveSchema(schema)));
+		} catch (JSONObjectAdapterException e) {
+			throw new RuntimeException(e);
+		}
 		// Add the comments to the class
 		JDocComment docs = newClass.javadoc();
 		if(schema.getTitle() != null){
@@ -162,7 +172,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				enumClass.enumConstant(enumName);
 			}
 			// Add all of the comments
-			addComments(schema, enumClass);
+			addCommentsAndEffectiveSchema(schema, enumClass);
 			return enumClass;
 		} catch (JClassAlreadyExistsException e) {
 			return e.getExistingClass();

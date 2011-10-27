@@ -1802,13 +1802,27 @@ public class ObjectSchema implements JSONEntity{
 	 * @param map
 	 * @param schema
 	 */
-	private static void recursivelyAddAllInterfaceProperties(HashMap<String, ObjectSchema> map, ObjectSchema schema){
+	public static void recursivelyAddAllInterfaceProperties(Map<String, ObjectSchema> map, ObjectSchema schema){
 		if(schema._implements != null){
 			for(ObjectSchema implSchema: schema._implements){
 				recursivelyAddAllInterfaceProperties(map, implSchema);
 				if(implSchema.properties != null){
 					map.putAll(implSchema.properties);
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Recursively AddAllInterfaceProperties
+	 * @param map
+	 * @param schema
+	 */
+	public static void recursivelyAddAllExtendsProperties(Map<String, ObjectSchema> map, ObjectSchema schema) {
+		if (schema._extends != null) {
+			recursivelyAddAllExtendsProperties(map, schema._extends);
+			if (schema._extends.properties != null) {
+				map.putAll(schema._extends.properties);
 			}
 		}
 	}

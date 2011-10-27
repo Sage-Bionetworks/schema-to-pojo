@@ -289,13 +289,32 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
-		System.out.println(classString);
+//		System.out.println(classString);
 		assertTrue(classString.indexOf("one,") > 0);
 		assertTrue(classString.indexOf("two,") > 0);
 		assertTrue(classString.indexOf("three;") > 0);
 		assertTrue(classString.indexOf(title) > 0);
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
+	}
+	
+	@Test
+	public void testEffectiveSchema() throws ClassNotFoundException{
+		String title = "This is the title";
+		String description = "Add a description";
+		schema.setTitle(title);
+		schema.setDescription(description);
+		schema.setType(TYPE.OBJECT);
+		schema.setName("Sample");
+		schema.putProperty("someProperty", new  ObjectSchema(TYPE.STRING));
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		assertNotNull(clazz);
+		assertTrue(clazz instanceof JDefinedClass);
+		JDefinedClass sampleClass = (JDefinedClass)clazz;
+		String classString = declareToString(sampleClass);
+		assertTrue(classString.indexOf("public final static java.lang.String EFFECTIVE_SCHEMA") > 0);
 	}
 	
 	
