@@ -69,6 +69,9 @@ public class ObjectSchemaTest {
 		property.setAdditionalItems(arrayType);
 		example.putAdditionalProperty("array", property);
 		
+		// Encoding
+		example.setContentEncoding(ENCODING.BINARY);
+		
 		// An enum
 		example.setEnum(new String[]{"a","b","c"});
 		

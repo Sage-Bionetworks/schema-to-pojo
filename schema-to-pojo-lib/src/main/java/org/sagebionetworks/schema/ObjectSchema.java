@@ -27,6 +27,24 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  */
 public class ObjectSchema implements JSONEntity{
 
+	public static final String JSON_ID = "id";
+	public static final String JSON_NAME = "name";
+	public static final String JSON_TYPE = "type";
+	public static final String JSON_PROPERTIES = "properties";
+	public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
+	public static final String JSON_ITEMS = "items";
+	public static final String JSON_UNIQUE_ITEMS = "uniqueItems";
+	public static final String JSON_ADDITIONAL_ITEMS = "additionalItems";
+	public static final String JSON_REQUIRED = "required";
+	public static final String JSON_MINIMUM = "minimum";
+	public static final String JSON_MAXIMUM = "maximum";
+	public static final String JSON_DESCRIPTION = "description";
+	public static final String JSON_IMPLEMENTS = "implements";
+	public static final String JSON_$REF = "$ref";
+	public static final String JSON_EXTENDS = "extends";
+	public static final String JSON_FORMAT = "format";
+	public static final String JSON_ENUM = "enum";
+	public static final String JSON_CONTENT_ENCODING = "contentEncoding";
 	public static final String SELF_REFERENCE = "#";
 	/*
 	 * The name of this object.
@@ -363,6 +381,17 @@ public class ObjectSchema implements JSONEntity{
 	 * conflicts with future JSON Schema specification changes.
 	 */
 	private String schema;
+	
+
+	/*
+	 * 6.4. contentEncoding
+	 * 
+	 * If the instance property value is a string, this attribute defines
+	 * that the string SHOULD be interpreted as binary data and decoded
+	 * using the encoding named by this schema property.  RFC 2045, Sec 6.1
+	 * [RFC2045] lists the possible values for this property.
+	 */
+	private ENCODING contentEncoding;
 
 	/**
 	 * New Object of a given type.
@@ -397,7 +426,32 @@ public class ObjectSchema implements JSONEntity{
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
+	/**
+	 * 6.4. contentEncoding
+	 * 
+	 * If the instance property value is a string, this attribute defines
+	 * that the string SHOULD be interpreted as binary data and decoded
+	 * using the encoding named by this schema property.  RFC 2045, Sec 6.1
+	 * [RFC2045] lists the possible values for this property.
+	 * @param encoding
+	 */
+	public void setContentEncoding(ENCODING encoding){
+		this.contentEncoding = encoding;
+	}
+	
+	/**
+	 * 6.4. contentEncoding
+	 * 
+	 * If the instance property value is a string, this attribute defines
+	 * that the string SHOULD be interpreted as binary data and decoded
+	 * using the encoding named by this schema property.  RFC 2045, Sec 6.1
+	 * [RFC2045] lists the possible values for this property.
+	 * @return
+	 */
+	public ENCODING getContentEncoding(){
+		return this.contentEncoding;
+	}
 	/**
 	 * 5.1. type
 	 * 
@@ -1338,6 +1392,8 @@ public class ObjectSchema implements JSONEntity{
 				* result
 				+ ((additionalProperties == null) ? 0 : additionalProperties
 						.hashCode());
+		result = prime * result
+				+ ((contentEncoding == null) ? 0 : contentEncoding.hashCode());
 		result = prime * result + Arrays.hashCode(dependencies);
 		result = prime * result
 				+ ((description == null) ? 0 : description.hashCode());
@@ -1411,6 +1467,8 @@ public class ObjectSchema implements JSONEntity{
 			if (other.additionalProperties != null)
 				return false;
 		} else if (!additionalProperties.equals(other.additionalProperties))
+			return false;
+		if (contentEncoding != other.contentEncoding)
 			return false;
 		if (!Arrays.equals(dependencies, other.dependencies))
 			return false;
@@ -1541,7 +1599,8 @@ public class ObjectSchema implements JSONEntity{
 				+ ", format=" + format + ", divisibleBy=" + divisibleBy
 				+ ", disallow=" + disallow + ", _extends=" + _extends
 				+ ", _implements=" + Arrays.toString(_implements) + ", id="
-				+ id + ", ref=" + ref + ", schema=" + schema + "]";
+				+ id + ", ref=" + ref + ", schema=" + schema
+				+ ", contentEncoding=" + contentEncoding + "]";
 	}
 	
 	public String toJSONString(JSONObjectAdapter adapter) throws JSONObjectAdapterException{
@@ -1592,30 +1651,30 @@ public class ObjectSchema implements JSONEntity{
 	public JSONObjectAdapter writeToJSONObject(JSONObjectAdapter in) throws JSONObjectAdapterException{
 		JSONObjectAdapter copy = in.createNew();
 		if(this.name != null){
-			copy.put("name", this.name);
+			copy.put(JSON_NAME, this.name);
 		}
 		if(this.type != null){
-			copy.put("type", this.type.getJSONValue());
+			copy.put(JSON_TYPE, this.type.getJSONValue());
 		}
 		if(properties != null){
 			JSONObjectAdapter props = createJSONObjectAdapter(this.properties, in);
-			copy.put("properties", props);	
+			copy.put(JSON_PROPERTIES, props);	
 		}
 		if(additionalProperties != null){
 			JSONObjectAdapter props = createJSONObjectAdapter(this.additionalProperties, in);
-			copy.put("additionalProperties", props);		
+			copy.put(JSON_ADDITIONAL_PROPERTIES, props);		
 		}
 		if(this.items != null){
-			copy.put("items", this.items.writeToJSONObject(in));
+			copy.put(JSON_ITEMS, this.items.writeToJSONObject(in));
 		}
 		if(this.uniqueItems != null){
-			copy.put("uniqueItems", this.uniqueItems.booleanValue());
+			copy.put(JSON_UNIQUE_ITEMS, this.uniqueItems.booleanValue());
 		}
 		if(this.additionalItems != null){
-			copy.put("additionalItems", this.additionalItems.writeToJSONObject(in));
+			copy.put(JSON_ADDITIONAL_ITEMS, this.additionalItems.writeToJSONObject(in));
 		}
 		if(this.required != null){
-			copy.put("required", this.required.booleanValue());
+			copy.put(JSON_REQUIRED, this.required.booleanValue());
 		}
 		if(dependencies != null){
 			JSONArrayAdapter array = in.createNewArray();
@@ -1625,38 +1684,41 @@ public class ObjectSchema implements JSONEntity{
 		}
 		if(_implements != null){
 			JSONArrayAdapter array = in.createNewArray();
-			copy.put("implements", array);
+			copy.put(JSON_IMPLEMENTS, array);
 			for(int i=0; i<_implements.length; i++){
 				array.put(i, _implements[i].writeToJSONObject(in));
 			}
 		}
 		if(this.minimum != null){
-			putBasedOnType(copy, "minimum", this.minimum, type);
+			putBasedOnType(copy, JSON_MINIMUM, this.minimum, type);
 		}
 		if(this.maximum != null){
-			putBasedOnType(copy, "maximum", this.maximum, type);
+			putBasedOnType(copy, JSON_MAXIMUM, this.maximum, type);
 		}
 		if(this.description != null){
-			copy.put("description", this.description);
+			copy.put(JSON_DESCRIPTION, this.description);
 		}
 		if(this.id != null){
-			copy.put("id", this.id.toString());
+			copy.put(JSON_ID, this.id.toString());
 		}
 		if(this.ref != null){
-			copy.put("$ref", this.ref.toString());
+			copy.put(JSON_$REF, this.ref.toString());
 		}
 		if(this._extends != null){
-			copy.put("extends", this._extends.writeToJSONObject(in));
+			copy.put(JSON_EXTENDS, this._extends.writeToJSONObject(in));
 		}
 		if(this.format != null){
-			copy.put("format", this.format.getJSONValue());
+			copy.put(JSON_FORMAT, this.format.getJSONValue());
 		}
 		if(this._enum != null){
 			JSONArrayAdapter array = in.createNewArray();
-			copy.put("enum", array);
+			copy.put(JSON_ENUM, array);
 			for(int i=0; i<_enum.length; i++){
 				array.put(i, _enum[i]);
 			}
+		}
+		if(this.contentEncoding != null){
+			copy.put(JSON_CONTENT_ENCODING, this.contentEncoding.getJsonValue());
 		}
 		return copy;
 	}
@@ -1792,71 +1854,74 @@ public class ObjectSchema implements JSONEntity{
 	@Override
 	public JSONObjectAdapter initializeFromJSONObject(
 			JSONObjectAdapter adapter) throws JSONObjectAdapterException {
-		if(adapter.has("name")){
-			this.name = adapter.getString("name");
+		if(adapter.has(JSON_NAME)){
+			this.name = adapter.getString(JSON_NAME);
 		}
-		if(adapter.has("type")){
-			this.type = TYPE.getTypeFromJSONValue(adapter.getString("type"));
+		if(adapter.has(JSON_TYPE)){
+			this.type = TYPE.getTypeFromJSONValue(adapter.getString(JSON_TYPE));
 		}
-		if(adapter.has("properties")){
-			JSONObjectAdapter props = adapter.getJSONObject("properties");
+		if(adapter.has(JSON_PROPERTIES)){
+			JSONObjectAdapter props = adapter.getJSONObject(JSON_PROPERTIES);
 			this.properties = createMapFromAdapter(props);
 		}
-		if(adapter.has("additionalProperties")){
-			JSONObjectAdapter props = adapter.getJSONObject("additionalProperties");
+		if(adapter.has(JSON_ADDITIONAL_PROPERTIES)){
+			JSONObjectAdapter props = adapter.getJSONObject(JSON_ADDITIONAL_PROPERTIES);
 			this.additionalProperties = createMapFromAdapter(props);
 		}
-		if(adapter.has("items")){
-			JSONObjectAdapter items = adapter.getJSONObject("items");
+		if(adapter.has(JSON_ITEMS)){
+			JSONObjectAdapter items = adapter.getJSONObject(JSON_ITEMS);
 			this.items = new ObjectSchema(items);
 		}
-		if(adapter.has("uniqueItems")){
-			this.uniqueItems =  adapter.getBoolean("uniqueItems");
+		if(adapter.has(JSON_UNIQUE_ITEMS)){
+			this.uniqueItems =  adapter.getBoolean(JSON_UNIQUE_ITEMS);
 		}else{
 			this.uniqueItems = null;
 		}
-		if(adapter.has("additionalItems")){
-			JSONObjectAdapter additionalItems = adapter.getJSONObject("additionalItems");
+		if(adapter.has(JSON_ADDITIONAL_ITEMS)){
+			JSONObjectAdapter additionalItems = adapter.getJSONObject(JSON_ADDITIONAL_ITEMS);
 			this.additionalItems = new ObjectSchema(additionalItems);
 		}
-		if(adapter.has("required")){
-			this.required = adapter.getBoolean("required");
+		if(adapter.has(JSON_REQUIRED)){
+			this.required = adapter.getBoolean(JSON_REQUIRED);
 		}
-		if(adapter.has("minimum")){
-			this.minimum = getNumberBasedOnType(type, adapter, "minimum");
+		if(adapter.has(JSON_MINIMUM)){
+			this.minimum = getNumberBasedOnType(type, adapter, JSON_MINIMUM);
 		}
-		if(adapter.has("maximum")){
-			this.maximum = getNumberBasedOnType(type, adapter, "maximum");
+		if(adapter.has(JSON_MAXIMUM)){
+			this.maximum = getNumberBasedOnType(type, adapter, JSON_MAXIMUM);
 		}
-		if(adapter.has("description")){
-			this.description = adapter.getString("description");
+		if(adapter.has(JSON_DESCRIPTION)){
+			this.description = adapter.getString(JSON_DESCRIPTION);
 		}
-		if(adapter.has("id")){
-			this.id = adapter.getString("id");
+		if(adapter.has(JSON_ID)){
+			this.id = adapter.getString(JSON_ID);
 		}
-		if(adapter.has("implements")){
-			JSONArrayAdapter array = adapter.getJSONArray("implements");
+		if(adapter.has(JSON_IMPLEMENTS)){
+			JSONArrayAdapter array = adapter.getJSONArray(JSON_IMPLEMENTS);
 			this._implements = new ObjectSchema[array.length()];
 			for(int i=0; i<array.length(); i++){
 				this._implements[i] = new ObjectSchema(array.getJSONObject(i));
 			}
 		}
-		if(adapter.has("$ref")){
-			this.ref = adapter.getString("$ref");
+		if(adapter.has(JSON_$REF)){
+			this.ref = adapter.getString(JSON_$REF);
 		}
-		if(adapter.has("extends")){
-			JSONObjectAdapter ex = adapter.getJSONObject("extends");
+		if(adapter.has(JSON_EXTENDS)){
+			JSONObjectAdapter ex = adapter.getJSONObject(JSON_EXTENDS);
 			this._extends = new ObjectSchema(ex);
 		}
-		if(adapter.has("format")){
-			this.format = FORMAT.getFormatForJSONValue(adapter.getString("format"));
+		if(adapter.has(JSON_FORMAT)){
+			this.format = FORMAT.getFormatForJSONValue(adapter.getString(JSON_FORMAT));
 		}
-		if(adapter.has("enum")){
-			JSONArrayAdapter array = adapter.getJSONArray("enum");
+		if(adapter.has(JSON_ENUM)){
+			JSONArrayAdapter array = adapter.getJSONArray(JSON_ENUM);
 			this._enum = new String[array.length()];
 			for(int i=0; i<array.length(); i++){
 				this._enum[i] = array.getString(i);
 			}
+		}
+		if(adapter.has(JSON_CONTENT_ENCODING)){
+			this.contentEncoding = ENCODING.getEncodingForJSONValue(adapter.getString(JSON_CONTENT_ENCODING));
 		}
 		return adapter;
 	}
