@@ -60,7 +60,7 @@ public class ObjectSchemaTest {
 		example.setImplements(_implements);
 		_implements[0] = new ObjectSchema();
 		_implements[0].setType(TYPE.INTERFACE);
-		
+
 		// Add an array
 		property = new ObjectSchema();
 		property.setType(TYPE.ARRAY);
@@ -71,6 +71,9 @@ public class ObjectSchemaTest {
 		
 		// Encoding
 		example.setContentEncoding(ENCODING.BINARY);
+		
+		// Transient
+		example.setTransient(true);
 		
 		// An enum
 		example.setEnum(new String[]{"a","b","c"});

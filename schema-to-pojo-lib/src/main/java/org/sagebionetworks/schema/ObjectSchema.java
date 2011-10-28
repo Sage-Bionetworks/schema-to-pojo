@@ -27,6 +27,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  */
 public class ObjectSchema implements JSONEntity{
 
+	public static final String JSON_TRANSIENT = "transient";
 	public static final String JSON_ID = "id";
 	public static final String JSON_NAME = "name";
 	public static final String JSON_TYPE = "type";
@@ -209,6 +210,13 @@ public class ObjectSchema implements JSONEntity{
 	 * are null; or
 	 */
 	private Boolean uniqueItems;
+	
+	/* 
+	 * This is an additional option to indicate that this item is transient
+	 * and therefore does not require persistence.
+	 */
+	private Boolean _transient;
+	
 	/*
 	 * 5.16. pattern
 	 * 
@@ -426,6 +434,8 @@ public class ObjectSchema implements JSONEntity{
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	
 	
 	/**
 	 * 6.4. contentEncoding
@@ -896,6 +906,7 @@ public class ObjectSchema implements JSONEntity{
 		if(uniqueItems == null)return false;
 		return uniqueItems;
 	}
+	
 
 	/**
 	 * 5.15. uniqueItems
@@ -912,6 +923,24 @@ public class ObjectSchema implements JSONEntity{
 	 */
 	public void setUniqueItems(Boolean uniqueItems) {
 		this.uniqueItems = uniqueItems;
+	}
+	
+	/**
+	 * Transient data is not persistent.
+	 * The default is false.
+	 * @return
+	 */
+	public boolean isTransient(){
+		if(_transient == null) return false;
+		return _transient;
+	}
+	
+	/**
+	 * Transient data is not persistent.
+	 * @param trans
+	 */
+	public void setTransient(Boolean trans){
+		this._transient = trans;
 	}
 
 	/**
@@ -1387,6 +1416,8 @@ public class ObjectSchema implements JSONEntity{
 				+ ((_extends == null) ? 0 : _extends.hashCode());
 		result = prime * result + Arrays.hashCode(_implements);
 		result = prime * result
+				+ ((_transient == null) ? 0 : _transient.hashCode());
+		result = prime * result
 				+ ((additionalItems == null) ? 0 : additionalItems.hashCode());
 		result = prime
 				* result
@@ -1457,6 +1488,11 @@ public class ObjectSchema implements JSONEntity{
 		} else if (!_extends.equals(other._extends))
 			return false;
 		if (!Arrays.equals(_implements, other._implements))
+			return false;
+		if (_transient == null) {
+			if (other._transient != null)
+				return false;
+		} else if (!_transient.equals(other._transient))
 			return false;
 		if (additionalItems == null) {
 			if (other.additionalItems != null)
@@ -1592,15 +1628,16 @@ public class ObjectSchema implements JSONEntity{
 				+ ", exclusiveMinimum=" + exclusiveMinimum
 				+ ", exclusiveMaximum=" + exclusiveMaximum + ", minItems="
 				+ minItems + ", maxItems=" + maxItems + ", uniqueItems="
-				+ uniqueItems + ", pattern=" + pattern + ", minLength="
-				+ minLength + ", maxLength=" + maxLength + ", _enum="
-				+ Arrays.toString(_enum) + ", _default=" + _default
-				+ ", title=" + title + ", description=" + description
-				+ ", format=" + format + ", divisibleBy=" + divisibleBy
-				+ ", disallow=" + disallow + ", _extends=" + _extends
-				+ ", _implements=" + Arrays.toString(_implements) + ", id="
-				+ id + ", ref=" + ref + ", schema=" + schema
-				+ ", contentEncoding=" + contentEncoding + "]";
+				+ uniqueItems + ", _transient=" + _transient + ", pattern="
+				+ pattern + ", minLength=" + minLength + ", maxLength="
+				+ maxLength + ", _enum=" + Arrays.toString(_enum)
+				+ ", _default=" + _default + ", title=" + title
+				+ ", description=" + description + ", format=" + format
+				+ ", divisibleBy=" + divisibleBy + ", disallow=" + disallow
+				+ ", _extends=" + _extends + ", _implements="
+				+ Arrays.toString(_implements) + ", id=" + id + ", ref=" + ref
+				+ ", schema=" + schema + ", contentEncoding=" + contentEncoding
+				+ "]";
 	}
 	
 	public String toJSONString(JSONObjectAdapter adapter) throws JSONObjectAdapterException{
@@ -1719,6 +1756,9 @@ public class ObjectSchema implements JSONEntity{
 		}
 		if(this.contentEncoding != null){
 			copy.put(JSON_CONTENT_ENCODING, this.contentEncoding.getJsonValue());
+		}
+		if(this._transient != null){
+			copy.put(JSON_TRANSIENT, this._transient);
 		}
 		return copy;
 	}
@@ -1936,6 +1976,9 @@ public class ObjectSchema implements JSONEntity{
 		}
 		if(adapter.has(JSON_CONTENT_ENCODING)){
 			this.contentEncoding = ENCODING.getEncodingForJSONValue(adapter.getString(JSON_CONTENT_ENCODING));
+		}
+		if(adapter.has(JSON_TRANSIENT)){
+			this._transient = adapter.getBoolean(JSON_TRANSIENT);
 		}
 		return adapter;
 	}
