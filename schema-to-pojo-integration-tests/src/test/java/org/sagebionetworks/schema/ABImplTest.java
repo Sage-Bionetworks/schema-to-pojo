@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.sagebionetworks.ABImpl;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 public class ABImplTest {
 	
@@ -65,6 +66,20 @@ public class ABImplTest {
 		assertNotNull(clone.getFromInterfaceB());
 
 		assertEquals(impl, clone);
+	}
+	
+	@Test
+	public void testGetJSONSchema() throws JSONObjectAdapterException{
+		ABImpl impl = new ABImpl();
+		String json = impl.getJSONSchema();
+		assertNotNull(json);
+		ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(json));
+		assertNotNull(schema);
+		assertNotNull(schema.getProperties());
+		assertNotNull(schema.getProperties().get("alsoFromInterfaceA"));
+		assertNotNull(schema.getProperties().get("alsoFromInterfaceB"));
+		assertNotNull(schema.getProperties().get("fromInterfaceB"));
+		assertNotNull(schema.getProperties().get("fromInterfaceA"));
 	}
 
 }

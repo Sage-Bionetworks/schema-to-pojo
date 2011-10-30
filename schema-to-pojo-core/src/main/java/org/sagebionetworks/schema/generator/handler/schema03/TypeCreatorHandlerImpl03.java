@@ -16,7 +16,6 @@ import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
@@ -29,6 +28,7 @@ import com.sun.codemodel.JType;
  *
  */
 public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
+	
 	
 	public static final String AUTO_GENERATED_MESSAGE = "Note: This class was auto-generated, and should not be directly modified.";
 
@@ -137,7 +137,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 	public void addCommentsAndEffectiveSchema(ObjectSchema schema, JDefinedClass newClass) {
 		try {
-			newClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, newClass.owner()._ref(String.class), "EFFECTIVE_SCHEMA", JExpr.lit(EffectiveSchemaUtil.generateJSONofEffectiveSchema(schema)));
+			newClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, newClass.owner()._ref(String.class), JSONEntity.EFFECTIVE_SCHEMA, JExpr.lit(EffectiveSchemaUtil.generateJSONofEffectiveSchema(schema)));
 		} catch (JSONObjectAdapterException e) {
 			throw new RuntimeException(e);
 		}

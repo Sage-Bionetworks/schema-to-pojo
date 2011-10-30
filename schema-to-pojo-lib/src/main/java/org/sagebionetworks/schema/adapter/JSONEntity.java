@@ -6,6 +6,8 @@ package org.sagebionetworks.schema.adapter;
  */
 public interface JSONEntity {
 	
+	public static final String EFFECTIVE_SCHEMA = "EFFECTIVE_SCHEMA";
+	
 	/**
 	 * Fully initialize this object from a JSONObjectAdapter.
 	 * @param toInitFrom
@@ -17,6 +19,12 @@ public interface JSONEntity {
 	 * @param writeTo
 	 */
 	public JSONObjectAdapter writeToJSONObject(JSONObjectAdapter writeTo) throws JSONObjectAdapterException;
+	
+	/**
+	 * Get the JSON schema for this entity.
+	 * @return
+	 */
+	public String getJSONSchema();
 	
 	
 

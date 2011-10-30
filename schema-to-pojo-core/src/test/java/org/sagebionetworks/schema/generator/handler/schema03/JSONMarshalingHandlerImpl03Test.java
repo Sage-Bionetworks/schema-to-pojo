@@ -15,13 +15,16 @@ import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
+import org.sagebionetworks.schema.generator.EffectiveSchemaUtil;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDeclaration;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
@@ -107,6 +110,20 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Make sure there is a call to super.
 		assertTrue(constructorString.indexOf("super(adapter);") > 0);
 //		printClassToConsole(childClasss);
+	}
+	
+	@Test
+	public void testCreateGetJSONSchemaMethod(){
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		sampleClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, sampleClass.owner()._ref(String.class), JSONEntity.EFFECTIVE_SCHEMA);
+		JMethod getMethod = handler.createGetJSONSchemaMethod(schema, sampleClass);
+		assertNotNull(getMethod);
+		assertEquals(JMod.PUBLIC, getMethod.mods().getValue());
+		assertNotNull(getMethod.params());
+		assertEquals(0, getMethod.params().size());
+		String methodString = declareToString(getMethod);
+//		System.out.println(methodString);
+		assertTrue(methodString.indexOf("return EFFECTIVE_SCHEMA;") > 0);
 	}
 	
 	@Test

@@ -42,6 +42,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
+		createGetJSONSchemaMethod(classSchema, classType);
+	
 		// Create the init method
 		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType);
 		// setup a constructor.
@@ -50,6 +52,22 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// Add the second method.
 		createWriteToJSONObject(classSchema, classType);
 		
+	}
+	
+	/**
+	 * Create the getJSONSchema method.
+	 * @param classSchema
+	 * @param classType
+	 */
+	public JMethod createGetJSONSchemaMethod(ObjectSchema classSchema,JDefinedClass classType){
+		// Look up the field for this property
+		JFieldVar field = classType.fields().get(JSONEntity.EFFECTIVE_SCHEMA);
+		if (field == null)
+			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+ JSONEntity.EFFECTIVE_SCHEMA + "' on class: " + classType.name());
+		// Create the get method
+		JMethod method = classType.method(JMod.PUBLIC, classType.owner()._ref(String.class), "getJSONSchema");
+		method.body()._return(field);
+		return method;
 	}
 
 

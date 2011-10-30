@@ -68,4 +68,10 @@ public class SimpleEntityStub implements JSONEntity{
 	public String toString() {
 		return "SimpleEntityStub [value=" + value + "]";
 	}
+
+	@Override
+	public String getJSONSchema() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

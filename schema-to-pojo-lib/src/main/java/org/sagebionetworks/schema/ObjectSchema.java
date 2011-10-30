@@ -1982,5 +1982,11 @@ public class ObjectSchema implements JSONEntity{
 		}
 		return adapter;
 	}
+
+	@Override
+	public String getJSONSchema() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
