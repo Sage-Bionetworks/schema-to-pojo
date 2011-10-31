@@ -23,6 +23,10 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	public JSONArrayAdapterImpl(JSONArray array) {
 		wrapped = array;
 	}
+	
+	public JSONArrayAdapterImpl(String jsonString) throws JSONException{
+		wrapped = new JSONArray(jsonString);
+	}
 
 	@Override
 	public boolean getBoolean(int index) throws JSONObjectAdapterException {
