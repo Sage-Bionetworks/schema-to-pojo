@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-
 import org.junit.Test;
 import org.sagebionetworks.AllTypes;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;

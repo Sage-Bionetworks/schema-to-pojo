@@ -42,17 +42,17 @@ public class PojoGeneratorDriver {
 	 * @param packageName
 	 * @throws ClassNotFoundException
 	 */
-	public void createAllClasses(JCodeModel codeModel, List<ObjectSchema> list, String packageName) throws ClassNotFoundException{
+	public void createAllClasses(JCodeModel codeModel, List<ObjectSchema> list) throws ClassNotFoundException{
 		// The first step is to register all named types and replace all references with
 		// concrete schemas.
 		list = preprocessSchemas(list);
 		// We are now ready to start creating the classes
 		// First create the package
-		JPackage _package = codeModel._package(packageName);
+		JPackage _package = codeModel._package("");
 		// Now recursively process all of the schema objects
 		for(ObjectSchema schema: list){
 			// Create each POJO
-			createPOJO(_package, schema);
+			createPOJO(codeModel, schema);
 		}
 	}
 	
@@ -64,9 +64,9 @@ public class PojoGeneratorDriver {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public JDefinedClass createPOJO(JPackage _package, ObjectSchema schema) throws ClassNotFoundException{
+	public JDefinedClass createPOJO(JCodeModel codeModel, ObjectSchema schema) throws ClassNotFoundException{
 		// First create the type for this schema
-		JType type = createOrGetType(_package, schema);
+		JType type = createOrGetType(codeModel, schema);
 		if(!(type instanceof JDefinedClass)) return null;
 		JDefinedClass classType = (JDefinedClass) type;
 		// If this is an enumeration then there is nothing left to add.
@@ -79,8 +79,15 @@ public class PojoGeneratorDriver {
 		while (it.hasNext()) {
 			String key = it.next();
 			ObjectSchema propertySchema = fieldMap.get(key);
+			// For nested sub-classes we need to make sure they have an id.
+			if(propertySchema.getId() == null){
+				if(propertySchema.getName() != null){
+					// Inherit the outer class package.
+					propertySchema.setId(schema.getPackageName()+"."+propertySchema.getName());
+				}
+			}
 			// Get type type for this property
-			JType propertyType = createOrGetType(_package, propertySchema);
+			JType propertyType = createOrGetType(codeModel, propertySchema);
 			// Create this property
 			factory.getPropertyHandler().createProperty(propertySchema,
 					classType, key, propertyType);
@@ -115,25 +122,25 @@ public class PojoGeneratorDriver {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public JType createOrGetType(JPackage _package, ObjectSchema schema) throws ClassNotFoundException {
+	public JType createOrGetType(JCodeModel codeModel, ObjectSchema schema) throws ClassNotFoundException {
 		// The purpose of the driver is to do all of the recursion for the handlers
-		JType superType = _package.owner()._ref(Object.class);
+		JType superType = codeModel._ref(Object.class);
 		if (schema.getExtends() != null) {
-			superType = createOrGetType(_package, schema.getExtends());
+			superType = createOrGetType(codeModel, schema.getExtends());
 		}
 		JType[] implementsArray = null;
 		if(schema.getImplements() != null){
 			implementsArray = new JType[schema.getImplements().length];
 			for(int i=0; i<schema.getImplements().length; i++){
-				implementsArray[i] = createOrGetType(_package, schema.getImplements()[i]);
+				implementsArray[i] = createOrGetType(codeModel, schema.getImplements()[i]);
 			}
 		}
 		JType arrayType = null;
 		if( schema.getItems() != null){
-			arrayType = createOrGetType(_package, schema.getItems());
+			arrayType = createOrGetType(codeModel, schema.getItems());
 		}
 		// Let the handler do most of the work.
-		return factory.getTypeCreatorHandler().handelCreateType(_package, schema, superType, arrayType, implementsArray);
+		return factory.getTypeCreatorHandler().handelCreateType(codeModel, schema, superType, arrayType, implementsArray);
 	}
 	
 	/**

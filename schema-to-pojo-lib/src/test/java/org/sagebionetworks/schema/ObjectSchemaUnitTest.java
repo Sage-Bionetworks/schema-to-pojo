@@ -149,4 +149,24 @@ public class ObjectSchemaUnitTest {
 		
 	}
 
+	@Test
+	public void testGetPackageName(){
+		ObjectSchema schema = new ObjectSchema();
+		schema.setName("SampleClass");
+		schema.setId("org.sample."+schema.getName());
+		String packageName = schema.getPackageName();
+		assertNotNull(packageName);
+		assertEquals("org.sample", packageName);
+	}
+	
+	@Test
+	public void testGetPackageNameDefault(){
+		ObjectSchema schema = new ObjectSchema();
+		schema.setName("SampleClass");
+		schema.setId(""+schema.getName());
+		String packageName = schema.getPackageName();
+		assertNotNull(packageName);
+		assertEquals("", packageName);
+	}
+	
 }

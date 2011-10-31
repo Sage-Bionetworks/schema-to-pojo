@@ -1,6 +1,5 @@
 {
     "type":"object",
-    "id":"ABImpl.json",
     "name":"ABImpl",
     "properties":{
         "fromMe":{
@@ -9,12 +8,10 @@
     },
     "implements":[
         {
-            "$ref":"InterfaceA.json",
-            "type":"interface"
+            "$ref":"InterfaceA"
         },
         {
-            "$ref":"InterfaceB.json",
-            "type":"interface"
+            "$ref":"InterfaceB"
         }
     ]
 }

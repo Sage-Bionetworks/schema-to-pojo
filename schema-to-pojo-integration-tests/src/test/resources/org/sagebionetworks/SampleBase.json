@@ -1,6 +1,5 @@
 {
     "type":"object",
-    "id":"SampleBase.json",
     "properties":{
         "fromBase":{
             "type":"string"

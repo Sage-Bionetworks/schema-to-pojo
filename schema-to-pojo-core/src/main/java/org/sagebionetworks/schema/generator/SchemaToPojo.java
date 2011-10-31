@@ -35,10 +35,9 @@ public class SchemaToPojo {
 	 * @throws JSONObjectAdapterException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static void generatePojos(File schemaSource, File outputDir, String packageName, HandlerFactory factory) throws IOException, JSONObjectAdapterException, ClassNotFoundException{
+	public static void generatePojos(File schemaSource, File outputDir, HandlerFactory factory) throws IOException, JSONObjectAdapterException, ClassNotFoundException{
 		if(schemaSource == null) throw new IllegalArgumentException("schemaSource cannot be null");
 		if(outputDir == null) throw new IllegalArgumentException("outputDir cannot be null");
-		if(packageName == null) throw new IllegalArgumentException("packageName cannot be null");
 		if(factory == null) throw new IllegalArgumentException("The HandlerFactory cannot be null");
 		// process each file
 		Iterator<File> iterator = FileUtil.getRecursiveIterator(schemaSource, new FileFilter() {
@@ -60,6 +59,9 @@ public class SchemaToPojo {
 			if(schema.getName() == null){
 				schema.setName(extractSchemaNameFromFileName(file));
 			}
+			// Set the id
+			String packageName = getPackageNameFromFiles(schemaSource, file);
+			schema.setId(packageName+schema.getName());
 			// Each base schema must be an object even if it is not set
 			if(schema.getType() == null){
 				schema.setType(TYPE.OBJECT);
@@ -71,12 +73,37 @@ public class SchemaToPojo {
 		JCodeModel codeModel = new JCodeModel();
 		// The drive does the recursive work and drives the handlers
 		PojoGeneratorDriver driver = new PojoGeneratorDriver(factory);
-		driver.createAllClasses(codeModel, schemaList, packageName);
+		driver.createAllClasses(codeModel, schemaList);
 		// The final step is to generate the classes
 		if(!outputDir.exists()){
 			outputDir.mkdirs();
 		}
 		codeModel.build(outputDir);
+	}
+	
+	/**
+	 * Extract the package name using the root file and the json file.
+	 * @param rootDir
+	 * @param jsonFile
+	 * @return
+	 */
+	public static String getPackageNameFromFiles(File rootDir, File jsonFile){
+		String rootPath = rootDir.getAbsolutePath();
+		String filePath = jsonFile.getAbsolutePath();
+		// If they are the same file then use the default package
+		if(rootPath.equals(filePath)){
+			return "";
+		}
+		int start = rootPath.length();
+		int end = filePath.indexOf(jsonFile.getName());
+		String sub = filePath.substring(start, end);
+		sub = sub.replaceAll("\\\\", ".");
+		start = 0;
+		end = sub.length();
+		if(sub.startsWith(".")){
+			start++;
+		}
+		return sub.substring(start, end);
 	}
 	
 	/**

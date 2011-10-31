@@ -39,6 +39,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setType(TYPE.OBJECT);
 		// give it a name
 		schema.setName("Sample");
+		schema.setId("org.sample"+schema.getName());
 	}
 	
 	@Test
@@ -50,10 +51,10 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setDescription(description);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		// Make sure we can call this twice with the same class
-		JType second = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType second = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertEquals(clazz, second);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -76,10 +77,10 @@ public class TypeCreatorHandlerImpl03Test {
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
 		JDefinedClass parentInterface = _package._interface("ParentInterface");
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, new JType[]{parentInterface});
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, new JType[]{parentInterface});
 		assertNotNull(clazz);
 		// Make sure we can call this twice with the same class
-		JType second = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, new JType[]{parentInterface});
+		JType second = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, new JType[]{parentInterface});
 		assertEquals(clazz, second);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -99,7 +100,7 @@ public class TypeCreatorHandlerImpl03Test {
 	public void testClassExtendsClass() throws ClassNotFoundException, JClassAlreadyExistsException {
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		JDefinedClass parentClass = _package._class("ParentClass");
-		JType clazz = handler.handelCreateType(_package, schema, parentClass, null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, parentClass, null, null);
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -113,7 +114,7 @@ public class TypeCreatorHandlerImpl03Test {
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		JDefinedClass parentInternace = _package._interface("ParentInterface");
 		JDefinedClass parentInternace2 = _package._interface("ParentInterface2");
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, new JType[]{parentInternace, parentInternace2});
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, new JType[]{parentInternace, parentInternace2});
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -127,7 +128,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setType(TYPE.INTERFACE);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -143,7 +144,7 @@ public class TypeCreatorHandlerImpl03Test {
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		JDefinedClass parentInternace = _package._interface("ParentInterface");
 		JDefinedClass parentInternace2 = _package._interface("ParentInterface2");
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, new JType[]{parentInternace, parentInternace2});
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, new JType[]{parentInternace, parentInternace2});
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -160,7 +161,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.DATE_TIME);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -172,7 +173,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.DATE);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -184,7 +185,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.TIME);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -196,7 +197,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.UTC_MILLISEC);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -209,7 +210,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.DATE_TIME);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -221,7 +222,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.DATE);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -233,7 +234,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.TIME);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -245,7 +246,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setFormat(FORMAT.UTC_MILLISEC);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
@@ -260,7 +261,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setEnum(new String[]{"one","two","three"});
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -270,7 +271,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setName(null);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 	}
 	
 	@Test
@@ -284,7 +285,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setName("SampleEnum");
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
@@ -309,7 +310,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.putProperty("someProperty", new  ObjectSchema(TYPE.STRING));
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
-		JType clazz = handler.handelCreateType(_package, schema, codeModel._ref(Object.class), null, null);
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
 		assertNotNull(clazz);
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;

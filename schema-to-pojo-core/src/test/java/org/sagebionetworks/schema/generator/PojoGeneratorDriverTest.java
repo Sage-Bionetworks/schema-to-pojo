@@ -1,7 +1,7 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -36,10 +36,14 @@ import com.sun.codemodel.JType;
 public class PojoGeneratorDriverTest {
 	
 	PojoGeneratorDriver driver = null;
+	ObjectSchema schema;
 	
 	@Before
 	public void before(){
 		driver = new PojoGeneratorDriver(new HandlerFactoryImpl03());
+		schema = new ObjectSchema();
+		schema.setName("SampleClass");
+		schema.setId("org.sample."+schema.getName());
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -306,95 +310,82 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.NUMBER);
 		JCodeModel codeModel = new JCodeModel();
+		schema.setId("org.sample.SampleClass");
 		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals("double", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesInteger() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.INTEGER);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals("long", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesBoolean() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.BOOLEAN);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals("boolean", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesString() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.STRING);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(String.class.getName(), type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesAny() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ANY);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Object.class.getName(), type.fullName());
 	}
 	
 	@Test 
 	public void testRecursivlyCreateAllTypesNull() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.NULL);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
 		// Null is not supported
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Object.class.getName(), type.fullName());
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testRecursivlyCreateAllTypesArrayNoType() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		JCodeModel codeModel = new JCodeModel();
 		JPackage _package = codeModel._package("org.sample");
 		// should fail since the array type is not set
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayString() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.STRING);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+String.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayStringSet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -402,29 +393,25 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.STRING);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+String.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayInteger() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.INTEGER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Long.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayIntegerSet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -432,29 +419,25 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.INTEGER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Long.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayBoolean() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.BOOLEAN);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Boolean.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayBooleanSet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -462,29 +445,25 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.BOOLEAN);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Boolean.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNumber() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.NUMBER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Double.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNumberSet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -492,29 +471,25 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.NUMBER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Double.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayAny() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.ANY);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Object.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayAnySet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -522,29 +497,25 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.ANY);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Object.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNull() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		ObjectSchema arrayType = new ObjectSchema();
 		arrayType.setType(TYPE.NULL);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Object.class.getName()+">", type.fullName());
 	}
 	
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNullSet() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
@@ -552,8 +523,7 @@ public class PojoGeneratorDriverTest {
 		arrayType.setType(TYPE.NULL);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(Set.class.getName()+"<"+Object.class.getName()+">", type.fullName());
 	}
@@ -564,12 +534,11 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema parent = new ObjectSchema();
 		parent.setType(TYPE.OBJECT);
 		parent.setName("ParentClass");
-		ObjectSchema schema = new ObjectSchema();
+		parent.setId("org.sample."+parent.getName());
 		schema.setExtends(parent);
 		schema.setType(TYPE.OBJECT);
 		schema.setName("ChildClass");
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		JDefinedClass def = (JDefinedClass) type;
 		String classDeffString = declareToString(def);
@@ -582,12 +551,11 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema parent = new ObjectSchema();
 		parent.setType(TYPE.INTERFACE);
 		parent.setName("ParentInterface");
-		ObjectSchema schema = new ObjectSchema();
+		parent.setId("org.sample."+parent.getName());
 		schema.setImplements(new ObjectSchema[]{parent});
 		schema.setType(TYPE.OBJECT);
 		schema.setName("ChildClass");
-		JPackage _package = codeModel._package("org.sample");
-		JType type = driver.createOrGetType(_package, schema);
+		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		JDefinedClass def = (JDefinedClass) type;
 		String classDeffString = declareToString(def);
@@ -607,12 +575,13 @@ public class PojoGeneratorDriverTest {
 			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
 //			schema.setName(name);
+			schema.setId(schema.getName());
 			schemaList.add(schema);
 		}
 		JCodeModel codeModel = new JCodeModel();
-		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		driver.createAllClasses(codeModel, schemaList);
 		// Get the class
-		JPackage _package = codeModel._package("org.sample");
+		JPackage _package = codeModel._package("");
 		JDefinedClass impl =  null;
 		try{
 			impl = _package._class("ABImpl");
@@ -657,12 +626,13 @@ public class PojoGeneratorDriverTest {
 		for(String name: namesToLoad){
 			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
+			schema.setId(schema.getName());
 			schemaList.add(schema);
 		}
 		JCodeModel codeModel = new JCodeModel();
-		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		driver.createAllClasses(codeModel, schemaList);
 		// Get the class
-		JPackage _package = codeModel._package("org.sample");
+		JPackage _package = codeModel._package("");
 		JDefinedClass impl =  null;
 		try{
 			impl = _package._class("AImpl");
@@ -686,12 +656,13 @@ public class PojoGeneratorDriverTest {
 		for(String name: namesToLoad){
 			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(fileString));
+			schema.setId(schema.getName());
 			schemaList.add(schema);
 		}
 		JCodeModel codeModel = new JCodeModel();
-		driver.createAllClasses(codeModel, schemaList, "org.sample");
+		driver.createAllClasses(codeModel, schemaList);
 		// Get the class
-		JPackage _package = codeModel._package("org.sample");
+		JPackage _package = codeModel._package("");
 		JDefinedClass impl =  null;
 		try{
 			impl = _package._class("PetEnum");

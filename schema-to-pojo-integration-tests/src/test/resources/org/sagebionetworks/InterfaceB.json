@@ -1,6 +1,5 @@
 {
     "type":"interface",
-    "id":"InterfaceB.json",
     "properties":{
         "fromInterfaceB":{
             "type":"string"
@@ -12,8 +11,7 @@
     },
     "implements":[
         {
-            "$ref":"InterfaceA.json",
-            "type":"interface"
+            "$ref":"org.sagebionetworks.InterfaceA",
         }
     ]
 }

@@ -2,7 +2,7 @@ package org.sagebionetworks.schema.generator.handler;
 
 import org.sagebionetworks.schema.ObjectSchema;
 
-import com.sun.codemodel.JPackage;
+import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JType;
 
 /**
@@ -21,6 +21,6 @@ public interface TypeCreatorHandler {
 	 * @return - The type created.
 	 * @throws ClassNotFoundException
 	 */
-	public JType handelCreateType(JPackage _package, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException;
+	public JType handelCreateType(JCodeModel model, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException;
 
 }

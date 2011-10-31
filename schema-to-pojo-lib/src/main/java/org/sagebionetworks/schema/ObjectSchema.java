@@ -1982,6 +1982,21 @@ public class ObjectSchema implements JSONEntity{
 		}
 		return adapter;
 	}
+	
+	/**
+	 * Get the package name for this object.
+	 * @return
+	 */
+	public String getPackageName(){
+		if(name == null)throw new IllegalArgumentException("Cannot get a package name if the name is null");
+		if(id == null) throw new IllegalArgumentException("Cannot get a package name if the id is null");
+		String sub = id.substring(0, id.length()-name.length());
+		if(sub.endsWith(".")){
+			return sub.substring(0, sub.length()-1);
+		}else{
+			return sub;
+		}
+	}
 
 	@Override
 	public String getJSONSchema() {

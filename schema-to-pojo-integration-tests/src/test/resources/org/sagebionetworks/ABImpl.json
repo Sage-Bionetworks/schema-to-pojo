@@ -1,6 +1,5 @@
 {
     "type":"object",
-    "id":"ABImpl.json",
     "properties":{
         "fromMe":{
             "type":"string"
@@ -8,8 +7,7 @@
     },
     "implements":[
         {
-            "$ref":"InterfaceB.json",
-            "type":"interface"
-        }
+            "$ref":"org.sagebionetworks.InterfaceB",
+        },
     ]
 }

@@ -1,0 +1,8 @@
+{
+    "type":"object",
+    "properties":{
+        "sample":{
+            "$ref":"org.sample.PackageSample"
+        }
+    },
+}

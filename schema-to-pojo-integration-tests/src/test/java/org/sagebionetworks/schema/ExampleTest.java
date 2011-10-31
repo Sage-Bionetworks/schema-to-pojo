@@ -15,7 +15,7 @@ public class ExampleTest {
 	@Test
 	public void testLoadExample() throws IOException, JSONException{
 		// Load the JSON string from the file.
-		String json = FileUtil.loadStringFromClasspathFile(ExampleTest.class.getClassLoader(), "ExampleSchema.json");
+		String json = FileUtil.loadStringFromClasspathFile(ExampleTest.class.getClassLoader(), "org/sagebionetworks/schema/ExampleSchema.json");
 		JSONObject loaded = new JSONObject(json);
 		assertNotNull(loaded);
 		StringWriter writer = new StringWriter();

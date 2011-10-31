@@ -70,7 +70,7 @@ public class SchemaToPojoMojo extends AbstractMojo {
 			// Hard code the factory for now
 			HandlerFactoryImpl03 factory = new HandlerFactoryImpl03();
 			// Generate the classes from their schemas.
-			SchemaToPojo.generatePojos(sourceDirectory, outputDirectory, packageName, factory);
+			SchemaToPojo.generatePojos(sourceDirectory, outputDirectory, factory);
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to execute mojo: "+e.getMessage(), e);
 		} 

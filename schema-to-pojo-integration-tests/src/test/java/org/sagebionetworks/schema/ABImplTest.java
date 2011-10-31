@@ -72,6 +72,7 @@ public class ABImplTest {
 	public void testGetJSONSchema() throws JSONObjectAdapterException{
 		ABImpl impl = new ABImpl();
 		String json = impl.getJSONSchema();
+		System.out.println(json);
 		assertNotNull(json);
 		ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(json));
 		assertNotNull(schema);

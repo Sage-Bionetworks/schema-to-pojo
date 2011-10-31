@@ -13,6 +13,7 @@ import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
@@ -34,11 +35,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 
 	@Override
-	public JType handelCreateType(JPackage _package, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException {
+	public JType handelCreateType(JCodeModel codeModel, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException {
 		// Is this an enumeration
 		if(schema.getEnum() != null){
 			// Create or get the enumeration class.
-			return createOrGetEnum(_package, schema);
+			return createOrGetEnum(codeModel, schema);
 		}
 		if(superType.isPrimitive()) return superType;
 		
@@ -49,27 +50,27 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		if(schema.getFormat() != null){
 			if(schema.getFormat().isDateFormat()){
 				// If the format is a date then the java type is a date.
-				return _package.owner().ref(Date.class);
+				return codeModel.ref(Date.class);
 			}
 		}
 		
 		// Handle primitives
 		if(schema.getType().isPrimitive()){
 			// This is a primitive
-			return _package.owner().parseType(schema.getType().getJavaType());
+			return codeModel.parseType(schema.getType().getJavaType());
 		}
 
 		// Strings
 		if(TYPE.STRING == schema.getType()){
-			return _package.owner().ref(String.class);
+			return codeModel.ref(String.class);
 		}
 		// Any is treated as a generic object
 		if(TYPE.ANY == schema.getType()){
-			return _package.owner().ref(Object.class);
+			return codeModel.ref(Object.class);
 		}
 		// Null is treated as object
 		if(TYPE.NULL == schema.getType()){
-			return _package.owner().ref(Object.class);
+			return codeModel.ref(Object.class);
 		}
 		if(TYPE.ARRAY == schema.getType()){
 			// We must have Items
@@ -77,15 +78,15 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			// Get the array type
 			if(schema.getUniqueItems()){
 				// This is a set
-				return _package.owner().ref(Set.class).narrow(arrayType);
+				return codeModel.ref(Set.class).narrow(arrayType);
 			}else{
 				// This is a list
-				return _package.owner().ref(List.class).narrow(arrayType);
+				return codeModel.ref(List.class).narrow(arrayType);
 			}
 		}
 		// The last category is objects.
 		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){
-			return createOrGetClassAndInterface(_package, schema, superType,
+			return createOrGetClassAndInterface(codeModel, schema, superType,
 					interfanceTypes);
 		}
 		// Any other type is a failure
@@ -101,11 +102,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 	 * @param interfanceTypes
 	 * @return
 	 */
-	private JType createOrGetClassAndInterface(JPackage _package, ObjectSchema schema, JType superType, JType[] interfanceTypes) {
+	private JType createOrGetClassAndInterface(JCodeModel codeModel, ObjectSchema schema, JType superType, JType[] interfanceTypes) {
 		// A named object is a new class while a null name is a generic object
 		if(schema.getName() == null){
-			return _package.owner().ref(Object.class);
+			return codeModel.ref(Object.class);
 		}
+		JPackage _package = codeModel._package(schema.getPackageName());
 		// Create a new class with this name
 		try {
 			JDefinedClass newClass = null;
@@ -162,10 +164,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 	 * @param schema
 	 * @return
 	 */
-	private JType createOrGetEnum(JPackage _package, ObjectSchema schema) {
+	private JType createOrGetEnum(JCodeModel codeModel, ObjectSchema schema) {
 		if(TYPE.STRING != schema.getType()) throw new IllegalArgumentException("Enumerations cannot be of type: "+schema.getType()+".  Enumerations can only be of type: "+TYPE.STRING);
 		if(schema.getName() == null) throw new IllegalArgumentException("Enumerations must have a name");
 		try {
+			JPackage _package = codeModel._package(schema.getPackageName());
 			JDefinedClass enumClass = _package._enum(schema.getName());
 			// Generate the enum constants
 			for(String enumName: schema.getEnum()){

@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
@@ -50,15 +51,68 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, "com.example",
-				factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, factory);
 		// Make sure the file exists
-		File result = new File(outputDir, "com/example/Product.java");
+		File result = new File(outputDir, "Product.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		// Load the file string
 		String resultString = FileUtil.readToString(result);
 		System.out.println(resultString);
+	}
+	
+	@Test
+	public void loadAllFiles() throws IOException,
+			JSONObjectAdapterException, ClassNotFoundException {
+		// Load form the sample file
+		File sampleFile = new File("src/test/resources");
+		assertTrue("Test file does not exist: " + sampleFile.getAbsolutePath(),
+				sampleFile.exists());
+		// Create the class
+		HandlerFactory factory = new HandlerFactoryImpl03();
+		// Generate the class
+		SchemaToPojo.generatePojos(sampleFile, outputDir, factory);
+		// Make sure the file exists
+		File result = new File(outputDir, "org/sample/PackageSample.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		result = new File(outputDir, "org/sample/ReferToPackageSample.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		result = new File(outputDir, "org/sample/Nested.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		result = new File(outputDir, "org/sample/ValidPets.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		// Load the file string
+		String resultString = FileUtil.readToString(result);
+		System.out.println(resultString);
+	}
+	
+	@Test
+	public void testGetPackageName() throws IOException{
+		File root = File.createTempFile("root file test", "");
+		// Delete the file
+		root.delete();
+		// Convert to directory
+		root.mkdirs();
+		File jsonFile = new File(root, "org/sagebionetworks/test.json");
+		String packageName = SchemaToPojo.getPackageNameFromFiles(root, jsonFile);
+		assertNotNull(packageName);
+		System.out.println(packageName);
+		assertEquals("org.sagebionetworks.", packageName);
+		// Now test a file at the root
+		jsonFile = new File(root, "test.json");
+		packageName = SchemaToPojo.getPackageNameFromFiles(root, jsonFile);
+		assertNotNull(packageName);
+		System.out.println(packageName);
+		assertEquals("", packageName);
+		root.delete();
 	}
 
 

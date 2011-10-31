@@ -1,6 +1,5 @@
 {
     "type":"interface",
-    "id":"InterfaceB.json",
     "name":"InterfaceB",
     "properties":{
         "fromInterfaceB":{
