@@ -146,8 +146,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				continue;
 			}
 			// Add an if
-			JConditional hasCondition = body._if(param.invoke("has").arg(
-					propName));
+			
+			JConditional hasCondition = body._if(param.invoke("isNull").arg(
+					propName).not());
 			JBlock thenBlock = hasCondition._then();
 			// For strings and primitives we can just assign the value right
 			// from the adapter.

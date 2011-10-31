@@ -187,7 +187,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(method);
 //		System.out.println(constructorString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (adapter.has(\"stringName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"stringName\")) {") > 0);
 		// It should directly set the value
 		assertTrue(methodString.indexOf("stringName = adapter.getString(\"stringName\");") > 0);
 		// It should also have an else that sets it to null
@@ -300,7 +300,7 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(declareToString(sampleClass));
 //		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (adapter.has(\"dateName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateName\")) {") > 0);
 		// This should convert from a string to a date.
 		assertTrue(methodString.indexOf("dateName = adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), adapter.getString(\"dateName\"));") > 0);
 		// It should also have an else that sets it to null

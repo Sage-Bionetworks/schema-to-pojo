@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
@@ -160,6 +161,17 @@ public class JSONObjectAdapterImplTest {
 		assertFalse(adapter.isNull(propertyKey));
 		adapter.put(propertyKey, (String)null);
 		assertTrue(adapter.isNull(propertyKey));
+	}
+	
+
+	@Test
+	public void testNullInput() throws JSONObjectAdapterException{
+		adapter =  JSONObjectAdapterImpl.createAdapterFromJSONString("{\"name\":\"testAnonymousGet\",\"annotations\":null,\"id\":null,}");
+		assertTrue(adapter.has("name"));
+		assertFalse(adapter.isNull("name"));
+		
+		assertTrue(adapter.isNull("annotations"));
+		assertTrue(adapter.isNull("id"));
 	}
 	
 	@Test
