@@ -64,6 +64,15 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		if(TYPE.STRING == schema.getType()){
 			return codeModel.ref(String.class);
 		}
+		if(TYPE.NUMBER == schema.getType()){
+			return codeModel.ref(Double.class);
+		}
+		if(TYPE.BOOLEAN == schema.getType()){
+			return codeModel.ref(Boolean.class);
+		}
+		if(TYPE.INTEGER == schema.getType()){
+			return codeModel.ref(Long.class);
+		}
 		// Any is treated as a generic object
 		if(TYPE.ANY == schema.getType()){
 			return codeModel.ref(Object.class);

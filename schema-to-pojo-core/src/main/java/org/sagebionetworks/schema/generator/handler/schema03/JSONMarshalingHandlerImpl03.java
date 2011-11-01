@@ -164,6 +164,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 							param, propName, propSchema);
 				}
 				thenBlock.assign(field, rhs);
+			}else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
+				JClass typeClass = (JClass) field.type();
+				// Basic assign
+				thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke(type.getMethodName()).arg(propName)));
 			} else if (TYPE.ARRAY == type) {
 				// Determine the type of the field
 				JClass typeClass = (JClass) field.type();
@@ -403,6 +407,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				}
 				thenBlock.add(param.invoke("put").arg(field.name())
 						.arg(valueToPut));
+			}else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
+				JClass typeClass = (JClass) field.type();
+				// Basic assign
+				thenBlock.add(param.invoke("put").arg(field.name()).arg(field));
 			} else if (TYPE.ARRAY == type) {
 				// Determine the type of the field
 				JClass typeClass = (JClass) field.type();

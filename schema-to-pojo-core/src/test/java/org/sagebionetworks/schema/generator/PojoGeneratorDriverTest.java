@@ -314,7 +314,7 @@ public class PojoGeneratorDriverTest {
 		JPackage _package = codeModel._package("org.sample");
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
-		assertEquals("double", type.fullName());
+		assertEquals(Double.class.getName(), type.fullName());
 	}
 	
 	@Test
@@ -323,7 +323,7 @@ public class PojoGeneratorDriverTest {
 		JCodeModel codeModel = new JCodeModel();
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
-		assertEquals("long", type.fullName());
+		assertEquals(Long.class.getName(), type.fullName());
 	}
 	
 	@Test
@@ -332,7 +332,7 @@ public class PojoGeneratorDriverTest {
 		JCodeModel codeModel = new JCodeModel();
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
-		assertEquals("boolean", type.fullName());
+		assertEquals(Boolean.class.getName(), type.fullName());
 	}
 	
 	@Test

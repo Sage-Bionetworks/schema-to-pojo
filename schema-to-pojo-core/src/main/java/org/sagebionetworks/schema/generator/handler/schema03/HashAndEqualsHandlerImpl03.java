@@ -81,35 +81,38 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 			// For each type we need to setup the add expression
 			JExpression addExpression = null;
 			// For all non-primitives we can use "hashCode"
-			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
-					|| TYPE.NULL == type || TYPE.OBJECT == type) {
-				// If the object is not null then use hashCode() else, 0;
-				addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
-						field.invoke("hashCode"));
-			} else if (TYPE.NUMBER == type) {
-				// Double requires special treatment
-				// Create or initialized the temp
-				JInvocation staticInvoke = classType.owner().ref(Double.class)
-						.staticInvoke("doubleToLongBits").arg(field);
-				if (temp == null) {
-					// Declare it the first time
-					temp = body.decl(JMod.NONE, classType.owner().LONG, "temp",
-							staticInvoke);
-				} else {
-					// Assign it all other times
-					body.assign(temp, staticInvoke);
-				}
-				addExpression = shiftXORCastLong(classType, temp);
-			} else if (TYPE.INTEGER == type) {
-				// Long requires special treatment
-				addExpression = shiftXORCastLong(classType, field);
-			} else if (TYPE.BOOLEAN == type) {
-				// boolean is also special
-				addExpression = JOp.cond(field, JExpr.lit(1231),
-						JExpr.lit(1237));
-			} else {
-				throw new IllegalArgumentException("Unknown type: " + type);
-			}
+			// If the object is not null then use hashCode() else, 0;
+			addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
+					field.invoke("hashCode"));
+//			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
+//					|| TYPE.NULL == type || TYPE.OBJECT == type) {
+//				// If the object is not null then use hashCode() else, 0;
+//				addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
+//						field.invoke("hashCode"));
+//			} else if (TYPE.NUMBER == type) {
+//				// Double requires special treatment
+//				// Create or initialized the temp
+//				JInvocation staticInvoke = classType.owner().ref(Double.class)
+//						.staticInvoke("doubleToLongBits").arg(field);
+//				if (temp == null) {
+//					// Declare it the first time
+//					temp = body.decl(JMod.NONE, classType.owner().LONG, "temp",
+//							staticInvoke);
+//				} else {
+//					// Assign it all other times
+//					body.assign(temp, staticInvoke);
+//				}
+//				addExpression = shiftXORCastLong(classType, temp);
+//			} else if (TYPE.INTEGER == type) {
+//				// Long requires special treatment
+//				addExpression = shiftXORCastLong(classType, field);
+//			} else if (TYPE.BOOLEAN == type) {
+//				// boolean is also special
+//				addExpression = JOp.cond(field, JExpr.lit(1231),
+//						JExpr.lit(1237));
+//			} else {
+//				throw new IllegalArgumentException("Unknown type: " + type);
+//			}
 			// Put it all together
 			body.assign(result, prime.mul(result).plus(addExpression));
 		}
@@ -173,33 +176,42 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 			TYPE type = propSchema.getType();
 
 			// For all non-primitives we can use "hashCode"
-			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
-					|| TYPE.NULL == type || TYPE.OBJECT == type) {
-				// just use equals() for all objects
-				JConditional outerCon = body._if(JOp.eq(field, JExpr._null()));
-				outerCon._then()
-						._if(JOp.ne(JExpr.ref(other, field), JExpr._null()))
-						._then()._return(JExpr.lit(false));
-				outerCon._elseif(
-						JOp.not(field.invoke("equals").arg(
-								JExpr.ref(other, field))))._then()
-						._return(JExpr.lit(false));
-			} else if (TYPE.NUMBER == type) {
-				// doubles are special
-				JClass doubleClass = classType.owner().ref(Double.class);
-				body._if(
-						JOp.ne(doubleClass.staticInvoke("doubleToLongBits")
-								.arg(field),
-								doubleClass.staticInvoke("doubleToLongBits")
-										.arg(JExpr.ref(other, field))))._then()
-						._return(JExpr.lit(false));
-			} else if (TYPE.INTEGER == type || TYPE.BOOLEAN == type) {
-				// primitives are easy
-				body._if(JOp.ne(field, JExpr.ref(other, field)))._then()
-						._return(JExpr.lit(false));
-			} else {
-				throw new IllegalArgumentException("Unknown type: " + type);
-			}
+			// just use equals() for all objects
+			JConditional outerCon = body._if(JOp.eq(field, JExpr._null()));
+			outerCon._then()
+					._if(JOp.ne(JExpr.ref(other, field), JExpr._null()))
+					._then()._return(JExpr.lit(false));
+			outerCon._elseif(
+					JOp.not(field.invoke("equals").arg(
+							JExpr.ref(other, field))))._then()
+					._return(JExpr.lit(false));
+//			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
+//					|| TYPE.NULL == type || TYPE.OBJECT == type) {
+//				// just use equals() for all objects
+//				JConditional outerCon = body._if(JOp.eq(field, JExpr._null()));
+//				outerCon._then()
+//						._if(JOp.ne(JExpr.ref(other, field), JExpr._null()))
+//						._then()._return(JExpr.lit(false));
+//				outerCon._elseif(
+//						JOp.not(field.invoke("equals").arg(
+//								JExpr.ref(other, field))))._then()
+//						._return(JExpr.lit(false));
+//			} else if (TYPE.NUMBER == type) {
+//				// doubles are special
+//				JClass doubleClass = classType.owner().ref(Double.class);
+//				body._if(
+//						JOp.ne(doubleClass.staticInvoke("doubleToLongBits")
+//								.arg(field),
+//								doubleClass.staticInvoke("doubleToLongBits")
+//										.arg(JExpr.ref(other, field))))._then()
+//						._return(JExpr.lit(false));
+//			} else if (TYPE.INTEGER == type || TYPE.BOOLEAN == type) {
+//				// primitives are easy
+//				body._if(JOp.ne(field, JExpr.ref(other, field)))._then()
+//						._return(JExpr.lit(false));
+//			} else {
+//				throw new IllegalArgumentException("Unknown type: " + type);
+//			}
 		}
 
         // Add the last return true

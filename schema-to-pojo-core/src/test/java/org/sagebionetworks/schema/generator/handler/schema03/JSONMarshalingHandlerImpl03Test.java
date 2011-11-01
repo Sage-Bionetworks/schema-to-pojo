@@ -341,15 +341,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "longName";
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
-		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(Long.class), propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(method);;
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("longName = adapter.getLong(\"longName\");") > 0);
-		assertFalse(methodString.indexOf("longName = null;") > 0);
+		assertTrue(methodString.indexOf("longName = new java.lang.Long(adapter.getLong(\"longName\"));") > 0);
+		assertTrue(methodString.indexOf("longName = null;") > 0);
 	}
 	
 	@Test
@@ -360,15 +360,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "doubleName";
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
-		sampleClass.field(JMod.PRIVATE, codeModel.parseType("double"), propName);
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(Double.class), propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("doubleName = adapter.getDouble(\"doubleName\");") > 0);
-		assertFalse(methodString.indexOf("doubleName = null;") > 0);
+		assertTrue(methodString.indexOf("oubleName = new java.lang.Double(adapter.getDouble(\"doubleName\"));") > 0);
+		assertTrue(methodString.indexOf("doubleName = null;") > 0);
 	}
 	
 	@Test
@@ -379,14 +379,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "propName";
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
-		sampleClass.field(JMod.PRIVATE, codeModel.parseType("boolean"), propName);
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(Boolean.class), propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = adapter.getBoolean(\"propName\");") > 0);
-		assertFalse(methodString.indexOf("propName = null;") > 0);
+		assertTrue(methodString.indexOf("propName = new java.lang.Boolean(adapter.getBoolean(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("propName = null;") > 0);
 	}
 	
 	@Test
@@ -726,7 +727,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("adapter.put(\"propName\", propName.writeToJSONObject(adapter.createNew()));") > 0);
 //		printClassToConsole(sampleClass);
@@ -846,7 +847,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
-		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		childClasss.field(JMod.PRIVATE, codeModel.ref(Boolean.class), "fromInterface");
 		// Now handle the
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(childSchema, childClasss);
@@ -855,9 +856,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertNotNull(body);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Make sure there is a call to super.
-		assertTrue(methodString.indexOf("fromInterface = adapter.getBoolean(\"fromInterface\");") > 0);
+		assertTrue(methodString.indexOf("fromInterface = new java.lang.Boolean(adapter.getBoolean(\"fromInterface\"));") > 0);
 	}
 	
 	@Test

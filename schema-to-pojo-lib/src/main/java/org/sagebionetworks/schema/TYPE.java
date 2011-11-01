@@ -17,16 +17,16 @@ public enum TYPE {
 	/*
 	 * Value MUST be a number, floating point numbers are allowed.
 	 */
-	NUMBER("number", true, "double", "getDouble"),
+	NUMBER("number", false, Double.class.getName(), "getDouble"),
 	/*
 	 * Value MUST be an integer, no floating point numbers are allowed. This is
 	 * a subset of the number type.
 	 */
-	INTEGER("integer", true, "long", "getLong"),
+	INTEGER("integer", false, Long.class.getName(), "getLong"),
 	/*
 	 * Value MUST be a boolean.
 	 */
-	BOOLEAN("boolean", true, "boolean", "getBoolean"),
+	BOOLEAN("boolean", false, Boolean.class.getName(), "getBoolean"),
 	/*
 	 * Value MUST be an object.
 	 */
