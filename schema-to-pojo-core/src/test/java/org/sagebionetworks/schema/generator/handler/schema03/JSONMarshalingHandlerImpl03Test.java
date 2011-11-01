@@ -516,7 +516,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
 		assertTrue(methodString.indexOf("catch (java.lang.IllegalArgumentException _x)") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"'SomeEnum' must be one of the following: 'A', 'B'.\")") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"'enumName' must be one of the following: 'A', 'B'.\")") > 0);
 	}
 	
 	@Test

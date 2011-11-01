@@ -169,7 +169,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					JCatchBlock catchBlock = tryBlock._catch(classType.owner().ref(IllegalArgumentException.class));
 					// Create the throw string
 					StringBuilder builder = new StringBuilder();
-					builder.append("'").append(propSchema.getName()).append("' must be one of the following: ");
+					builder.append("'").append(propName).append("' must be one of the following: ");
 					for(int i=0; i<propSchema.getEnum().length; i++){
 						if(i!=0){
 							builder.append(", ");
