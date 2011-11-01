@@ -17,6 +17,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JCatchBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JCommentPart;
@@ -30,6 +31,7 @@ import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
+import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
 
@@ -161,13 +163,28 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JExpression rhs = null;
 				if(propSchema.getEnum() != null){
 					// Assign an enum
+					JTryBlock tryBlock = thenBlock._try();
 					rhs = assignJSONStringToEnumProperty(param, propName, field);
+					tryBlock.body().assign(field, rhs);
+					JCatchBlock catchBlock = tryBlock._catch(classType.owner().ref(IllegalArgumentException.class));
+					// Create the throw string
+					StringBuilder builder = new StringBuilder();
+					builder.append("'").append(propSchema.getName()).append("' must be one of the following: ");
+					for(int i=0; i<propSchema.getEnum().length; i++){
+						if(i!=0){
+							builder.append(", ");
+						}
+						builder.append("'").append(propSchema.getEnum()[i]).append("'");
+					}
+					builder.append(".");
+					catchBlock.body()._throw(JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(builder.toString()));
 				}else{
 					// This is just a string.
 					rhs = assignJSONStringToProperty(classType.owner(),
 							param, propName, propSchema);
+					thenBlock.assign(field, rhs);
 				}
-				thenBlock.assign(field, rhs);
+
 			}else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
 				JClass typeClass = (JClass) field.type();
 				// Basic assign

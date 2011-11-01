@@ -512,8 +512,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
+		assertTrue(methodString.indexOf("catch (java.lang.IllegalArgumentException _x)") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"'SomeEnum' must be one of the following: 'A', 'B'.\")") > 0);
 	}
 	
 	@Test
