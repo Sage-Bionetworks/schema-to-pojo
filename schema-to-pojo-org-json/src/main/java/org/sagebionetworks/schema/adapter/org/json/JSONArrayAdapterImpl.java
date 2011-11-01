@@ -117,6 +117,11 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	public JSONArrayAdapter createNewArray() {
 		return new JSONArrayAdapterImpl();
 	}
+	
+	@Override
+	public JSONObjectAdapter createNew(String json) throws JSONObjectAdapterException {
+		return JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+	}
 
 	@Override
 	public JSONArrayAdapter put(int index, JSONArrayAdapter value)
@@ -210,5 +215,6 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	public boolean equals(Object obj) {
 		return wrapped.equals(obj);
 	}
+
 
 }

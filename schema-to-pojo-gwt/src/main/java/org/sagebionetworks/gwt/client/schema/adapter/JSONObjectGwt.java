@@ -15,6 +15,7 @@ import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
@@ -234,6 +235,13 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		}else{
 			throw new IllegalArgumentException("Unknown date format: "+format.name());
 		}
+	}
+
+	@Override
+	public JSONObjectAdapter createNew(String json)
+			throws JSONObjectAdapterException {
+		JSONValue value = JSONParser.parseStrict(json);
+		return new JSONObjectGwt(value.isObject());
 	}
 
 

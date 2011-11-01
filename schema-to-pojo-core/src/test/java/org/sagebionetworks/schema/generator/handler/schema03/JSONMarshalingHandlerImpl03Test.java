@@ -17,14 +17,12 @@ import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
-import org.sagebionetworks.schema.generator.EffectiveSchemaUtil;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDeclaration;
 import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
@@ -405,6 +403,23 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(constructorString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(\"propName\"));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectValidate() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = schema;
+		String propName = "propName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.ValidateUtil.validateEntity(Sample.EFFECTIVE_SCHEMA, adapter, Sample.class);") > 0);
 	}
 	
 	@Test
@@ -881,6 +896,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Make sure there is a call to super.
 		assertTrue(methodString.indexOf("adapter.put(\"fromInterface\", fromInterface);") > 0);
 	}
+	
 
 	public void printClassToConsole(JDefinedClass classToPrint) {
 		StringWriter writer = new StringWriter();

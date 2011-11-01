@@ -8,6 +8,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
@@ -88,6 +89,13 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	@Override
 	public JSONObjectAdapter createNew() {
 		return new JSONObjectGwt(new JSONObject());
+	}
+	
+	@Override
+	public JSONObjectAdapter createNew(String json)
+			throws JSONObjectAdapterException {
+		JSONValue value = JSONParser.parseStrict(json);
+		return new JSONObjectGwt(value.isObject());
 	}
 
 	@Override
@@ -182,5 +190,7 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	public String toString(){
 		return this.wrapped.toString();
 	}
+
+
 
 }

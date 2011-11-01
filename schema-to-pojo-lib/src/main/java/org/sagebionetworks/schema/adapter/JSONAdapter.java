@@ -9,6 +9,14 @@ public interface JSONAdapter {
 	public JSONObjectAdapter createNew();
 	
 	/**
+	 * Create a new Adapter using the passed JSON String
+	 * @param json
+	 * @return
+	 * @throws JSONObjectAdapterException 
+	 */
+	public JSONObjectAdapter createNew(String json) throws JSONObjectAdapterException;
+	
+	/**
 	 * Create a new array.
 	 * @return
 	 */

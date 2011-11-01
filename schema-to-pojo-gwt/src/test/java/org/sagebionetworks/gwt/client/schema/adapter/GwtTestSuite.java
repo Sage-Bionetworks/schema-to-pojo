@@ -336,5 +336,20 @@ public class GwtTestSuite extends GWTTestCase {
 		System.out.println(adapter.toJSONString());
 		assertEquals(adapter.toJSONString(), adapter.toString());
 	}
+	
+	@Test
+	public void testCreateNewJSON() throws JSONObjectAdapterException{
+		// Create a new object using JSON
+		adapterObject.put("longKey", 123);
+		adapterObject.put("doubleKey", 34.5);
+		adapterObject.put("stringKey", "I am a great string!");
+		String json = adapterObject.toJSONString();
+		System.out.println(json);
+		// Create a new Adapter with the JSON string
+		JSONObjectAdapter adapter = adapterObject.createNew(json);
+		assertNotNull(adapter);
+		String cloneJson = adapter.toJSONString();
+		assertEquals(json, cloneJson);
+	}
 
 }

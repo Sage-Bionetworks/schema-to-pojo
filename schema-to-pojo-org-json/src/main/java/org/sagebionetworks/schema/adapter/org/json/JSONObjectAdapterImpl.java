@@ -57,6 +57,11 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	public JSONObjectAdapter createNew() {
 		return new JSONObjectAdapterImpl();
 	}
+	
+	@Override
+	public JSONObjectAdapter createNew(String json)	throws JSONObjectAdapterException {
+		return JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+	}
 
 	@Override
 	public String toJSONString() {
@@ -279,6 +284,8 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	public boolean equals(Object obj) {
 		return wrapped.equals(obj);
 	}
+
+
 	
 
 }
