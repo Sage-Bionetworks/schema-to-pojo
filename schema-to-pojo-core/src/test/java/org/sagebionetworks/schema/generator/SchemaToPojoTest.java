@@ -60,7 +60,7 @@ public class SchemaToPojoTest {
 		String resultString = FileUtil.readToString(result);
 		System.out.println(resultString);
 	}
-	
+	@Ignore
 	@Test
 	public void loadAllFiles() throws IOException,
 			JSONObjectAdapterException, ClassNotFoundException {
@@ -93,7 +93,7 @@ public class SchemaToPojoTest {
 		String resultString = FileUtil.readToString(result);
 		System.out.println(resultString);
 	}
-	
+	@Ignore
 	@Test
 	public void testGetPackageName() throws IOException{
 		File root = File.createTempFile("root file test", "");
