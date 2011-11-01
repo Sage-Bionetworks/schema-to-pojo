@@ -98,6 +98,7 @@ public class SchemaToPojo {
 		int end = filePath.indexOf(jsonFile.getName());
 		String sub = filePath.substring(start, end);
 		sub = sub.replaceAll("\\\\", ".");
+		sub = sub.replaceAll("/", ".");
 		start = 0;
 		end = sub.length();
 		if(sub.startsWith(".")){
