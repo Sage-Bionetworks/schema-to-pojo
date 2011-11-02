@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.junit.Test;
 import org.sagebionetworks.ABImpl;
+import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -13,7 +14,7 @@ import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 public class ABImplTest {
 	
 	@Test
-	public void testEquals(){
+	public void testEquals() throws JSONObjectAdapterException{
 		ABImpl a = new ABImpl();
 		ABImpl b = new ABImpl();
 		assertTrue(a.equals(b));
@@ -43,6 +44,9 @@ public class ABImplTest {
 		b.setFromMe(a.getFromMe());
 		assertTrue(a.equals(b));
 		
+		JSONAdapter adapter = a.writeToJSONObject(new JSONObjectAdapterImpl());
+		
+		ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(a.getJSONSchema()));
 	}
 	
 	@Test
