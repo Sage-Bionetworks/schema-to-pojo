@@ -5,9 +5,6 @@ import java.util.Map;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 /**
  * Validates JSONObjectAdapter's against their schemas.
  * @author ntiedema
