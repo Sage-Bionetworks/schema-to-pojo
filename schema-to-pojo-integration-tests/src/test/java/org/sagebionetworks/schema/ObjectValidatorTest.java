@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.sagebionetworks.AllTypes;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -81,7 +82,7 @@ public class ObjectValidatorTest {
 		adapter.put("theSecondProperty", 7);
 		adapter.put("theThirdProperty", "hello");
 		
-		ObjectValidator.validateObject(adapter, testSchema);
+		ObjectValidator.validateEntity(testSchema, adapter);
 	}
 	
 	/**
@@ -118,7 +119,7 @@ public class ObjectValidatorTest {
 		adapter.put("theFristProperty", 123.456);
 		adapter.put("theSecondProperty", 7);		
 		
-		ObjectValidator.validateObject(adapter, testSchema);
+		ObjectValidator.validateEntity(testSchema, adapter);
 	}
 	
 	/**
@@ -146,14 +147,11 @@ public class ObjectValidatorTest {
 		testSchema.putProperty("theSecondProperty", nextProp);
 		
 		//set up adapter
-		adapter.put("name", "testSchemaName");
-		adapter.put("description", "this is description for test schema");
 		adapter.put("theSecondProperty", 7);
-		adapter.put("aRandomProperty", 45);
 		adapter.put("theFirstProperty", 123.456);
 		
 		//now validate
-		ObjectValidator.validateObject(adapter, testSchema);
+		ObjectValidator.validateEntity(testSchema, adapter);
 	}
 	
 	/**
@@ -165,12 +163,8 @@ public class ObjectValidatorTest {
 		testSchema.setName("testSchemasName");
 		testSchema.setDescription("this is description for test schema");
 		
-		//set up adapter
-		adapter.put("name", "testSchemaName");
-		adapter.put("description", "this is description for test schema");
-		
 		//now validate
-		ObjectValidator.validateObject(adapter, testSchema);
+		ObjectValidator.validateEntity(testSchema, adapter);
 	}
 	
 	/**
@@ -200,7 +194,7 @@ public class ObjectValidatorTest {
 		adapter.put("theFirstProperty", 123.456);
 		adapter.put("theSecondProperty", 7);
 		
-		ObjectValidator.validateObject(adapter, testSchema);
+		ObjectValidator.validateEntity(testSchema, adapter);
 	}
 	
 	/**
@@ -420,5 +414,33 @@ public class ObjectValidatorTest {
 		//make an corresponding adapter that will not contain the correct type
 		adapter.put("adapterProperty", 5);
 		ObjectValidator.validatePropertyType(adapter, property, propertyName);
+	}
+	
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testNonDeclaredValue() throws JSONObjectAdapterException{
+		AllTypes at = new AllTypes();
+		at.setBooleanProp(true);
+		at.setLongProp(123L);
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+		at.writeToJSONObject(adapter);
+		// Now add an undeclared property to the object
+		adapter.put("NOT DECLARED", "I should not be here");
+		// This should fail validation
+		ObjectValidator.validateEntity(at.getJSONSchema(), adapter, AllTypes.class);
+	}
+	
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testNonDeclaredValueOnInit() throws JSONObjectAdapterException{
+		AllTypes at = new AllTypes();
+		at.setBooleanProp(true);
+		at.setLongProp(123L);
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+		at.writeToJSONObject(adapter);
+		// Now add an undeclared property to the object
+		adapter.put("NOT DECLARED", "I should not be here");
+		// This should fail validation
+		AllTypes clone = new AllTypes();
+		// The init should fail.
+		clone.initializeFromJSONObject(adapter);
 	}
 }

@@ -8,8 +8,8 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectValidator;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.ValidateUtil;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -127,7 +127,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
 		
 		// First validate against the schema
-		body.staticInvoke(classType.owner().ref(ValidateUtil.class), "validateEntity").arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
+		body.staticInvoke(classType.owner().ref(ObjectValidator.class), "validateEntity").arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
         
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();

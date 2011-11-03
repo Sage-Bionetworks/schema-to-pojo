@@ -419,7 +419,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.ValidateUtil.validateEntity(Sample.EFFECTIVE_SCHEMA, adapter, Sample.class);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.ObjectValidator.validateEntity(Sample.EFFECTIVE_SCHEMA, adapter, Sample.class);") > 0);
 	}
 	
 	@Test

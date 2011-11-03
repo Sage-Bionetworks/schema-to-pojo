@@ -4,8 +4,8 @@ Walk the complete PLFM hierarchy and bring all the pom.xml files up to new minor
 '''
 
 #Old and new minor versions
-oldVersion = '0.1.3'
-newVersion = '0.1.4'
+oldVersion = '0.1.4'
+newVersion = '0.1.5'
 #Path to PLFM on your system
 startPath = 'C:\\sage\\workspace\\schema-to-pojo'
 for root, subFolders, files in os.walk(startPath):    

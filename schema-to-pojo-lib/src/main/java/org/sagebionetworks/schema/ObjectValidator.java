@@ -1,38 +1,99 @@
 package org.sagebionetworks.schema;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 /**
- * Validates JSONObjectAdapter's against their schemas.
- * @author ntiedema
+ * Utility to help validate an instance (as an JSONObjectAdapter) against a schema.
+ * 
+ * @author John
+ *
  */
 public class ObjectValidator {
+	/**
+	 * Private schema cache.
+	 * NOTE: We cannot use Collections.synchronizedMap because GWT does not support it.
+	 */
+	private static Map<Class<? extends JSONEntity>, ObjectSchema> cache = new HashMap<Class<? extends JSONEntity>, ObjectSchema>();
 	
 	/**
-	 * Validates a JSONObjectAdapter against it's schema.
-	 * @param adapter
-	 * @param schema
+	 * Get the ObjectSchema for a JSONEntity.
+	 * @param entity
+	 * @return
 	 * @throws JSONObjectAdapterException
 	 */
-	public static void validateObject(JSONObjectAdapter adapter,
-			ObjectSchema schema) throws JSONObjectAdapterException{
-		//do we have a valid adapter
-		if (adapter == null){
-			throw new IllegalArgumentException
-				("can not validate with a null adapter object");
+	private static ObjectSchema getSchema(String schemaJSON, JSONObjectAdapter adapter, Class<? extends JSONEntity> clazz) {
+		if(schemaJSON == null) throw new IllegalArgumentException("Schema string cannot be null");
+		if(adapter == null) throw new IllegalArgumentException("Adapter cannot be null");
+		if(clazz == null) throw new IllegalArgumentException("Adapter cannot be null");
+		ObjectSchema schema = cache.get(clazz);
+		if(schema == null){
+			try {
+				schema = new ObjectSchema(adapter.createNew(schemaJSON));
+			} catch (JSONObjectAdapterException e) {
+				// convert this to a runtime.
+				throw new RuntimeException(e);
+			}
+			cache.put(clazz, schema);
 		}
-		
-		//do we have a valid schema
-		if (schema == null){
-			throw new IllegalArgumentException
-				("can not validate with a null schema object");
+		return schema;
+	}
+	
+	/**
+	 * Validate.
+	 * @param schemaJSON
+	 * @param adapter
+	 * @param clazz
+	 */
+	public static void validateEntity(String schemaJSON, JSONObjectAdapter adapter, Class<? extends JSONEntity> clazz) throws JSONObjectAdapterException{
+		if(schemaJSON == null) throw new IllegalArgumentException("Schema string cannot be null");
+		if(adapter == null) throw new IllegalArgumentException("Adapter cannot be null");
+		if(clazz == null) throw new IllegalArgumentException("Adapter cannot be null");
+		// First fetch the schema.
+		ObjectSchema schema = getSchema(schemaJSON, adapter, clazz);
+		// Validate it against the schema
+		validateEntity(schema, adapter);
+	}
+	
+	/**
+	* Validate the passed adapter against the given schema.
+	* @param schema
+	* @param adapter
+	* @throws JSONObjectAdapterException
+	*/
+	public static void validateEntity(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+		if(schema == null) throw new IllegalArgumentException("Schema cannot be null");
+		if(adapter == null) throw new IllegalArgumentException("Adapter cannot be null");
+		// First fetch the schema.
+		validateAllKeysAreDefined(schema, adapter);
+		//make sure all required properties are represented in adapter
+		validateRequiredProperties(schema, adapter);
+	}
+	
+	/**
+	 * Validate that all of the keys are defined.
+	 * @param schema
+	 * @param adapter
+	 * @throws JSONObjectAdapterException 
+	 */
+	private static void validateAllKeysAreDefined(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+		Iterator<String> it = adapter.keys();
+		Map<String, ObjectSchema> props = schema.getProperties();
+		if(props == null){
+			if(it.hasNext()) throw new JSONObjectAdapterException("The schema has not properties so the adapter cannot have any data");
+			return;
 		}
-		
-		//check that adapter has all properties marked as "required" in schema
-		validateRequiredProperties(adapter, schema);
+		while(it.hasNext()){
+			String key = it.next();
+			if(!props.containsKey(key)){
+				throw new JSONObjectAdapterException("Found property: "+key+", but this property is not defined in the schema: "+schema.getId());
+			}
+		}
 	}
 	
 	/**
@@ -43,8 +104,8 @@ public class ObjectValidator {
 	 * @param schema
 	 * @throws JSONObjectAdapterException
 	 */
-	private static void validateRequiredProperties(JSONObjectAdapter adapter, 
-			ObjectSchema schema) throws JSONObjectAdapterException {
+	private static void validateRequiredProperties(ObjectSchema schema, 
+			JSONObjectAdapter adapter) throws JSONObjectAdapterException {
 		//obtain schema's properties
 		Map<String, ObjectSchema> schemaProperties = schema.getProperties();
 		if (schemaProperties != null){
@@ -63,6 +124,7 @@ public class ObjectValidator {
 			}
 		}
 	}
+	
 	/**
 	 * Validates a JSONObjectAdapter has name/values in the correct TYPE for 
 	 * all required schema properties.
