@@ -172,16 +172,14 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 			throws JSONObjectAdapterException {
 		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
 		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		this.wrapped.put(key, new JSONString(Integer.toString(value)));
+		this.wrapped.put(key, new JSONNumber(value));
 		return this;
 	}
 
 	@Override
 	public JSONObjectAdapter put(String key, long value)
 			throws JSONObjectAdapterException {
-		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
-		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		this.wrapped.put(key, new JSONString(Long.toString(value)));
+		this.wrapped.put(key, JSONValueUtil.createJSONNumberForLong(value));
 		return this;
 	}
 

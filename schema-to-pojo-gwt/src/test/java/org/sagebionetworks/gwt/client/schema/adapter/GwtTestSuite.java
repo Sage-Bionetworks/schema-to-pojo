@@ -211,10 +211,22 @@ public class GwtTestSuite extends GWTTestCase {
 	
 	@Test
 	public void testObjectLongRoundTrip() throws JSONObjectAdapterException{
-		long value = 123;
+		long value = Integer.MAX_VALUE -1;
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertEquals(value, adapterObject.getLong(propertyKey));
+	}
+
+	@Test
+	public void testObjectLongTooLarge() throws JSONObjectAdapterException{
+		// This value will be too large since GWT will store it as a double.
+		long value = Long.MAX_VALUE -1;
+		try{
+			adapterObject.put(propertyKey, value);
+			fail();
+		}catch(JSONObjectAdapterException e){
+			// This is expected since the value is too large
+		}
 	}
 	
 	@Test
@@ -350,6 +362,13 @@ public class GwtTestSuite extends GWTTestCase {
 		assertNotNull(adapter);
 		String cloneJson = adapter.toJSONString();
 		assertEquals(json, cloneJson);
+		JSONObjectAdapter clone = adapterObject.createNew(json);
+		assertNotNull(clone);
+		assertEquals(123, clone.getLong("longKey"));
+		assertEquals(34.5, clone.getDouble("doubleKey"));
+		assertEquals("I am a great string!", clone.getString("stringKey"));
 	}
+	
+	
 
 }

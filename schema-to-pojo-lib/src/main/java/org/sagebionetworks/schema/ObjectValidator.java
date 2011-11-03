@@ -114,58 +114,12 @@ public class ObjectValidator {
 				//adapter has corresponding property
 				ObjectSchema nextPropertySchema = schemaProperties.get(propertyName);
 				if (nextPropertySchema.isRequired()){
-					if (!adapter.has(propertyName)){
+					if (adapter.isNull(propertyName)){
 						throw new JSONObjectAdapterException("The property: " + propertyName + " is required, " +
 							"and was not found in the adapter");
 					}
-					//validate that adapter has correct "type"
-					validatePropertyType(adapter, nextPropertySchema, propertyName);
 				}
 			}
-		}
-	}
-	
-	/**
-	 * Validates a JSONObjectAdapter has name/values in the correct TYPE for 
-	 * all required schema properties.
-	 * @param adapter
-	 * @throws JSONObjectAdapterException 
-	 */
-	protected static void validatePropertyType(JSONObjectAdapter adapter, ObjectSchema property, String propertyKey) throws JSONObjectAdapterException {
-		if (TYPE.STRING == property.getType()){
-			if (adapter.getString(propertyKey) == null){
-				throw new JSONObjectAdapterException(propertyKey + " is not a valid string");
-			}
-		}
-		else if (TYPE.NUMBER == property.getType()){
-			adapter.getDouble(propertyKey);
-		}
-		else if (TYPE.INTEGER == property.getType()){
-			adapter.getLong(propertyKey);
-		}
-		else if (TYPE.BOOLEAN == property.getType()){
-			adapter.getBoolean(propertyKey);
-		}
-		else if (TYPE.OBJECT == property.getType() || TYPE.ANY == property.getType() || TYPE.INTERFACE == property.getType()){
-			if (adapter.isNull(propertyKey)){
-				throw new JSONObjectAdapterException(propertyKey + " is not a valid JSONObjectAdapter");
-			}
-			//we verified that it's not a JSONObject.NULL, but also need to verify
-			//adapter has that property in the correct type
-			adapter.getJSONObject(propertyKey);
-		}
-		else if (TYPE.ARRAY == property.getType()){
-			if (adapter.getJSONArray(propertyKey) == null){
-				throw new JSONObjectAdapterException(propertyKey + " is not a valid JSONObjectArray");
-			}
-		}
-		else if (TYPE.NULL == property.getType()){
-			if (adapter.getJSONObject(propertyKey) != null){
-				throw new JSONObjectAdapterException(propertyKey + " is not a null JSONObjectAdapter");
-			}
-		}
-		else {
-			throw new JSONObjectAdapterException(propertyKey + "is not a supported JSONObject type");
 		}
 	}
 }

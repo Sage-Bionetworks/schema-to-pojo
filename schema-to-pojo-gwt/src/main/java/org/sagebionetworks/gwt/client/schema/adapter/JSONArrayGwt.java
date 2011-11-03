@@ -143,9 +143,7 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	@Override
 	public JSONArrayAdapter put(int index, long value)
 			throws JSONObjectAdapterException {
-		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
-		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		this.wrapped.set(index, new JSONString(Long.toString(value)));
+		this.wrapped.set(index, JSONValueUtil.createJSONNumberForLong(value));
 		return this;
 	}
 
@@ -166,9 +164,7 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	@Override
 	public JSONArrayAdapter put(int index, int value)
 			throws JSONObjectAdapterException {
-		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
-		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		this.wrapped.set(index, new JSONString(Integer.toString(value)));
+		this.wrapped.set(index, new JSONNumber(value));
 		return this;
 	}
 

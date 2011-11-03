@@ -40,16 +40,26 @@ public class JSONValueUtil {
 	 */
 	public static long getLongValue(JSONValue value, Object key) throws JSONObjectAdapterException{
 		if(value == null) throw new JSONObjectAdapterException("No value found for key: "+key);
-		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
-		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		JSONString valueType = value.isString();
-		if(valueType == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not a string. Value class: "+value.getClass().getName());
-		try{
-			// Now convert from a string to a long
-			return Long.parseLong(valueType.stringValue());
-		}catch (NumberFormatException e){
-			throw new JSONObjectAdapterException(e);
-		}
+		JSONNumber number = value.isNumber();
+		if(number == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not a number. Value class: "+value.getClass().getName());
+		return (long) number.doubleValue();
+	}
+	
+	
+	/**
+	 * Helper to get a Long from a JSONValue.
+	 * @param value
+	 * @param key
+	 * @return
+	 * @throws JSONObjectAdapterException if the value is null or the value is not a long.
+	 */
+	public static JSONNumber createJSONNumberForLong(long value) throws JSONObjectAdapterException{
+		// We are forced to store longs as JSONNumber which are backed by doubles.  This means
+		// there is a chance for data loss for large longs.
+		double temp = value;
+		long fromTemp = (long) temp;
+		if(value != fromTemp) throw new JSONObjectAdapterException("The long value: "+value+" is too large to store as a GWT JSONNuber.");
+		return new JSONNumber(value);
 	}
 	
 	
@@ -62,16 +72,9 @@ public class JSONValueUtil {
 	 */
 	public static int getIntValue(JSONValue value, Object key) throws JSONObjectAdapterException{
 		if(value == null) throw new JSONObjectAdapterException("No value found for key: "+key);
-		// According to GWT a long cannot be represented in JavaScript so we pass it as string.
-		// See: http://code.google.com/webtoolkit/doc/1.6/DevGuideCodingBasics.html
-		JSONString valueType = value.isString();
-		if(valueType == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not a string. Value class: "+value.getClass().getName());
-		try{
-			// Now convert from a string to a long
-			return Integer.parseInt(valueType.stringValue());
-		}catch (NumberFormatException e){
-			throw new JSONObjectAdapterException(e);
-		}
+		JSONNumber number = value.isNumber();
+		if(number == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not a number. Value class: "+value.getClass().getName());
+		return (int) number.doubleValue();
 	}
 	
 	/**
