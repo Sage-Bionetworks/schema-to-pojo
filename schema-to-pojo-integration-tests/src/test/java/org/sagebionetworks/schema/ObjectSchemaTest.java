@@ -1,9 +1,13 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.joda.time.Period;
 import org.json.JSONException;
@@ -17,6 +21,96 @@ import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 public class ObjectSchemaTest {
 	
+	/**
+	 * Test to make sure when each field is set it makes the round trip from ObjectSchema to JSON and back to ObjectSchema.
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws JSONObjectAdapterException
+	 * @throws JSONException
+	 */
+	@Test
+	public void testRoundTripEachField() throws IllegalArgumentException, IllegalAccessException, JSONObjectAdapterException, JSONException{
+		Field[] fields = ObjectSchema.class.getDeclaredFields();
+		for(Field field: fields){
+			ObjectSchema toTest = createSchemaWithField(field);
+			if(toTest != null){
+				// Make sure we can make a round trip using this field.
+				String json = toTest.toJSONString( new JSONObjectAdapterImpl());
+				// Make sure we can write this to JSON using a passed adapter.
+				JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+				toTest.writeToJSONObject(adapter);
+				String json2 = adapter.toJSONString();
+				assertEquals(json, json2);
+				System.out.println(json);
+				// Now create a new object using the JSON String
+				ObjectSchema clone = new  ObjectSchema(new JSONObjectAdapterImpl(new JSONObject(json)));
+				assertNotNull(clone);
+				System.out.println(clone.toJSONString(new JSONObjectAdapterImpl()));
+				assertEquals("Field named: '"+field.getName()+"' did not make the round trip from ObjectSchema to JSON back to ObjectSchema",toTest, clone);
+			}
+		}
+		
+	}
+
+	/**
+	 * Create a new ObjectSchema with the given field filled in.
+	 * @param field
+	 * @return
+	 * @throws IllegalAccessException
+	 */
+	private ObjectSchema createSchemaWithField(Field field)	throws IllegalAccessException {
+		// Skip static fields
+		if((Modifier.STATIC & field.getModifiers()) > 0){
+			return null;
+		}
+		field.setAccessible(true);
+		ObjectSchema toTest = new ObjectSchema();
+		if(field.getName().equals("_default")){
+			toTest.setType(TYPE.STRING);
+			field.set(toTest, "defaultString value");
+		}else if(field.getType() == String.class){
+			field.set(toTest, "StringValue");
+		}else if(field.getType() == TYPE.class){
+			field.set(toTest, TYPE.STRING);
+		}else if(field.getType() == Map.class){
+			HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
+			map.put("somePropertyKey", new ObjectSchema(TYPE.BOOLEAN));
+			field.set(toTest, map);
+		}else if(field.getType() == ObjectSchema.class){
+			field.set(toTest, new ObjectSchema(TYPE.INTEGER));
+		}else if(field.getType() == ObjectSchema[].class){
+			ObjectSchema[] array = new ObjectSchema[]{new ObjectSchema(TYPE.INTEGER), new ObjectSchema(TYPE.STRING)};
+			field.set(toTest, array);
+		}else if(field.getType() == String[].class){
+			String[] array = new String[]{"a", "b", "c"};
+			field.set(toTest, array);
+		}else if(field.getType() == Number.class){
+			Number number = new Long(123);
+			field.set(toTest, number);
+			toTest.setType(TYPE.INTEGER);
+		}else if(field.getType() == Long.class){
+			Long number = new Long(456);
+			field.set(toTest, number);
+			toTest.setType(TYPE.INTEGER);
+		}else if(field.getType() == Integer.class){
+			Integer number = new Integer(987);
+			field.set(toTest, number);
+			toTest.setType(TYPE.INTEGER);
+		}else if(field.getType() == Boolean.class){
+			field.set(toTest, Boolean.TRUE);
+		}else if(field.getType() == Object.class){
+			field.set(toTest, "SomeObjectString");
+		}else if(field.getType() == FORMAT.class){
+			field.set(toTest, FORMAT.DATE_TIME);
+		}else if(field.getType() == ENCODING.class){
+			field.set(toTest, ENCODING.BINARY);
+		}else{
+			throw new IllegalArgumentException("Unknown Type:"+field.getType());
+		}
+		return toTest;
+	}
+	
+
 	@Test
 	public void testRoundTrip() throws JSONObjectAdapterException, JSONException{
 		// Create a ObjectModel from the spec example.
@@ -86,14 +180,29 @@ public class ObjectSchemaTest {
 		// An enum
 		example.setEnum(new String[]{"a","b","c"});
 		
+		validateSchemaRoundTrip(example);
+	}
+	
+	/**
+	 * Given an ObjectSchema, first write it to JSON, then create a clone from the JSON. Finally, validates that the original schema
+	 * and the clone are equal.
+	 * @throws JSONException 
+	 * @throws JSONObjectAdapterException 
+	 */
+	public void validateSchemaRoundTrip(ObjectSchema toValidate) throws JSONObjectAdapterException, JSONException{
 		// Now go to the JSONString
-		String json = example.toJSONString( new JSONObjectAdapterImpl());
+		String json = toValidate.toJSONString( new JSONObjectAdapterImpl());
+		// Make sure we can write this to JSON using a passed adapter.
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+		toValidate.writeToJSONObject(adapter);
+		String json2 = adapter.toJSONString();
+		assertEquals(json, json2);
 		System.out.println(json);
 		// Now create a new object using the JSON String
 		ObjectSchema clone = new  ObjectSchema(new JSONObjectAdapterImpl(new JSONObject(json)));
 		assertNotNull(clone);
 		System.out.println(clone.toJSONString(new JSONObjectAdapterImpl()));
-		assertEquals(example, clone);
+		assertEquals(toValidate, clone);
 	}
 	
 	@Test
@@ -158,6 +267,7 @@ public class ObjectSchemaTest {
 		//make an object that represents a string
 		String str = "hello";
 		Object strObject = str;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.STRING.getJSONValue());
 		ObjectSchema.setDefaultType(strObject, adapter);
 		
 		//verify adapter has a default set and that it's of type string
@@ -168,6 +278,7 @@ public class ObjectSchemaTest {
 		//make an object that represents a number
 		Double doub = 7.77;
 		Object doubObject = doub;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.NUMBER.getJSONValue());
 		ObjectSchema.setDefaultType(doubObject, adapter);
 		
 		//verify adapter has a default set and that it's of type double
@@ -178,6 +289,7 @@ public class ObjectSchemaTest {
 		//make an object that represents a integer
 		Long theLong = (long) 77;
 		Object longObject = theLong;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.INTEGER.getJSONValue());
 		ObjectSchema.setDefaultType(longObject, adapter);
 		
 		//verify adapter has a default set and that it's of type integer
@@ -188,6 +300,7 @@ public class ObjectSchemaTest {
 		//make an object that represents a boolean
 		Boolean boole = true;
 		Object booleObject = boole;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.BOOLEAN.getJSONValue());
 		ObjectSchema.setDefaultType(booleObject, adapter);
 		
 		//verify adapter has a default set and that it's of type boolean
@@ -199,6 +312,7 @@ public class ObjectSchemaTest {
 		JSONArrayAdapter arrayAdapter = new JSONArrayAdapterImpl();
 		arrayAdapter.put(0, "yoHello");
 		Object arrayObject = arrayAdapter;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.ARRAY.getJSONValue());
 		ObjectSchema.setDefaultType(arrayObject, adapter);
 		
 		//verify adapter has a default set and that it's of type array
@@ -210,6 +324,7 @@ public class ObjectSchemaTest {
 		JSONObjectAdapter adap = new JSONObjectAdapterImpl();
 		adap.put("yoHelloKey", "yoHello");
 		Object adapObject = adap;
+		adapter.put(ObjectSchema.JSON_TYPE, TYPE.OBJECT.getJSONValue());
 		ObjectSchema.setDefaultType(adapObject, adapter);
 		
 		//verify adapter has a default set and that it's of type object
@@ -220,7 +335,7 @@ public class ObjectSchemaTest {
 	 * Tests that setDefaultType correctly throws exception when the
 	 * object sent is not of a supported JSON type.
 	 */
-	@Test (expected = RuntimeException.class)
+	@Test (expected = JSONObjectAdapterException.class)
 	public void testSetDefaultTypeForInvalidObject() throws Exception {
 		//make adapter
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
@@ -235,7 +350,7 @@ public class ObjectSchemaTest {
 	 * Tests that setDefaultType correctly throws exception when the
 	 * object sent is null.
 	 */
-	@Test (expected = RuntimeException.class)
+	@Test (expected = JSONObjectAdapterException.class)
 	public void testSetDefaultTypeForNullObject() throws Exception {
 		//make adapter
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
