@@ -47,6 +47,7 @@ public class ObjectSchema implements JSONEntity{
 	public static final String JSON_ENUM = "enum";
 	public static final String JSON_CONTENT_ENCODING = "contentEncoding";
 	public static final String SELF_REFERENCE = "#";
+	public static final String JSON_DEFAULT = "default";
 	/*
 	 * The name of this object.
 	 */
@@ -1760,6 +1761,9 @@ public class ObjectSchema implements JSONEntity{
 		if(this._transient != null){
 			copy.put(JSON_TRANSIENT, this._transient);
 		}
+		if(this._default != null){
+			setDefaultType(this.getDefault(), copy);
+		}
 		return copy;
 	}
 	
@@ -1980,6 +1984,9 @@ public class ObjectSchema implements JSONEntity{
 		if(adapter.has(JSON_TRANSIENT)){
 			this._transient = adapter.getBoolean(JSON_TRANSIENT);
 		}
+		if (adapter.has(JSON_DEFAULT)){
+			setDefaultObject(this, adapter);		
+		}
 		return adapter;
 	}
 	
@@ -2004,4 +2011,87 @@ public class ObjectSchema implements JSONEntity{
 		return null;
 	}
 	
+	/**
+	 * Set's a adapter's default
+	 * @throws JSONObjectAdapterException 
+	 */
+	public static JSONObjectAdapter setDefaultType(Object defaultObject, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+		//determine which type defaultObject is and set adapter accordingly
+		if (defaultObject.getClass().getName().equals(String.class.getName())){
+			String defaultString = (String)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultString);
+		}
+		else if (defaultObject.getClass().getName().equals(Double.class.getName())){
+			double defaultDouble = (Double)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultDouble);
+		}
+		else if (defaultObject.getClass().getName().equals(Long.class.getName())){
+			long defaultLong = (Long)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultLong);
+		}
+		else if (defaultObject.getClass().getName().equals(Boolean.class.getName())){
+			boolean defaultBool = (Boolean)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultBool);
+		}
+		else if (defaultObject instanceof JSONObjectAdapter){
+			JSONObjectAdapter defaultAdapter = (JSONObjectAdapter)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultAdapter);
+		}
+		else if (defaultObject instanceof JSONArrayAdapter){
+			JSONArrayAdapter defaultArray = (JSONArrayAdapter)defaultObject;
+			adapter.put(JSON_DEFAULT, defaultArray);
+		}
+		else {
+			throw new RuntimeException("Object " + defaultObject + 
+					" can't be added to adapter " + adapter +
+					" default as it is not of a supported type");
+		}
+		return adapter;
+	}
+	
+	/**
+	 * Sets a ObjectSchema's default
+	 * @throws JSONObjectAdapterException 
+	 */
+	public static void setDefaultObject(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+		if (schema == null){
+			throw new RuntimeException("can not setDefaultObject when schema paramter is null");
+		}
+		if (adapter == null){
+			throw new RuntimeException("can not setDefaultObject when adapter is null");
+		}
+		String type = adapter.getString(JSON_TYPE);
+		if (type == null){
+			throw new RuntimeException("can't add defaultObject to a schema when adapter "
+					+ adapter + " has a null type");
+		}
+		if (type.equals("string")){
+			Object defaultString = adapter.getString(JSON_DEFAULT);
+			schema.setDefault(defaultString);
+		}
+		else if (type.equals("number")){
+			Object defaultNumber = adapter.getDouble(JSON_DEFAULT);
+			schema.setDefault(defaultNumber);
+		}
+		else if (type.equals("integer")){
+			Object defaultInteger = adapter.getLong(JSON_DEFAULT);
+			schema.setDefault(defaultInteger);
+		}
+		else if (type.equals("boolean")){
+			Object defaultBoolean = adapter.getBoolean(JSON_DEFAULT);
+			schema.setDefault(defaultBoolean);
+		}
+		else if (type.equals("object")){
+			Object defaultJSONObject = adapter.getJSONObject(JSON_DEFAULT);
+			schema.setDefault(defaultJSONObject);
+		}
+		else if (type.equals("array")){
+			Object defaultArray = adapter.getJSONArray(JSON_DEFAULT);
+			schema.setDefault(defaultArray);
+		}
+		else {
+			throw new RuntimeException("can't add default object to " + schema +
+					"because adapter " + "has a invalid type of " + type);
+		}
+	}
 }
