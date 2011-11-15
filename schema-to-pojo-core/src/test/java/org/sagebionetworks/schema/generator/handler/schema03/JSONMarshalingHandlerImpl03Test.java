@@ -10,7 +10,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -932,4 +935,184 @@ public class JSONMarshalingHandlerImpl03Test {
 		return writer.toString();
 	}
 
+	/**
+	 * Tests that initializeFromJSONObject works for properties
+	 *  that have a default string set.
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONWithDefaultStringProperty() throws Exception {
+		//make a property that has default set with a string
+		ObjectSchema propertySchema = new ObjectSchema();
+		String defaultString = "defaultString";
+		propertySchema.setDefault(defaultString);
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setRequired(true);
+		String propName = "stringName";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		
+		// It check to see if the "if statement got generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"stringName\")) {") > 0);
+		//check that assignment statement got generated
+		assertTrue(methodString.indexOf("stringName = adapter.getString(\"stringName\");") > 0);
+		//check that else statement was generated
+		assertTrue(methodString.indexOf("stringName = \"defaultString\";") > 0);
+	}
+	
+	/**
+	 * Tests that initializeFromJSONObject works for properties 
+	 * that have a default Number/double set.
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONWithDefaultDoubleProperty() throws Exception {
+		//make a property that has default set with a double
+		ObjectSchema propertySchema = new ObjectSchema();
+		double defaultDouble = 7.12;
+		propertySchema.setDefault(defaultDouble);
+		propertySchema.setType(TYPE.NUMBER);
+		propertySchema.setRequired(true);
+		String propName = "defaultDoubleName";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		
+		//check that if statement was generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultDoubleName\")) {") > 0);
+		//check that body of if statement was generated
+		assertTrue(methodString.indexOf("defaultDoubleName = " +
+				"new java.lang.String(adapter.getDouble(\"defaultDoubleName\"));") > 0);
+		//check that body of else statement was generated
+		assertTrue(methodString.indexOf("defaultDoubleName = 7.12D;") > 0);
+	}
+	
+	/**
+	 * Tests that initializeFromJSONObject works for properties
+	 * that have a default Integer/long set.
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONWithDefaultIntegerProperty() throws Exception {
+		//make a property that has a default set with a integer
+		ObjectSchema propertySchema = new ObjectSchema();
+		long defaultLong = 77;
+		propertySchema.setDefault(defaultLong);
+		propertySchema.setType(TYPE.INTEGER);
+		propertySchema.setRequired(true);
+		String propName = "defaultIntegerName";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		//check that if statement was generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultIntegerName\")) {") > 0);
+		//check that body of if statement was generated
+		assertTrue(methodString.indexOf("defaultIntegerName = " +
+				"new java.lang.String(adapter.getLong(\"defaultIntegerName\"));") > 0);
+		//check that body of else statment was generated
+		assertTrue(methodString.indexOf("defaultIntegerName = 77L;") > 0);
+	}
+	
+	/**
+	 * Tests that initializeFromJSONObject works for properties
+	 *that have a default boolean set.
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONWithDefaultBooleanProperty() throws Exception {
+		//make a property that has a default set with a boolean
+		ObjectSchema propertySchema = new ObjectSchema();
+		boolean defaultBoolean = false;
+		propertySchema.setDefault(defaultBoolean);
+		propertySchema.setType(TYPE.BOOLEAN);
+		propertySchema.setRequired(true);
+		String propName = "defaultBooleanName";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		//check that if statement was generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultBooleanName\")) {") > 0);
+		//check that body of if statement was generated
+		assertTrue(methodString.indexOf("defaultBooleanName = " +
+				"new java.lang.String(adapter.getBoolean(\"defaultBooleanName\"));") > 0);
+		//check that body of else statment was generated
+		assertTrue(methodString.indexOf("defaultBooleanName = false;") > 0);
+	}
+	
+	/**
+	 * Tests that initializeFromJSONObject works for properties
+	 * that have a default boolean set.
+	 */
+	@Ignore
+	@Test
+	public void testCreateMethodInitializeFromJSONWithDefaultObjectProperty() throws Exception {
+		//make a property that has default sent with a JSONObject
+		ObjectSchema propertySchema = new ObjectSchema();
+		JSONObject defaultObject = new JSONObject();
+		defaultObject.put("imABool", true);
+		propertySchema.setDefault(defaultObject);
+		propertySchema.setType(TYPE.OBJECT);
+		propertySchema.setRequired(true);
+		String propName = "defaultObjectName";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+	}
 }

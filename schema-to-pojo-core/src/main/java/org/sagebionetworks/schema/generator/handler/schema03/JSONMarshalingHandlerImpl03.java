@@ -240,14 +240,24 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 								param.invoke("getJSONObject").arg(propName)));
 			}
 			// throw an exception it this is a required fields
-			if (propSchema.isRequired()) {
+			if (propSchema.isRequired() && propSchema.getDefault() == null) {
 				hasCondition._else()
 						._throw(createIllegalArgumentException(classType,
 								"Property: '" + propName
 										+ "' is required and cannot be null"));
 			} else {
-				// For non-require properties set the property to null
-				hasCondition._else().assign(field, JExpr._null());
+				//if propSchema has a default defined the property must
+				//be assigned to that default when  the adapter doesn't
+				//have a corresponding property
+				if (propSchema.getDefault() == null){
+					// For non-require properties set the property to null
+					hasCondition._else().assign(field, JExpr._null());
+				}
+				else {
+					JExpression propShouldBe = assignDefaultProperty(propSchema);
+					hasCondition._else().assign(field, propShouldBe);
+				}
+				
 			}
 		}
         // Always return the param
@@ -513,5 +523,40 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		return JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(message);
 	}
 
-
+	/**
+	 * Helper to assign a property a default value in the initializeFromJSONObject
+	 * method that will be generated.  Handles situation where a property has a default
+	 * value.
+	 */
+	private JExpression assignDefaultProperty(ObjectSchema propSchema){
+		//determine what type the propSchema is
+		TYPE type = propSchema.getType();
+		JExpression propShouldBe = null;
+		if (type == null){
+			throw new IllegalArgumentException("property " + propSchema + 
+					" has an null type and so a default can not " +
+					"be assigned for this property");
+		}
+		if (TYPE.STRING == type){
+			String defaultAsString = (String)propSchema.getDefault();
+			propShouldBe = JExpr.lit(defaultAsString);
+		}
+		else if (TYPE.NUMBER == type){
+			double defaultLong = (Double)propSchema.getDefault();
+			propShouldBe = JExpr.lit(defaultLong);
+		}
+		else if (TYPE.INTEGER == type){
+			long defaultLong = (Long)propSchema.getDefault();
+			propShouldBe = JExpr.lit(defaultLong);
+		}
+		else if (TYPE.BOOLEAN == type){
+			boolean defaultBoolean = (Boolean)propSchema.getDefault();
+			propShouldBe = JExpr.lit(defaultBoolean);
+		}
+		else {
+			throw new RuntimeException("can't assign default value " 
+					+ propSchema.getDefault() + " as it is not a supported type");
+		}
+		return propShouldBe;
+	}
 }
