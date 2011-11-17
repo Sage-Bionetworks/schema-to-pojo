@@ -3,6 +3,8 @@ package org.sagebionetworks.schema;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -73,6 +75,10 @@ public class ObjectValidator {
 		validateAllKeysAreDefined(schema, adapter);
 		//make sure all required properties are represented in adapter
 		validateRequiredProperties(schema, adapter);
+		//make sure all properties that have a pattern defined, check
+		//that adapter's corresponding property is a valid instance of
+		//that pattern
+		validatePatternProperties(schema, adapter);
 	}
 	
 	/**
@@ -117,6 +123,66 @@ public class ObjectValidator {
 					if (adapter.isNull(propertyName)){
 						throw new JSONObjectAdapterException("The property: " + propertyName + " is required, " +
 							"and was not found in the adapter");
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Verifies that all schema properties that have a "pattern" defined, 
+	 * becomes a pattern which adapter's property is verified against.  If
+	 * adapter property is a valid instance of the pattern, then it is fine.
+	 * If adapter property is not a valid instance of the pattern then an
+	 * exception is thrown.
+	 * @throws JSONObjectAdapterException 
+	 */
+	public static void validatePatternProperties(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+		if (schema == null){
+			throw new IllegalArgumentException("can't validate patterns against a null schema");
+		}
+		if (adapter == null){
+			throw new IllegalArgumentException("cant' validate patterns for schema "
+					+ schema + " against a null adapter");
+		}
+		//obtain all the schema's properties
+		Map<String, ObjectSchema> schemaProperties = schema.getProperties();
+		if (schemaProperties != null){
+			for (String nextPropertyName : schemaProperties.keySet()){
+				//obtain next property
+				ObjectSchema nextProperty = schemaProperties.get(nextPropertyName);
+			
+				//check if nextProperty has a pattern defined
+				if (nextProperty.getPattern() != null){
+					//make sure all properties that have a pattern defined are of type string
+					if (TYPE.STRING != nextProperty.getType()){
+						throw new JSONObjectAdapterException("pattern for property " 
+								+ nextProperty + 
+								" can only exist for a property that has a String type");
+					}
+					
+					//obtain pattern
+					String propertysPattern = nextProperty.getPattern();
+					
+					//verify adapter has that property
+					if (!adapter.has(nextPropertyName)){
+						throw new IllegalArgumentException("can't validate Pattern for property " 
+								+ nextProperty + " because adapter " + adapter + 
+								" had no corresponding property with name " + nextPropertyName);
+					}
+					
+					//obtain adapter's instance of the pattern
+					String mustMatch = adapter.getString(nextPropertyName);
+					
+					//make pattern and matcher for regular expression checking
+					Pattern regexPattern = Pattern.compile(propertysPattern);
+					Matcher matcher = regexPattern.matcher(mustMatch);
+					
+					//check if the adapter matches pattern
+					if (!matcher.matches()){
+						throw new JSONObjectAdapterException ("pattern from property "
+								+ nextProperty + " has a regularExpression pattern" +
+										" that does not match adapter " + adapter);	
 					}
 				}
 			}

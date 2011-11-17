@@ -214,4 +214,136 @@ public class ObjectValidatorTest {
 		// The init should fail.
 		clone.initializeFromJSONObject(adapter);
 	}
+	
+	/**
+	 * Tests that validatePatternProperties correctly verifies a property 
+	 * that has a pattern defined correctly converts that pattern to a 
+	 * java.regex Pattern and verifies corresponding adapter property
+	 * holds a string that is a valid instance of that pattern.  
+	 */
+	@Test
+	public void testValidatePropertyPattern() throws Exception {
+		//set up schema
+		testSchema.setName("imATestSchemaName");
+		testSchema.setDescription("I'm the description for the test schema");
+		
+		//make the key/name for the property
+		String propKeyName = "imAKeyForAPropertyWithAPattern";
+		
+		//make the pattern and the matcher that will work for that pattern
+		String regexPattern = "a*b";
+		String instanceOfRegexPattern = "aaaaab";
+		
+		//make an objectSchema that is the property that contains the pattern
+		ObjectSchema patternProperty = new ObjectSchema();
+		patternProperty.setPattern(regexPattern);
+		patternProperty.setDescription("this property is to test pattern functionality");
+		patternProperty.setType(TYPE.STRING);
+		testSchema.putProperty(propKeyName, patternProperty);
+		
+		//make an adapter that has a string that will work schema's pattern
+		JSONObjectAdapter patternAdapter = new JSONObjectAdapterImpl();
+		patternAdapter.put(propKeyName, instanceOfRegexPattern);
+		
+		//validate
+		ObjectValidator.validatePatternProperties(testSchema, patternAdapter);
+	}
+	
+	/**
+	 * Tests that validatePatternProperties correctly throws exception when
+	 * adapter holds a string that is not an instance of the schema's 
+	 * pattern.  
+	 */
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testValidatePropertyPatternForBadPattern() throws Exception {
+		//set up schema
+		testSchema.setName("imATestSchemaName");
+		testSchema.setDescription("I'm the description for the test schema");
+		
+		//make the key/name for the property
+		String propKeyName = "imAPattern";
+		
+		//make the pattern and the matcher that will not work for that pattern
+		String regexPattern = "a*b";
+		String adaptersBadPattern = "cccaaaaab";
+		
+		//make an objectSchema that is the property that contains the pattern
+		ObjectSchema patternProperty = new ObjectSchema();
+		patternProperty.setPattern(regexPattern);
+		patternProperty.setDescription("this property is to test pattern functionality");
+		patternProperty.setType(TYPE.STRING);
+		testSchema.putProperty(propKeyName, patternProperty);
+		
+		//make an adapter that has a string that will work schema's pattern
+		JSONObjectAdapter patternAdapter = new JSONObjectAdapterImpl();
+		patternAdapter.put(propKeyName, adaptersBadPattern);
+		
+		//validate
+		ObjectValidator.validatePatternProperties(testSchema, patternAdapter);
+	}
+	
+	/**
+	 * Tests that validatePatternProperties correctly throws exception when
+	 * adapter doesn't hold a corresponding property for the schema's
+	 * pattern.  
+	 */
+	@Test (expected = IllegalArgumentException.class)
+	public void testValidatePropertyPatternForAdapterWithNoPattern() throws Exception {
+		//set up schema
+		testSchema.setName("imATestSchemaName");
+		testSchema.setDescription("I'm the description for the test schema");
+		
+		//make the key/name for the property
+		String propKeyName = "imAPattern";
+		
+		//make the pattern and the matcher that will work for that pattern
+		String regexPattern = "a*b";
+		
+		//make an objectSchema that is the property that contains the pattern
+		ObjectSchema patternProperty = new ObjectSchema();
+		patternProperty.setPattern(regexPattern);
+		patternProperty.setDescription("this property is to test pattern functionality");
+		patternProperty.setType(TYPE.STRING);
+		testSchema.putProperty(propKeyName, patternProperty);
+		
+		//make an adapter that has a string that will work schema's pattern
+		JSONObjectAdapter adapterWNoPattern = new JSONObjectAdapterImpl();
+		adapterWNoPattern.put("boolean", true);
+		
+		//validate
+		ObjectValidator.validatePatternProperties(testSchema, adapterWNoPattern);
+	}
+	
+	/**
+	 * Tests that validatePatternProperties correctly throws exception when
+	 * schema holds a pattern that can't be converted into a java regex
+	 * pattern.  
+	 */
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testValidatePropertyPatternForSchemaWithInvalidPattern() throws Exception {
+		//set up schema
+		testSchema.setName("imATestSchemaName");
+		testSchema.setDescription("I'm the description for the test schema");
+		
+		//make the key/name for the property
+		String propKeyName = "imAPattern";
+		
+		//make the pattern and the matcher that will work for that pattern
+		String notRegexPattern = "'''''''''''''";
+		String instanceOfRegexPattern = "aaaaab";
+		
+		//make an objectSchema that is the property that contains the pattern
+		ObjectSchema patternProperty = new ObjectSchema();
+		patternProperty.setPattern(notRegexPattern);
+		patternProperty.setDescription("this property is to test pattern functionality");
+		patternProperty.setType(TYPE.STRING);
+		testSchema.putProperty(propKeyName, patternProperty);
+		
+		//make an adapter that has a string that will work schema's pattern
+		JSONObjectAdapter patternAdapter = new JSONObjectAdapterImpl();
+		patternAdapter.put(propKeyName, instanceOfRegexPattern);
+		
+		//validate
+		ObjectValidator.validatePatternProperties(testSchema, patternAdapter);
+	}
 }

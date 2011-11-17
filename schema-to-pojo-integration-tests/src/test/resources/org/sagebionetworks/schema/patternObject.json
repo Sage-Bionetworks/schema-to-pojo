@@ -1,0 +1,13 @@
+{
+    "type":"object",
+    "properties":{
+        "patternPropertyOne":{
+            "type":"string",
+            "pattern":"a*b",
+        },
+        "booleanProperty":{
+            "type":"boolean",
+            "default":false,
+        },
+    }
+}
