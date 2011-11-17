@@ -3,9 +3,6 @@ package org.sagebionetworks.schema;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -173,17 +170,19 @@ public class ObjectValidator {
 					
 					//obtain adapter's instance of the pattern
 					String mustMatch = adapter.getString(nextPropertyName);
+	
+// The following code does not work with GWT.
 					
 					//make pattern and matcher for regular expression checking
-					Pattern regexPattern = Pattern.compile(propertysPattern);
-					Matcher matcher = regexPattern.matcher(mustMatch);
-					
-					//check if the adapter matches pattern
-					if (!matcher.matches()){
-						throw new JSONObjectAdapterException ("pattern from property "
-								+ nextProperty + " has a regularExpression pattern" +
-										" that does not match adapter " + adapter);	
-					}
+//					Pattern regexPattern = Pattern.compile(propertysPattern);
+//					Matcher matcher = regexPattern.matcher(mustMatch);
+//					
+//					//check if the adapter matches pattern
+//					if (!matcher.matches()){
+//						throw new JSONObjectAdapterException ("pattern from property "
+//								+ nextProperty + " has a regularExpression pattern" +
+//										" that does not match adapter " + adapter);	
+//					}
 				}
 			}
 		}
