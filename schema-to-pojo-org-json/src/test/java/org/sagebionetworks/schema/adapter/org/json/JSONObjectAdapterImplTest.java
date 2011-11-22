@@ -185,5 +185,27 @@ public class JSONObjectAdapterImplTest {
 		System.out.println(adapter.toJSONString());
 		assertEquals(adapter.toJSONString(), adapter.toString());
 	}
-
+	
+	/**
+	 * Tests that validatePatternProperty works for a valid pattern
+	 * and valid string property.
+	 * @throws Exception
+	 */
+	@Test
+	public void testValidatePatternProperty() throws Exception {
+		String pattern = "a*b";
+		String property = "aaaab";
+		assertTrue(adapter.validatePatternProperty(pattern, property));
+	}
+	
+	/**
+	 * Tests that validatePatternProperty correctly handles when 
+	 * an invalid property is sent for the pattern.
+	 */
+	@Test
+	public void testValidatePatternPropertyForInvalidProperty() throws Exception {
+		String pattern = "a*b";
+		String badProperty = "caaaaaaaaab";
+		assertFalse(adapter.validatePatternProperty(pattern, badProperty));
+	}
 }

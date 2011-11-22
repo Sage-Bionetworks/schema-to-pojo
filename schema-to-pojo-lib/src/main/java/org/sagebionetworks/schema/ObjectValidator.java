@@ -57,6 +57,8 @@ public class ObjectValidator {
 		ObjectSchema schema = getSchema(schemaJSON, adapter, clazz);
 		// Validate it against the schema
 		validateEntity(schema, adapter);
+		//check for schema properties that have a pattern defined
+		validatePatternProperties(schema, adapter);
 	}
 	
 	/**
@@ -72,10 +74,6 @@ public class ObjectValidator {
 		validateAllKeysAreDefined(schema, adapter);
 		//make sure all required properties are represented in adapter
 		validateRequiredProperties(schema, adapter);
-		//make sure all properties that have a pattern defined, check
-		//that adapter's corresponding property is a valid instance of
-		//that pattern
-		validatePatternProperties(schema, adapter);
 	}
 	
 	/**
@@ -170,19 +168,13 @@ public class ObjectValidator {
 					
 					//obtain adapter's instance of the pattern
 					String mustMatch = adapter.getString(nextPropertyName);
-	
-// The following code does not work with GWT.
 					
-					//make pattern and matcher for regular expression checking
-//					Pattern regexPattern = Pattern.compile(propertysPattern);
-//					Matcher matcher = regexPattern.matcher(mustMatch);
-//					
-//					//check if the adapter matches pattern
-//					if (!matcher.matches()){
-//						throw new JSONObjectAdapterException ("pattern from property "
-//								+ nextProperty + " has a regularExpression pattern" +
-//										" that does not match adapter " + adapter);	
-//					}
+					boolean match = adapter.validatePatternProperty(propertysPattern, mustMatch);
+					if (!match){
+						throw new JSONObjectAdapterException("property for "
+								+ nextProperty + 
+								" is not a valid instance of the pattern");
+					}
 				}
 			}
 		}

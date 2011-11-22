@@ -7,6 +7,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectValidator;
+import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -369,6 +372,79 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals("I am a great string!", clone.getString("stringKey"));
 	}
 	
+	/**
+	 * Tests that validatePatternProperty works for a valid pattern
+	 * and valid string property.
+	 * @throws Exception
+	 */
+	@Test
+	public void testValidatePatternProperty() throws Exception {
+		String pattern = "a*b";
+		String property = "aaaab";
+		assertTrue(adapterObject.validatePatternProperty(pattern, property));
+	}
 	
-
+	/**
+	 * Tests that validatePatternProperty correctly returns false when 
+	 * an property has an invalid letter before the valid string.
+	 */
+	@Test
+	public void testValidatePatternPropertyForInvalidFirstLetterProperty() throws Exception {
+		String pattern = "a*b";
+		String badProperty = "caaaaaaaaab";
+		assertFalse(adapterObject.validatePatternProperty(pattern, badProperty));
+	}
+	
+	/**
+	 * Tests that validatePatternProperty correctly returns false when
+	 * an property has invalid letters after the valid string.
+	 */
+	@Test
+	public void testValidatePatternPropertyForInvalidLettersAfterProperty() throws Exception {
+		String pattern = "a*b";
+		String badProperty = "aabc";
+		assertFalse(adapterObject.validatePatternProperty(pattern, badProperty));
+	}
+	
+	/**
+	 * Tests that validatePatternProperty correctly returns false when
+	 * an property has no matches for the pattern.
+	 */
+	@Test
+	public void testValidatePatternPropertyForTotallyInvalidProperty() throws Exception {
+		String pattern = "a*b";
+		String totallyBadProperty = "cccc";
+		assertFalse(adapterObject.validatePatternProperty(pattern, totallyBadProperty));
+	}
+	
+	/**
+	 * Tests that ObjectValidator works for GWT.
+	 */
+	@Test
+	public void testObjectValidatorForGWT() throws Exception {
+		ObjectSchema testSchema = new ObjectSchema();
+		//set up schema
+		testSchema.setName("imATestSchemaName");
+		testSchema.setDescription("I'm the description for the test schema");
+		
+		//make the key/name for the property
+		String propKeyName = "imAKeyForAPropertyWithAPattern";
+		
+		//make the pattern and the matcher that will work for that pattern
+		String regexPattern = "a*b";
+		String instanceOfRegexPattern = "aaaaab";
+		
+		//make an objectSchema that is the property that contains the pattern
+		ObjectSchema patternProperty = new ObjectSchema();
+		patternProperty.setPattern(regexPattern);
+		patternProperty.setDescription("this property is to test pattern functionality");
+		patternProperty.setType(TYPE.STRING);
+		testSchema.putProperty(propKeyName, patternProperty);
+		
+		//make an adapter that has a string that will work schema's pattern
+		adapterObject.put(propKeyName, instanceOfRegexPattern);
+		
+		//validate
+		ObjectValidator.validatePatternProperties(testSchema, adapterObject);
+	}
 }

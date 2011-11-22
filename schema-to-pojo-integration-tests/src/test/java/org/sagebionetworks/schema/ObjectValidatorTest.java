@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema;
 
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -251,12 +252,11 @@ public class ObjectValidatorTest {
 	}
 	
 	/**
-	 * Tests that validatePatternProperties correctly throws exception when
+	 * Tests that validatePatternProperties works correctly when
 	 * adapter holds a string that is not an instance of the schema's 
 	 * pattern.  
 	 */
-	@Ignore // This is currently not working because GWT does not support java.util.regex.Pattern.
-	@Test (expected=JSONObjectAdapterException.class)
+	@Test (expected = JSONObjectAdapterException.class)
 	public void testValidatePropertyPatternForBadPattern() throws Exception {
 		//set up schema
 		testSchema.setName("imATestSchemaName");
@@ -267,7 +267,7 @@ public class ObjectValidatorTest {
 		
 		//make the pattern and the matcher that will not work for that pattern
 		String regexPattern = "a*b";
-		String adaptersBadPattern = "cccaaaaab";
+		String adaptersBadPattern = "ccc";
 		
 		//make an objectSchema that is the property that contains the pattern
 		ObjectSchema patternProperty = new ObjectSchema();
@@ -321,7 +321,6 @@ public class ObjectValidatorTest {
 	 * schema holds a pattern that can't be converted into a java regex
 	 * pattern.  
 	 */
-	@Ignore // This is currently not working because GWT does not support java.util.regex.Pattern.
 	@Test (expected=JSONObjectAdapterException.class)
 	public void testValidatePropertyPatternForSchemaWithInvalidPattern() throws Exception {
 		//set up schema

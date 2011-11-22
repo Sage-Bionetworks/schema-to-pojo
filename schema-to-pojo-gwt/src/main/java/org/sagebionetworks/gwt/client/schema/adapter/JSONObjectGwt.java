@@ -17,6 +17,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.regexp.shared.MatchResult;
 
 /**
  * An com.google.gwt.json.client.JSONObject implementation of JSONObjectAdapter.
@@ -241,5 +243,33 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		return new JSONObjectGwt(value.isObject());
 	}
 
-
+	/**
+	 * Method to validate a regular expression string against a pattern.
+	 */
+	public boolean validatePatternProperty(String pattern, String property){
+		if (pattern == null){
+			throw new IllegalArgumentException("can not validatePatternProperty for property " 
+					+ property + " because pattern is null");
+		}
+		if (property == null){
+			throw new IllegalArgumentException("can not validatePatternProperty for pattern "
+					+ pattern + "because property is null");
+		}
+		RegExp regExp = RegExp.compile(pattern);
+		MatchResult matcher = regExp.exec(property);
+		//for the property to MATCH the pattern three things must be true
+		//first, matcher can't be null, that means no matches were found
+		//second, index  must be 0 which means  match started at first character
+		//third, match group must match the input string
+		if (matcher == null){
+			return false;
+		}
+		else if (matcher.getIndex() != 0){
+			return false;
+		}
+		else if (!matcher.getGroup(0).equals(matcher.getInput())){
+			return false;
+		}
+		return true;
+	}
 }

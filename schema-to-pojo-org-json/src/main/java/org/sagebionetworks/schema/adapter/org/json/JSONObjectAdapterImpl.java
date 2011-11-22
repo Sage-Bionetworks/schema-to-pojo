@@ -2,6 +2,8 @@ package org.sagebionetworks.schema.adapter.org.json;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -285,7 +287,20 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 		return wrapped.equals(obj);
 	}
 
-
-	
-
+	/**
+	 * Method to validate a regular expression string against a pattern.
+	 */
+	public boolean validatePatternProperty(String pattern, String property){
+		if (pattern == null){
+			throw new IllegalArgumentException("can not validatePatternProperty for property " 
+					+ property + " because pattern is null");
+		}
+		if (property == null){
+			throw new IllegalArgumentException("can not validatePatternProperty for pattern "
+					+ pattern + "because property is null");
+		}
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(property);
+		return m.matches();
+	}
 }

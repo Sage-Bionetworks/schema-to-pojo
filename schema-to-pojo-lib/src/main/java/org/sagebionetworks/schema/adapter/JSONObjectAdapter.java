@@ -14,9 +14,8 @@ import org.sagebionetworks.schema.FORMAT;
  * @author jmhill
  *
  */
-public interface JSONObjectAdapter extends JSONAdapter {
+public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	
-
 	/**
 	 * Key iterator.
 	 * @return
@@ -147,5 +146,8 @@ public interface JSONObjectAdapter extends JSONAdapter {
 	 */
 	public Date convertStringToDate(FORMAT format, String toFormat);
 	
-	
+	/**
+	 * Method to validate a regular expression string against a pattern.
+	 */
+	public boolean validatePatternProperty(String pattern, String property);
 }

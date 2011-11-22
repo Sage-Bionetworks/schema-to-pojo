@@ -74,7 +74,7 @@ public class PatternObjectTest {
 		//make an adapter that has a valid instance of the pattern
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		adapter.put("booleanProperty", true);
-		adapter.put("patternPropertyOne", "ccaaaaaaaaaaaaab");
+		adapter.put("patternPropertyOne", "cccccccccccccccccc");
 		
 		//initialize
 		objectWithAPattern.initializeFromJSONObject(adapter);
