@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
+import java.awt.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
+import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCatchBlock;
 import com.sun.codemodel.JClass;
@@ -31,6 +33,7 @@ import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
+import com.sun.codemodel.JPrimitiveType;
 import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
@@ -343,6 +346,17 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	}
 	
 	protected JExpression createExpresssionToGetFromArray(JVar jsonArray, TYPE arrayType, JClass arrayTypeClass ,JVar index){
+		//check if our array type is an enum
+		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String")){
+			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
+			ClassType shouldHaveEnum = getTheClass.getClassType();
+			if (ClassType.ENUM == shouldHaveEnum){
+				//here we know we are dealing with an enum
+				JExpression stringFromAdapter = jsonArray.invoke(arrayType.getMethodName()).arg(index);
+				return arrayTypeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+			}
+		}
+		
 		if(arrayType.isPrimitive() || TYPE.STRING == arrayType){
 			return jsonArray.invoke(arrayType.getMethodName()).arg(index);
 		}else if(TYPE.ARRAY == arrayType){
@@ -503,6 +517,15 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	}
 	
 	protected JExpression createExpresssionToSetFromArray(TYPE arrayType, JClass arrayTypeClass, JVar iterator, JVar param){
+		//need to determine if we are dealing with an array of enumerations
+		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String")){
+			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
+			ClassType shouldHaveEnum = getTheClass.getClassType();
+			if (ClassType.ENUM == shouldHaveEnum){
+				return iterator.invoke("next").invoke("name");
+			}
+		}
+		
 		if(arrayType.isPrimitive() || TYPE.STRING == arrayType){
 			return iterator.invoke("next");
 		}else if(TYPE.ARRAY == arrayType){

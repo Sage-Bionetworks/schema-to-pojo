@@ -1086,7 +1086,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	/**
 	 * Tests that initializeFromJSONObject works for properties
-	 * that have a default boolean set.
+	 * that have a default object set.
 	 */
 	@Ignore
 	@Test
@@ -1113,6 +1113,229 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertNotNull(method);
 		
 		// Now get the string and check it.
+		//String methodString = declareToString(method);
+	}
+	
+	/**
+	 * Tests that an schema that has a property of type ARRAY, whose item is
+	 * an enumeration is supported in initializeFromJSONObject methods created
+	 * by handler.
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectArrayWithEnumItem() throws Exception {
+		//create a property that is an Array
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "arrayWhoseItemIsAnEnum";
+		
+		//create an enum ObjectSchema and add it to propertySchema's items
+		//it must have a name, id, and it's type must be STRING
+		//it must have an enum defined
+		ObjectSchema typesEnum = new ObjectSchema();
+		typesEnum.setType(TYPE.STRING);
+		typesEnum.setName("Animals");
+		typesEnum.setId("Animals");
+		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		typesEnum.setEnum(forTheEnum);
+		
+		//add enum to property's items
+		propertySchema.setItems(typesEnum);
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+	
+		//add field to sampleClass
+		codeModel._package("org.sample");
+		JDefinedClass testClass = _package._enum("Animals");
+		testClass.enumConstant("puppy");
+		testClass.enumConstant("mouse");
+		testClass.enumConstant("elephant");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
+		
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		// Now get the string and check it.
 		String methodString = declareToString(method);
+		
+		//check that array of enumeration got created successfully, and 
+		//assignments are correct
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(jsonArray.getString(i)));") > 0);
+	}
+	
+	/**
+	 * Tests that an schema that has a property of type ARRAY, whose item is
+	 * an enumeration and a property of type ARRAY, whose item is not an
+	 * enumeration to verify handler correctly handles both.
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectArrayWithAndWithoutEnumItem() throws Exception {
+		//create a property that is an Array with item that is an enum
+		ObjectSchema propertySchemaOne = new ObjectSchema();
+		propertySchemaOne.setType(TYPE.ARRAY);
+		String propName = "arrayWhoseItemIsAnEnum";
+		//create an enum ObjectSchema and add it to propertySchema's items
+		//it must have a name, id, and it's type must be STRING
+		//it must have an enum defined
+		ObjectSchema typesEnum = new ObjectSchema();
+		typesEnum.setType(TYPE.STRING);
+		typesEnum.setName("Animals");
+		typesEnum.setId("Animals");
+		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		typesEnum.setEnum(forTheEnum);
+		
+		//add enum to property's items
+		propertySchemaOne.setItems(typesEnum);
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchemaOne);
+	
+		//add field to sampleClass
+		codeModel._package("org.sample");
+		JDefinedClass testClass = _package._enum("Animals");
+		testClass.enumConstant("puppy");
+		testClass.enumConstant("mouse");
+		testClass.enumConstant("elephant");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
+		
+		//now create a property that is an Array with item that is not an enum
+		ObjectSchema propertySchemaTwo = new ObjectSchema();
+		propertySchemaTwo.setType(TYPE.ARRAY);
+		String propTwoName = "arrayWhoseItemIsNotEnum";
+		ObjectSchema typesString = new ObjectSchema();
+		typesString.setType(TYPE.STRING);
+		propertySchemaTwo.setItems(typesString);
+		schema.putProperty(propTwoName, propertySchemaTwo);
+		
+		//add field to sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
+		
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		
+		//check that everything was created correctly for the array with an enum
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(jsonArray.getString(i)));") > 0);
+		
+		//check that everything was created correctly for the array without an enum
+		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsNotEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add(jsonArray.getString(i));") > 0);       
+	}
+	
+	/**
+	 * Tests that writeToJSONObject works for Array type that has an
+	 * Enum for it's item.
+	 * @throws Exception
+	 */
+	@Test
+	public void testWriteToJSONObjectArrayWEnum()throws Exception {
+		//make an array property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "arrayPropWithEnum";
+		
+		//make the ObjectSchema that represents the array's items that contains an enum
+		ObjectSchema itemWithEnum = new ObjectSchema();
+		itemWithEnum.setType(TYPE.STRING);
+		itemWithEnum.setName("Animals");
+		itemWithEnum.setId("Animals");
+		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		itemWithEnum.setEnum(forTheEnum);
+		
+		//add item to property
+		propertySchema.setItems(itemWithEnum);
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		//add field to test JDefinedClass
+		codeModel._package("org.sample");
+		JDefinedClass testClass = _package._enum("Animals");
+		testClass.enumConstant("puppy");
+		testClass.enumConstant("mouse");
+		testClass.enumConstant("elephant");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
+		
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		
+		//make sure everything was created correctly
+		assertTrue(methodString.indexOf("array.put(index, it.next().name());") > 0);
+	}
+	
+	/**
+	 * Tests that writeToJSONObject works for schema that has both an Array
+	 * prop that has an enum for it's item and an Array prop that doesn't 
+	 * have an enum for it's item.
+	 * @throws Exception
+	 */
+	@Test
+	public void testWriteToJSONObjectArrayWEnumAndWithoutEnum()throws Exception {
+		//create a property that is an Array with item that is an enum
+		ObjectSchema propertySchemaOne = new ObjectSchema();
+		propertySchemaOne.setType(TYPE.ARRAY);
+		String propName = "arrayWhoseItemIsAnEnum";
+		//create an enum ObjectSchema and add it to propertySchema's items
+		ObjectSchema typesEnum = new ObjectSchema();
+		typesEnum.setType(TYPE.STRING);
+		typesEnum.setName("Animals");
+		typesEnum.setId("Animals");
+		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		typesEnum.setEnum(forTheEnum);
+		
+		//add enum to property's items
+		propertySchemaOne.setItems(typesEnum);
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchemaOne);
+	
+		//add field to sampleClass
+		codeModel._package("org.sample");
+		JDefinedClass testClass = _package._enum("Animals");
+		testClass.enumConstant("puppy");
+		testClass.enumConstant("mouse");
+		testClass.enumConstant("elephant");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
+		
+		//now create a property that is an Array with item that is not an enum
+		ObjectSchema propertySchemaTwo = new ObjectSchema();
+		propertySchemaTwo.setType(TYPE.ARRAY);
+		String propTwoName = "arrayWhoseItemIsNotEnum";
+		ObjectSchema typesString = new ObjectSchema();
+		typesString.setType(TYPE.STRING);
+		propertySchemaTwo.setItems(typesString);
+		schema.putProperty(propTwoName, propertySchemaTwo);
+		
+		//add field to sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
+		
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		
+		//make sure everything is in order for the property that has an enum
+		assertTrue(methodString.indexOf("java.util.Iterator<org.sample.Animals> it = arrayWhoseItemIsAnEnum.iterator();") > 0);
+		assertTrue(methodString.indexOf(" array.put(index, it.next().name());") > 0);
+		
+		//make sure everything is in order for the property that does not have an enum
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> it = arrayWhoseItemIsNotEnum.iterator();") > 0);
+		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0); 
 	}
 }

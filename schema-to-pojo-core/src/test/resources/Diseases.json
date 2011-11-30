@@ -1,0 +1,11 @@
+{
+	"description":"JSON schema for Disease Data POJO",
+    "name": "DiseaseNames",
+    "type":"string",
+    "enum":[
+        "Alzheimers",
+        "Asthma",
+        "Autism",
+        "Cancer"
+    ]
+}

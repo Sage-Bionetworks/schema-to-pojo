@@ -1,0 +1,16 @@
+{
+    "description":"JSON schema for Dataset POJO",
+    "properties":{
+        "eulaId":{
+            "type":"string",
+            "description":"The id of the EULA for this dataset",
+        },
+        "diseases":{
+            "type":"array",
+			"description":"The list of diseases for this dataset",
+            "items":{
+                "$ref":"org.sagebionetworks.schema.DiseaseNames",
+            }
+        }
+    }
+}
