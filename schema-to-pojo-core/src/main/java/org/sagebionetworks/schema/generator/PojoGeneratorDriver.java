@@ -97,6 +97,8 @@ public class PojoGeneratorDriver {
 			factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType);
 			// Add hash and equals
 			factory.getHashAndEqualsHandler().addHashAndEquals(schema, classType);
+			//add the toString
+			factory.getToStringHandler().addToStringMethod(schema, classType);
 		}
 
 		return classType;

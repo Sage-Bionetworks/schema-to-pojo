@@ -4,6 +4,7 @@ import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 import org.sagebionetworks.schema.generator.handler.HashAndEqualsHandler;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 import org.sagebionetworks.schema.generator.handler.PropertyHandler;
+import org.sagebionetworks.schema.generator.handler.ToStringHandler;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
 /**
@@ -34,5 +35,9 @@ public class HandlerFactoryImpl03 implements HandlerFactory {
 	public HashAndEqualsHandler getHashAndEqualsHandler() {
 		return new HashAndEqualsHandlerImpl03();
 	}
-
+	
+	@Override
+	public ToStringHandler getToStringHandler() {
+		return new ToStringHandlerImpl03();
+	}
 }

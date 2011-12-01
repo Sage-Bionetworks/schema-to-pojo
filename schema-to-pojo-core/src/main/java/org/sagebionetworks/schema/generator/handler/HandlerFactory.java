@@ -31,4 +31,10 @@ public interface HandlerFactory {
 	 */
 	public HashAndEqualsHandler getHashAndEqualsHandler();
 
+	/**
+	 * This handler must add toString()
+	 * @return
+	 */
+	public ToStringHandler getToStringHandler();
+
 }
