@@ -27,12 +27,15 @@ import com.google.gwt.regexp.shared.MatchResult;
  */
 public class JSONObjectGwt implements JSONObjectAdapter {
 	
-
 	protected JSONObject wrapped = null;
 
 	@Override
 	public JSONObjectAdapter createNew() {
 		return createNewAdapter();
+	}
+	
+	public JSONObjectGwt() {
+		this(new JSONObject());
 	}
 	
 	public JSONObjectGwt(JSONObject toWrap){
