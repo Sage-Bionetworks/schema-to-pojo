@@ -32,6 +32,27 @@ public class JSONValueUtil {
 	}
 	
 	/**
+	 * Helper to get an Object from a JSONValue.
+	 * @param value
+	 * @param key
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static Object getObjectValue(JSONValue value, Object key) throws JSONObjectAdapterException{
+		if(value.isString() != null){
+			return value.isString().stringValue();
+		}else if(value.isNumber() != null){
+			return value.isNumber().doubleValue();
+		}else if(value.isBoolean() != null){
+			return value.isBoolean().booleanValue();
+		}else if(value.isNull() != null){
+			return null;
+		}else {
+			throw new JSONObjectAdapterException("Cannot get key: "+key+" as an Object. Value class: "+value.getClass().getName());
+		}
+	}
+	
+	/**
 	 * Helper to get a Long from a JSONValue.
 	 * @param value
 	 * @param key
@@ -126,7 +147,7 @@ public class JSONValueUtil {
 	 * @return
 	 * @throws JSONObjectAdapterException if the value is null or the value is not a JSONArray.
 	 */
-	public static JSONObject getObjectValue(JSONValue value, Object key) throws JSONObjectAdapterException{
+	public static JSONObject getJSONObjectValue(JSONValue value, Object key) throws JSONObjectAdapterException{
 		if(value == null) throw new JSONObjectAdapterException("No value found for key: "+key);
 		JSONObject valueType = value.isObject();
 		if(valueType == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not an object. Value class: "+value.getClass().getName());

@@ -31,6 +31,8 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
      */
 	public String getString(String key) throws JSONObjectAdapterException;
 	
+	public Object get(String key) throws JSONObjectAdapterException;
+	
 	public JSONObjectAdapter put(String key, boolean value) throws JSONObjectAdapterException;
 	
 	public JSONObjectAdapter put(String key, String value) throws JSONObjectAdapterException;

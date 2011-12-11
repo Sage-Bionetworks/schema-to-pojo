@@ -42,7 +42,7 @@ public class GwtTestSuite extends GWTTestCase {
 	public void gwtSetUp() {
 		// This is a test for the JSONObjectAdapterImpl
 		adapter = new JSONArrayGwt();
-		adapterObject = JSONObjectGwt.createNewAdapter();
+		adapterObject = new JSONObjectGwt();
 		index = 0;
 		propertyKey = "propKey";
 	}
@@ -65,6 +65,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getString(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 
 	@Test
@@ -75,6 +77,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 	
 	private boolean doubleCompare(double a, double b){
@@ -89,6 +93,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getBoolean(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 
 	@Test
@@ -99,6 +105,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getInt(index));
+		// Make sure we can also get it as an object
+		assertNotNull(adapter.get(index));
 	}
 
 	@Test
@@ -238,6 +246,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertEquals(value, adapterObject.getString(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
 	}
 	
 	@Test
@@ -246,6 +256,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
 	}
 	
 	@Test
@@ -254,6 +266,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertEquals(value, adapterObject.getBoolean(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
 	}
 	
 	@Test
@@ -262,6 +276,8 @@ public class GwtTestSuite extends GWTTestCase {
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertEquals(value, adapterObject.getInt(propertyKey));
+		// Make sure we can also get it as an object
+		assertNotNull(adapterObject.get(propertyKey));
 	}
 	
 	@Test
@@ -447,4 +463,5 @@ public class GwtTestSuite extends GWTTestCase {
 		//validate
 		ObjectValidator.validatePatternProperties(testSchema, adapterObject);
 	}
+	
 }

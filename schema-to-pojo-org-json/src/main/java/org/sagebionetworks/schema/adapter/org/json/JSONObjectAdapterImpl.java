@@ -69,6 +69,15 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	public String toJSONString() {
 		return wrapped.toString();
 	}
+	
+	@Override
+	public Object get(String key) throws JSONObjectAdapterException {
+		try {
+			return wrapped.get(key);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
 
 	@Override
 	public String getString(String key) throws JSONObjectAdapterException {
@@ -303,4 +312,6 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 		Matcher m = p.matcher(property);
 		return m.matches();
 	}
+
+
 }

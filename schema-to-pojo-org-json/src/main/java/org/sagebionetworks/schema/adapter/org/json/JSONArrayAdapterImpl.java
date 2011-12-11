@@ -82,6 +82,15 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 			throw new JSONObjectAdapterException(e);
 		}
 	}
+	
+	@Override
+	public Object get(int index) throws JSONObjectAdapterException {
+		try {
+			return wrapped.get(index);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
 
 	@Override
 	public boolean isNull(int index) {
@@ -215,6 +224,8 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	public boolean equals(Object obj) {
 		return wrapped.equals(obj);
 	}
+
+
 
 
 }

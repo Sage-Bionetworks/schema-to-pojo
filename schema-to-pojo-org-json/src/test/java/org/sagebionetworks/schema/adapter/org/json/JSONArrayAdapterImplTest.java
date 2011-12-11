@@ -29,6 +29,8 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getLong(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 	
 	@Test
@@ -39,6 +41,8 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getString(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 	
 	@Test
@@ -49,6 +53,8 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(Double.doubleToLongBits(value), Double.doubleToLongBits(adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(Double.doubleToLongBits(value), Double.doubleToLongBits((Double)adapter.get(index)));
 	}
 
 	@Test
@@ -59,6 +65,8 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getBoolean(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 	
 	@Test
@@ -69,6 +77,8 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getInt(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
 	}
 	
 	@Test

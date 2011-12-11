@@ -96,6 +96,12 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		}
 		return this;
 	}
+	
+	@Override
+	public Object get(String key) throws JSONObjectAdapterException {
+		// The utility will do the value validation.
+		return JSONValueUtil.getObjectValue(wrapped.get(key), key);
+	}
 
 	@Override
 	public long getLong(String key) throws JSONObjectAdapterException {
@@ -132,7 +138,7 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 	public JSONObjectAdapter getJSONObject(String key)
 			throws JSONObjectAdapterException {
 		// The utility will do the value validation.
-		return new JSONObjectGwt(JSONValueUtil.getObjectValue(wrapped.get(key), key));
+		return new JSONObjectGwt(JSONValueUtil.getJSONObjectValue(wrapped.get(key), key));
 	}
 
 	@Override

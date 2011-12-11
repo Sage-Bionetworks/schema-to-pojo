@@ -55,6 +55,8 @@ public interface JSONArrayAdapter extends JSONAdapter{
      * @throws JSONObjectAdapterException
      */
     public JSONObjectAdapter getJSONObject(int index)throws JSONObjectAdapterException ;
+    
+    public Object get(int index)throws JSONObjectAdapterException ;
 
     /**
      * 

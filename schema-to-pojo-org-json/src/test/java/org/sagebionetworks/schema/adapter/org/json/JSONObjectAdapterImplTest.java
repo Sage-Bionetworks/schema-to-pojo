@@ -1,13 +1,15 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
@@ -75,6 +77,8 @@ public class JSONObjectAdapterImplTest {
 		adapter.put(propertyKey, value);
 		assertTrue(adapter.has(propertyKey));
 		assertEquals(value, adapter.getLong(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(propertyKey));
 	}
 	
 	@Test
@@ -83,6 +87,8 @@ public class JSONObjectAdapterImplTest {
 		adapter.put(propertyKey, value);
 		assertTrue(adapter.has(propertyKey));
 		assertEquals(value, adapter.getString(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(propertyKey));
 	}
 	
 	@Test
@@ -91,6 +97,8 @@ public class JSONObjectAdapterImplTest {
 		adapter.put(propertyKey, value);
 		assertTrue(adapter.has(propertyKey));
 		assertEquals(Double.doubleToLongBits(value), Double.doubleToLongBits(adapter.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertEquals(Double.doubleToLongBits(value), Double.doubleToLongBits((Double)adapter.get(propertyKey)));
 	}
 	
 	@Test
@@ -99,6 +107,8 @@ public class JSONObjectAdapterImplTest {
 		adapter.put(propertyKey, value);
 		assertTrue(adapter.has(propertyKey));
 		assertEquals(value, adapter.getBoolean(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(propertyKey));
 	}
 	
 	@Test
@@ -107,6 +117,8 @@ public class JSONObjectAdapterImplTest {
 		adapter.put(propertyKey, value);
 		assertTrue(adapter.has(propertyKey));
 		assertEquals(value, adapter.getInt(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(propertyKey));
 	}
 	
 	@Test

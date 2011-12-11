@@ -66,6 +66,12 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 		// The utility will do the value validation.
 		return JSONValueUtil.getStringValue(wrapped.get(index), index);
 	}
+	
+	@Override
+	public Object get(int index) throws JSONObjectAdapterException {
+		// The utility will do the value validation.
+		return JSONValueUtil.getObjectValue(wrapped.get(index), index);
+	}
 
 	@Override
 	public boolean isNull(int index) {
@@ -83,7 +89,7 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	public JSONObjectAdapter getJSONObject(int index)
 			throws JSONObjectAdapterException {
 		// The utility will do the value validation.
-		return new JSONObjectGwt(JSONValueUtil.getObjectValue(wrapped.get(index), index));
+		return new JSONObjectGwt(JSONValueUtil.getJSONObjectValue(wrapped.get(index), index));
 	}
 
 	@Override
@@ -186,7 +192,6 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	public String toString(){
 		return this.wrapped.toString();
 	}
-
 
 
 }
