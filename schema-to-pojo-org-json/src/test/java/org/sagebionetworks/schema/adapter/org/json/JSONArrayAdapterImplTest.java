@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -31,6 +32,17 @@ public class JSONArrayAdapterImplTest {
 		assertEquals(value, adapter.getLong(index));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
+	public void testNullRoundTrip() throws JSONObjectAdapterException{
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		long value = 123;
+		adapter.putNull(index);
+		assertEquals(1, adapter.length());
+		assertTrue(adapter.isNull(index));
+		assertEquals(null, adapter.get(index));
 	}
 	
 	@Test

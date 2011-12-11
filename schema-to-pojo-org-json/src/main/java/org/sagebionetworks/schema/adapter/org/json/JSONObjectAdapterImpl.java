@@ -73,7 +73,9 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 	@Override
 	public Object get(String key) throws JSONObjectAdapterException {
 		try {
-			return wrapped.get(key);
+			Object result = wrapped.get(key);
+			if(JSONObject.NULL == result) return null;
+			return result;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
 		}
@@ -197,6 +199,17 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 			throw new JSONObjectAdapterException(e);
 		}
 	}
+	
+	@Override
+	public JSONObjectAdapter putNull(String key)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(key, JSONObject.NULL);
+			return this;
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
 
 	@Override
 	public JSONObjectAdapter put(String key, double value)
@@ -312,6 +325,5 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 		Matcher m = p.matcher(property);
 		return m.matches();
 	}
-
 
 }

@@ -6,6 +6,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -145,6 +146,13 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 		}
 		return this;
 	}
+	
+	@Override
+	public JSONArrayAdapter putNull(int index)
+			throws JSONObjectAdapterException {
+		this.wrapped.set(index, JSONNull.getInstance());
+		return this;
+	}
 
 	@Override
 	public JSONArrayAdapter put(int index, long value)
@@ -192,6 +200,5 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	public String toString(){
 		return this.wrapped.toString();
 	}
-
 
 }

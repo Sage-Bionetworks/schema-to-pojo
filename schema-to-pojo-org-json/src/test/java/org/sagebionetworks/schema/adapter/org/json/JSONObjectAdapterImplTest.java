@@ -92,6 +92,14 @@ public class JSONObjectAdapterImplTest {
 	}
 	
 	@Test
+	public void testNullRoundTrip() throws JSONObjectAdapterException{
+		adapter.putNull(propertyKey);
+		assertTrue(adapter.has(propertyKey));
+		assertTrue(adapter.isNull(propertyKey));
+		assertEquals(null, adapter.get(propertyKey));
+	}
+	
+	@Test
 	public void testDoubleRoundTrip() throws JSONObjectAdapterException{
 		double value = 12.5565;
 		adapter.put(propertyKey, value);

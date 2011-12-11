@@ -1,5 +1,8 @@
 package org.sagebionetworks.gwt.client.schema.adapter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -67,6 +70,17 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals(value, adapter.getString(index));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
+	public void testNullRoundTrip() throws JSONObjectAdapterException{
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		long value = 123;
+		adapter.putNull(index);
+		assertEquals(1, adapter.length());
+		assertTrue(adapter.isNull(index));
+		assertEquals(null, adapter.get(index));
 	}
 
 	@Test
@@ -248,6 +262,14 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals(value, adapterObject.getString(propertyKey));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectNullRoundTrip() throws JSONObjectAdapterException{
+		adapterObject.putNull(propertyKey);
+		assertTrue(adapterObject.has(propertyKey));
+		assertTrue(adapterObject.isNull(propertyKey));
+		assertEquals(null, adapterObject.get(propertyKey));
 	}
 	
 	@Test

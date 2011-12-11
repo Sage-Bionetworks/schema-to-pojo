@@ -43,6 +43,8 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	
 	public JSONObjectAdapter put(String key, long value) throws JSONObjectAdapterException;	
 	
+	public JSONObjectAdapter putNull(String key) throws JSONObjectAdapterException;	
+	
 	/**
 	 * @param key
 	 * @param value

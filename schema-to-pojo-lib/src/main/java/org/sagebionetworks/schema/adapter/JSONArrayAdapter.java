@@ -79,6 +79,7 @@ public interface JSONArrayAdapter extends JSONAdapter{
     
     public JSONArrayAdapter put(int index, int value) throws JSONObjectAdapterException;
 
+    public JSONArrayAdapter putNull(int index) throws JSONObjectAdapterException;
     /**
      * Get the JSONObject associated with an index.
      * @param index subscript

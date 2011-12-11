@@ -2,6 +2,7 @@ package org.sagebionetworks.schema.adapter.org.json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -86,7 +87,9 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	@Override
 	public Object get(int index) throws JSONObjectAdapterException {
 		try {
-			return wrapped.get(index);
+			Object result = wrapped.get(index);
+			if(JSONObject.NULL == result) return null;
+			return result;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
 		}
@@ -211,6 +214,17 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	}
 	
 	@Override
+	public JSONArrayAdapter putNull(int index)
+			throws JSONObjectAdapterException {
+		try {
+			wrapped.put(index, JSONObject.NULL);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+		return this;
+	}
+	
+	@Override
 	public String toString() {
 		return wrapped.toString();
 	}
@@ -224,8 +238,5 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	public boolean equals(Object obj) {
 		return wrapped.equals(obj);
 	}
-
-
-
 
 }

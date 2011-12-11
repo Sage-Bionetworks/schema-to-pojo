@@ -12,6 +12,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -170,6 +171,13 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		}
 		return this;
 	}
+	
+	@Override
+	public JSONObjectAdapter putNull(String key)
+			throws JSONObjectAdapterException {
+		this.wrapped.put(key, JSONNull.getInstance());
+		return this;
+	}
 
 	@Override
 	public JSONObjectAdapter put(String key, double value)
@@ -281,4 +289,6 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		}
 		return true;
 	}
+
+
 }
