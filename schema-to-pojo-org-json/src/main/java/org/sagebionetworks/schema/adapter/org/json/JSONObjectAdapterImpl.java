@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sagebionetworks.schema.FORMAT;
@@ -75,6 +76,11 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 		try {
 			Object result = wrapped.get(key);
 			if(JSONObject.NULL == result) return null;
+			if(result instanceof JSONObject){
+				return new JSONObjectAdapterImpl((JSONObject) result);
+			}else if(result instanceof JSONArray){
+				return new JSONArrayAdapterImpl((JSONArray) result);
+			}
 			return result;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
