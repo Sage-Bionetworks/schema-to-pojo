@@ -154,4 +154,12 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	 * Method to validate a regular expression string against a pattern.
 	 */
 	public boolean validatePatternProperty(String pattern, String property);
+	
+	/**
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public boolean validateURI(String uri) throws JSONObjectAdapterException;
 }

@@ -290,5 +290,11 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		return true;
 	}
 
+	@Override
+	public boolean validateURI(String uri) throws JSONObjectAdapterException {
+		// Currently there is no easy way to do this with GWT, so we accept all URIs.
+		return true;
+	}
+
 
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-
 /**
  * Utility to help validate an instance (as an JSONObjectAdapter) against a schema.
  * 
@@ -14,6 +13,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  *
  */
 public class ObjectValidator {
+	
 	/**
 	 * Private schema cache.
 	 * NOTE: We cannot use Collections.synchronizedMap because GWT does not support it.
@@ -57,8 +57,6 @@ public class ObjectValidator {
 		ObjectSchema schema = getSchema(schemaJSON, adapter, clazz);
 		// Validate it against the schema
 		validateEntity(schema, adapter);
-		//check for schema properties that have a pattern defined
-		validatePatternProperties(schema, adapter);
 	}
 	
 	/**
@@ -74,6 +72,10 @@ public class ObjectValidator {
 		validateAllKeysAreDefined(schema, adapter);
 		//make sure all required properties are represented in adapter
 		validateRequiredProperties(schema, adapter);
+		//check for schema properties that have a pattern defined
+		validatePatternProperties(schema, adapter);
+		// Validate URI properties
+		validateURIProperties(schema, adapter);
 	}
 	
 	/**
@@ -118,6 +120,27 @@ public class ObjectValidator {
 					if (adapter.isNull(propertyName)){
 						throw new JSONObjectAdapterException("The property: " + propertyName + " is required, " +
 							"and was not found in the adapter");
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Find any URI property and validate that the value is actaully a URI.
+	 */
+	private static void validateURIProperties(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException {
+		//obtain schema's properties
+		Map<String, ObjectSchema> schemaProperties = schema.getProperties();
+		if (schemaProperties != null){
+			for (String propertyName : schemaProperties.keySet()){
+				//check each schemaProperty and if it is required, verify
+				//adapter has corresponding property
+				ObjectSchema nextPropertySchema = schemaProperties.get(propertyName);
+				if (TYPE.STRING == nextPropertySchema.getType() && FORMAT.URI == nextPropertySchema.getFormat()){
+					if (!adapter.isNull(propertyName)){
+						// Get the value
+						adapter.validateURI(adapter.getString(propertyName));
 					}
 				}
 			}

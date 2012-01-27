@@ -198,6 +198,32 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreateMethodInitializeFromJSONObjectStringURI() throws JClassAlreadyExistsException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setFormat(FORMAT.URI);
+		String propName = "uriName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		assertNotNull(method);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+//		System.out.println(methodString);
+		// It should check to see if the property exits in the adapter
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"uriName\")) {") > 0);
+		// It should directly set the value
+		assertTrue(methodString.indexOf("uriName = adapter.getString(\"uriName\");") > 0);
+		// It should also have an else that sets it to null
+		assertTrue(methodString.indexOf("} else {") > 0);
+		assertTrue(methodString.indexOf("uriName = null;") > 0);
+		assertTrue(methodString.indexOf("return adapter;") > 0);
+	}
+	
+	@Test
 	public void testAssignJSONStringToPropertyNullFormat(){
 		ObjectSchema propertySchema = new ObjectSchema();
 		propertySchema.setType(TYPE.STRING);
@@ -247,6 +273,23 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
 		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE\"), adapter.getString(\"dateName\"))", methodString);
+	}
+	
+	@Test
+	public void testAssignJSONStringToURI(){
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setFormat(FORMAT.URI);
+		String propName = "someURI";
+		// Create an adapter
+		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		// add the parameter
+		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		String methodString = generateToString(rhs);
+		System.out.println(methodString);
+		assertEquals("adapter.getString(\"someURI\")", methodString);
 	}
 	
 	@Test
@@ -632,6 +675,24 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
 		assertEquals("java.lang.Long.toString(dateName.getTime())", methodString);
+	}
+	
+	@Test
+	public void testAssignPropertyToJSONStringURI(){
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STRING);
+		propertySchema.setFormat(FORMAT.URI);
+		String propName = "uriName";
+		// Create an adapter
+		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		// add the parameter
+		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JFieldVar field = sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		JExpression rhs = handler.assignPropertyToJSONString(codeModel, adapter, propName, propertySchema, field);
+		String methodString = generateToString(rhs);
+//		System.out.println(methodString);
+		assertEquals("uriName", methodString);
 	}
 	
 	@Test

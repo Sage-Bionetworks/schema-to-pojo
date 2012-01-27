@@ -282,7 +282,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		FORMAT format = propertySchema.getFormat();
 		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
-		if(format == null){
+		if(format == null || format == FORMAT.URI){
 			// Null format is treated as a simple string.
 			return stringFromAdapter;
 		}else{
@@ -327,7 +327,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		FORMAT format = propertySchema.getFormat();
 //		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
-		if(format == null){
+		if(format == null || format == FORMAT.URI){
 			// Null format is treated as a simple string.
 			return field;
 		}else{

@@ -1,5 +1,7 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -330,6 +332,17 @@ public class JSONObjectAdapterImpl implements JSONObjectAdapter {
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(property);
 		return m.matches();
+	}
+
+	@Override
+	public boolean validateURI(String uri) throws JSONObjectAdapterException {
+		try {
+			// Let Java validate the URI.
+			new URI(uri);
+			return true;
+		} catch (URISyntaxException e) {
+			throw new JSONObjectAdapterException(e);
+		}
 	}
 
 }

@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -22,6 +23,23 @@ public class JSONObjectAdapterImplTest {
 	
 	JSONObjectAdapter adapter = null;
 	String propertyKey = null;
+	
+	public static final String[] validURIs = new String[] {
+		"foo://username:password@example.com:8042/over/there/index.dtb?type=animal&name=narwhal#nose",
+		"ftp://ftp.is.co.za/rfc/rfc1808.txt",
+		"http://www.ietf.org/rfc/rfc2396.txt",
+		"ldap://[2001:db8::7]/c=GB?objectClass?one",
+		"mailto:John.Doe@example.com",
+		"news:comp.infosystems.www.servers.unix",
+		"tel:+1-816-555-1212",
+		"telnet://192.0.2.16:80/",
+		"urn:oasis:names:specification:docbook:dtd:xml:4.1.2", 
+		};
+	
+	public static final String[] invalidURIs = new String[] {
+		"foo#username:password@example.com:8042/over/there/index.dtb?type=animal&name=narwhal#nose",
+		"This is not a URI",
+		};
 	
 	@Before
 	public void before(){
@@ -228,4 +246,26 @@ public class JSONObjectAdapterImplTest {
 		String badProperty = "caaaaaaaaab";
 		assertFalse(adapter.validatePatternProperty(pattern, badProperty));
 	}
+	
+	@Test
+	public void testValidateValidURI() throws JSONObjectAdapterException{
+		// Validate all of the valid URIs.
+		for(String toTest: validURIs){
+			assertTrue("This URI was valid: "+toTest, adapter.validateURI(toTest));
+		}
+	}
+	
+	@Test
+	public void testValidateInvalidURI() {
+		// Validate all of the valid URIs.
+		for(String toTest: invalidURIs){
+			try {
+				assertTrue(adapter.validateURI(toTest));
+				fail("This uri was invalid: "+toTest);
+			} catch (JSONObjectAdapterException e) {
+				// Expected
+			}
+		}
+	}
+
 }
