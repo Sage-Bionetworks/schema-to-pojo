@@ -13,6 +13,7 @@ import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.sagebionetworks.schema.LinkDescription.LinkRel;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -104,6 +105,10 @@ public class ObjectSchemaTest {
 			field.set(toTest, FORMAT.DATE_TIME);
 		}else if(field.getType() == ENCODING.class){
 			field.set(toTest, ENCODING.BINARY);
+		}else if(field.getType() == LinkDescription[].class){
+			field.set(toTest, new LinkDescription[] { 
+					new LinkDescription(LinkRel.DESCRIBED_BY, "http://google.com/"),
+					new LinkDescription(LinkRel.ROOT, "http://localhost:8080/")});
 		}else{
 			throw new IllegalArgumentException("Unknown Type:"+field.getType());
 		}
