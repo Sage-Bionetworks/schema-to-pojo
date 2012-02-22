@@ -1,5 +1,10 @@
 package org.sagebionetworks.gwt.client.schema.adapter;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+
+import org.apache.commons.codec.binary.Base64;
+import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -200,5 +205,55 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	public String toString(){
 		return this.wrapped.toString();
 	}
+
+	@Override
+	public String convertDateToString(FORMAT format, Date toFormat) {
+		return DateUtils.convertDateToString(format, toFormat);
+	}
+
+	@Override
+	public Date convertStringToDate(FORMAT format, String toFormat) {
+		return DateUtils.convertStringToDate(format, toFormat);
+	}
+
+	@Override
+	public Date getDate(int index) throws JSONObjectAdapterException {
+		// Get the string value
+		String stringValue = getString(index);
+		return DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, stringValue);
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, Date date) throws JSONObjectAdapterException {
+		if(date == null) throw new IllegalArgumentException("Date cannot be null");
+		// first convert it to a date string
+		String dateString = DateUtils.convertDateToString(FORMAT.UTC_MILLISEC, date);
+		return put(index, dateString);
+	}
+
+	@Override
+	public JSONArrayAdapter put(int index, byte[] value)throws JSONObjectAdapterException {
+		// Base64 encode the byte array
+		try {
+			byte[] encoded = Base64.encodeBase64(value);
+			String stringValue = new String(encoded, "UTF-8");
+			return put(index, stringValue);
+		} catch (UnsupportedEncodingException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+
+	}
+
+	@Override
+	public byte[] getBinary(int index) throws JSONObjectAdapterException {
+		try {
+			// Get the string value
+			String base64String = getString(index);
+			return Base64.decodeBase64(base64String.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+	}
+
 
 }

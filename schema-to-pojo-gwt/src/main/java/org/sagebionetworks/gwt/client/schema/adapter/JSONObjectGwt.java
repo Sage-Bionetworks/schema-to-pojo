@@ -1,10 +1,10 @@
 package org.sagebionetworks.gwt.client.schema.adapter;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.gwttime.time.DateTime;
-import org.gwttime.time.format.ISODateTimeFormat;
+import org.apache.commons.codec.binary.Base64;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -18,8 +18,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * An com.google.gwt.json.client.JSONObject implementation of JSONObjectAdapter.
@@ -217,40 +217,12 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 
 	@Override
 	public String convertDateToString(FORMAT format, Date toFormat) {
-		if(format == null) throw new IllegalArgumentException("FORMAT cannot be null");
-		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
-		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
-		if(FORMAT.DATE_TIME == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.dateTime().print(dt);
-		}else if(FORMAT.DATE == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.date().print(dt);
-		}else if(FORMAT.TIME == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.time().print(dt);
-		}else{
-			throw new IllegalArgumentException("Unknown date format: "+format.name());
-		}
+		return DateUtils.convertDateToString(format, toFormat);
 	}
 
 	@Override
 	public Date convertStringToDate(FORMAT format, String toFormat) {
-		if(format == null) throw new IllegalArgumentException("FORMAT cannot be null");
-		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
-		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
-		if(FORMAT.DATE_TIME == format){
-			DateTime dt = ISODateTimeFormat.dateTime().parseDateTime(toFormat);
-			return dt.toDate();
-		}else if(FORMAT.DATE == format){
-			DateTime dt = ISODateTimeFormat.date().parseDateTime(toFormat);
-			return dt.toDate();
-		}else if(FORMAT.TIME == format){
-			DateTime dt = ISODateTimeFormat.time().parseDateTime(toFormat);
-			return dt.toDate();
-		}else{
-			throw new IllegalArgumentException("Unknown date format: "+format.name());
-		}
+		return DateUtils.convertStringToDate(format, toFormat);
 	}
 
 	@Override
@@ -294,6 +266,46 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 	public boolean validateURI(String uri) throws JSONObjectAdapterException {
 		// Currently there is no easy way to do this with GWT, so we accept all URIs.
 		return true;
+	}
+	
+	@Override
+	public JSONObjectAdapter put(String key, Date date) throws JSONObjectAdapterException {
+		if(key == null) throw new IllegalArgumentException("Key cannot be null");
+		if(date == null) throw new IllegalArgumentException("Date cannot be null");
+		// first convert it to a date string
+		String dateString = DateUtils.convertDateToString(FORMAT.UTC_MILLISEC, date);
+		return put(key, dateString);
+	}
+
+	@Override
+	public Date getDate(String key) throws JSONObjectAdapterException {
+		// Get the string value
+		String stringValue = getString(key);
+		return DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, stringValue);
+	}
+	
+	@Override
+	public JSONObjectAdapter put(String key, byte[] value)	throws JSONObjectAdapterException {
+		// Base64 encode the byte array
+		try {
+			byte[] encoded = Base64.encodeBase64(value);
+			String stringValue = new String(encoded, "UTF-8");
+			return put(key, stringValue);
+		} catch (UnsupportedEncodingException e) {
+			throw new JSONObjectAdapterException(e);
+		}
+
+	}
+
+	@Override
+	public byte[] getBinary(String key) throws JSONObjectAdapterException {
+		try {
+			// Get the string value
+			String base64String = getString(key);
+			return Base64.decodeBase64(base64String.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new JSONObjectAdapterException(e);
+		}
 	}
 
 

@@ -5,4 +5,6 @@
 	<!-- We want all file in schema to be included in GWT client compile -->
 	<source path='schema' />
 	
+	<inherits name="org.apache.commons.ApacheBase64"/>
+	
 </module>

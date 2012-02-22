@@ -1,5 +1,7 @@
 package org.sagebionetworks.schema.adapter;
 
+import java.util.Date;
+
 
 
 public interface JSONArrayAdapter extends JSONAdapter{
@@ -37,6 +39,21 @@ public interface JSONArrayAdapter extends JSONAdapter{
      */
     public int getInt(int index) throws JSONObjectAdapterException ;
 
+    /**
+     * Get a date for the given index.
+     * @param index
+     * @return
+     * @throws JSONObjectAdapterException
+     */
+    public Date getDate(int index) throws JSONObjectAdapterException;
+    
+    /**
+     * Get the binary value.
+     * @param index
+     * @return
+     * @throws JSONObjectAdapterException
+     */
+    public byte[] getBinary(int index)throws JSONObjectAdapterException;
 
     /**
      * Get the JSONArray associated with an index.
@@ -78,6 +95,10 @@ public interface JSONArrayAdapter extends JSONAdapter{
     public JSONArrayAdapter put(int index, boolean value) throws JSONObjectAdapterException;
     
     public JSONArrayAdapter put(int index, int value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, Date value) throws JSONObjectAdapterException;
+    
+    public JSONArrayAdapter put(int index, byte[] value) throws JSONObjectAdapterException;
 
     public JSONArrayAdapter putNull(int index) throws JSONObjectAdapterException;
     /**

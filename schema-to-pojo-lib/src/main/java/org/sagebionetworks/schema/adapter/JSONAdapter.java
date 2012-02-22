@@ -1,5 +1,9 @@
 package org.sagebionetworks.schema.adapter;
 
+import java.util.Date;
+
+import org.sagebionetworks.schema.FORMAT;
+
 public interface JSONAdapter {
 	
 	/**
@@ -27,4 +31,20 @@ public interface JSONAdapter {
 	 * @return
 	 */
 	public String toJSONString();
+	
+	/**
+	 * Convert a Date to a string of the given format.
+	 * @param format
+	 * @param toFormat
+	 * @return
+	 */
+	public String convertDateToString(FORMAT format, Date toFormat);
+	
+	/**
+	 * Convert a String to a Date of the given format.
+	 * @param format
+	 * @param toFormat
+	 * @return
+	 */
+	public Date convertStringToDate(FORMAT format, String toFormat);
 }

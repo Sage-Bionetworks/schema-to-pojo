@@ -1,18 +1,22 @@
 package org.sagebionetworks.gwt.client.schema.adapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectValidator;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -486,4 +490,193 @@ public class GwtTestSuite extends GWTTestCase {
 		ObjectValidator.validatePatternProperties(testSchema, adapterObject);
 	}
 	
+	@Test
+	public void testAdapterCollectionUtilsMapOfStringCollectionRoundTrip() throws JSONObjectAdapterException{
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		List<String> one = new ArrayList<String>();
+		one.add("a");
+		one.add("b");
+		map.put("one", one);
+		// Writ this to an adapter
+		adapterObject = new JSONObjectGwt();
+		AdapterCollectionUtils.writeToAdapter(adapterObject, map, String.class);
+		System.out.println(adapterObject.toJSONString());
+		// Now make sure we can come back
+		Map<String, List<String>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, String.class);
+		assertEquals(map, clone);
+	}
+	
+	@Test
+	public void testAdapterCollectionUtilsMapOfDoubleCollectionRoundTrip() throws JSONObjectAdapterException{
+		Map<String, List<Double>> map = new HashMap<String, List<Double>>();
+		List<Double> one = new ArrayList<Double>();
+		one.add(new Double(123));
+		one.add(new Double(345.5));
+		map.put("one", one);
+		// Writ this to an adapter
+		adapterObject = new JSONObjectGwt();
+		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Double.class);
+		System.out.println(adapterObject.toJSONString());
+		// Now make sure we can come back
+		Map<String, List<Double>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, Double.class);
+		assertEquals(map, clone);
+	}
+	
+	@Test
+	public void testAdapterCollectionUtilsMapOfLongCollectionRoundTrip() throws JSONObjectAdapterException{
+		Map<String, List<Long>> map = new HashMap<String, List<Long>>();
+		List<Long> one = new ArrayList<Long>();
+		one.add(new Long(123));
+		one.add(new Long(345));
+		map.put("one", one);
+		// Writ this to an adapter
+		adapterObject = new JSONObjectGwt();
+		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Long.class);
+		System.out.println(adapterObject.toJSONString());
+		// Now make sure we can come back
+		Map<String, List<Long>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, Long.class);
+		assertEquals(map, clone);
+	}
+	
+	@Test
+	public void testAdapterCollectionUtilsMapOfDateCollectionRoundTrip() throws JSONObjectAdapterException{
+		Map<String, List<Date>> map = new HashMap<String, List<Date>>();
+		List<Date> one = new ArrayList<Date>();
+		one.add(new Date(System.currentTimeMillis()));
+		one.add(new Date(345*1000));
+		map.put("one", one);
+		// Writ this to an adapter
+		adapterObject = new JSONObjectGwt();
+		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Date.class);
+		System.out.println(adapterObject.toJSONString());
+		// Now make sure we can come back
+		Map<String, List<Date>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, Date.class);
+		assertEquals(map, clone);
+	}
+	
+	@Test
+	public void testAdapterCollectionUtilsMapOfBinaryCollectionRoundTrip() throws JSONObjectAdapterException, UnsupportedEncodingException{
+		Map<String, List<byte[]>> map = new HashMap<String, List<byte[]>>();
+		List<byte[]> one = new ArrayList<byte[]>();
+		one.add("First blob".getBytes("UTF-8"));
+		one.add("Second blob".getBytes("UTF-8"));
+		map.put("one", one);
+		// Writ this to an adapter
+		adapterObject = new JSONObjectGwt();
+		AdapterCollectionUtils.writeToAdapter(adapterObject, map, byte[].class);
+		System.out.println(adapterObject.toJSONString());
+		// Now make sure we can come back
+		Map<String, List<byte[]>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, byte[].class);
+		assertEquals(1, clone.size());
+		List<byte[]> list = clone.get("one");
+		assertNotNull(list);
+		assertEquals(2, list.size());
+		assertEquals("First blob", new String(list.get(0), "UTF-8"));
+		assertEquals("Second blob", new String(list.get(1), "UTF-8"));
+	}
+	
+	@Test
+	public void testDateRoundTrip() throws JSONObjectAdapterException{
+		Date dateValue = new Date(System.currentTimeMillis());
+		adapterObject.put("key", dateValue);
+		System.out.println(adapter.toJSONString());
+		Date clone = adapterObject.getDate("key");
+		assertEquals(dateValue, clone);
+	}
+	
+	@Test 
+	public void testDateNull() throws JSONObjectAdapterException{
+		try{
+			Date dateValue = new Date(System.currentTimeMillis());
+			adapterObject.put(null, dateValue);
+			fail("Should have thrown an exception");
+		}catch(IllegalArgumentException e){
+			//expected
+		}
+
+	}
+	
+	@Test
+	public void testDateNullValue() throws JSONObjectAdapterException{
+		try{
+			Date value = adapterObject.getDate("key");
+			fail("Should have thrown an exception");
+		}catch(JSONObjectAdapterException e){
+			// expected
+			
+		}
+
+	}
+	
+	@Test
+	public void testDateRoundTripArray() throws JSONObjectAdapterException{
+		Date dateValue = new Date(System.currentTimeMillis());
+		adapter.put(0, dateValue);
+		System.out.println(adapter.toJSONString());
+		Date clone = adapter.getDate(0);
+		assertEquals(dateValue, clone);
+	}
+	
+	@Test
+	public void testDateNullArray() throws JSONObjectAdapterException{
+		try{
+			adapter.put(0, (Date)null);
+			fail("Should have thrown an exception");
+		}catch(IllegalArgumentException e){
+			// expected
+		}
+
+	}
+	
+	@Test
+	public void testDateNullValueArray() throws JSONObjectAdapterException{
+		try{
+			Date value = adapter.getDate(0);
+			fail("Should have thrown an exception");
+		}catch(JSONObjectAdapterException e){
+			// expected
+		}
+	}
+	
+	@Test
+	public void binaryRoundTrip() throws JSONObjectAdapterException, UnsupportedEncodingException {
+		// Make sure we can use base 64
+		String startString = "This string will be encoded";
+		byte[] value = startString.getBytes("UTF-8");
+		adapterObject.put("binary", value);
+		// Get the value out
+		byte[] cloneArray = adapterObject.getBinary("binary");
+		String clone = new String(cloneArray, "UTF-8");
+		assertEquals(startString, clone);
+	}
+	
+	@Test
+	public void binaryRoundTripArray() throws JSONObjectAdapterException, UnsupportedEncodingException {
+		// Make sure we can use base 64
+		String startString = "This string will be encoded";
+		byte[] value = startString.getBytes("UTF-8");
+		adapter.put(0, value);
+		// Get the value out
+		byte[] cloneArray = adapter.getBinary(0);
+		String clone = new String(cloneArray, "UTF-8");
+		assertEquals(startString, clone);
+	}
+	
+	@Test
+	public void testDateUtilsDateTime(){
+		// Make sure we can do a round trip for each date type
+		Date now = new Date(System.currentTimeMillis());
+		String dateString = DateUtils.convertDateToString(FORMAT.DATE_TIME, now);
+		Date clone = DateUtils.convertStringToDate(FORMAT.DATE_TIME, dateString);
+		assertEquals(now, clone);
+	}
+	
+	@Test
+	public void testDateUtilsUTC(){
+		// Make sure we can do a round trip for each date type
+		Date now = new Date(System.currentTimeMillis());
+		String dateString = DateUtils.convertDateToString(FORMAT.UTC_MILLISEC, now);
+		Date clone = DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, dateString);
+		assertEquals(now, clone);
+	}
 }

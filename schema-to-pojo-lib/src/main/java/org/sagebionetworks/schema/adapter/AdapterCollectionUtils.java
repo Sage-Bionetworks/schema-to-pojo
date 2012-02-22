@@ -1,10 +1,14 @@
 package org.sagebionetworks.schema.adapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.sagebionetworks.schema.FORMAT;
 
 
 /**
@@ -205,7 +209,7 @@ public class AdapterCollectionUtils {
 		return results;
 	}
 
-	private static List<Double> readDoubleListFromArray(JSONArrayAdapter array) throws JSONObjectAdapterException {
+	public static List<Double> readDoubleListFromArray(JSONArrayAdapter array) throws JSONObjectAdapterException {
 		List<Double> results = new ArrayList<Double>();
 		for(int i=0; i<array.length(); i++){
 			results.add(array.getDouble(i));
@@ -229,6 +233,12 @@ public class AdapterCollectionUtils {
 		return results;
 	}
 
+	/**
+	 * Read
+	 * @param adapter
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
 	public static Map<String, Object> readMapFromObject(JSONObjectAdapter adapter) throws JSONObjectAdapterException{
 		Map<String, Object> results = new HashMap<String, Object>();
 		Iterator<String> keyIt = adapter.keys();
@@ -245,6 +255,100 @@ public class AdapterCollectionUtils {
 			}
 		}
 		return results;
+	}
+	
+	/**
+	 * Create Map<String, Collection<String>> from a JSONObjectAdapter.
+	 * @param object
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static <T> Map<String, List<T>> createMapOfCollection(JSONObjectAdapter object, Class<? extends T> clazz) throws JSONObjectAdapterException{
+		HashMap<String, List<T>> map = new HashMap<String, List<T>>();
+		Iterator<String> it = object.keys();
+		while(it.hasNext()){
+			String key = it.next();
+			JSONArrayAdapter array = object.getJSONArray(key);
+			List<T> values = AdapterCollectionUtils.readListFromArray(array, clazz);
+			map.put(key, values);
+		}
+		return map;
+	}
+	
+	/**
+	 * Read a List<T> from JSONArrayAdapter
+	 * @param <T>
+	 * @param array
+	 * @param clazz
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static <T> List<T> readListFromArray(JSONArrayAdapter array, Class<? extends T> clazz) throws JSONObjectAdapterException {
+		List<T> results = new ArrayList<T>();
+		for(int i=0; i<array.length(); i++){
+			if(String.class == clazz){
+				String string = array.getString(i);
+				results.add((T)string);
+			}else if(Double.class == clazz){
+				Double value = array.getDouble(i);
+				results.add((T)value);
+			}else if(Long.class == clazz){
+				Long value = array.getLong(i);
+				results.add((T)value);
+			}else if(Date.class == clazz){
+				Date value = array.getDate(i);
+				results.add((T)value);
+			}else if(byte[].class == clazz){
+				byte[] value = array.getBinary(i);
+				results.add((T)value);
+			}else{
+				throw new IllegalArgumentException("Unknown type: "+clazz);
+			}
+		}
+		return results;
+	}
+	
+	/**
+	 * Write a Map<String, Collection<String>> to the passed JSONObjectAdapter.
+	 * @param object
+	 * @param map
+	 * @throws JSONObjectAdapterException
+	 */
+	public static <T> void writeToAdapter(JSONObjectAdapter object, Map<String, List<T>> map, Class<? extends T> clazz) throws JSONObjectAdapterException{
+		for(String key: map.keySet()){
+			List<T> values = map.get(key);
+			JSONArrayAdapter array = object.createNewArray();
+			AdapterCollectionUtils.writeToArray(array, values, clazz);
+			object.put(key, array);
+		}
+	}
+	
+	/**
+	 * Write a list JSONArrayAdapter
+	 * @param <T>
+	 * @param newArray
+	 * @param list
+	 * @param clazz
+	 * @throws JSONObjectAdapterException
+	 */
+	public static <T> void writeToArray(JSONArrayAdapter newArray, List<T> list, Class<? extends T> clazz) throws JSONObjectAdapterException {
+		for(int i=0; i<list.size(); i++){
+			if(clazz == String.class){
+				newArray.put(i, (String)list.get(i));
+			}else if(Double.class == clazz){
+				newArray.put(i, (Double)list.get(i));
+			}else if(Long.class == clazz){
+				newArray.put(i, (Long)list.get(i));
+			}else if(Date.class == clazz){
+				Date date = (Date) list.get(i);
+				newArray.put(i, date);
+			}else if(byte[].class == clazz){
+				byte[] value = (byte[]) list.get(i);
+				newArray.put(i, value);
+			}else{
+				throw new IllegalArgumentException("Unknown type: "+clazz);
+			}
+		}
 	}
 
 

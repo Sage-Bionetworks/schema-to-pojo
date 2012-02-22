@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
@@ -129,6 +131,25 @@ public class JSONArrayAdapterImplTest {
 		adapter.put(3, object);
 		System.out.println(adapter.toJSONString());
 		assertEquals(adapter.toJSONString(), adapter.toString());
+	}
+	
+	@Test
+	public void testDateRoundTrip() throws JSONObjectAdapterException{
+		Date dateValue = new Date(System.currentTimeMillis());
+		adapter.put(0, dateValue);
+		System.out.println(adapter.toJSONString());
+		Date clone = adapter.getDate(0);
+		assertEquals(dateValue, clone);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testDateNull() throws JSONObjectAdapterException{
+		adapter.put(0, (Date)null);
+	}
+	
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testDateNullValue() throws JSONObjectAdapterException{
+		Date value = adapter.getDate(0);
 	}
 	
 }

@@ -41,7 +41,22 @@ public class AdapterCollectionUtilsTest {
 		List<String> list = (List<String>) back.get("key array");
 		assertEquals(3, list.size());
 		assertEquals("one", list.get(0));
-		
+	}
+	
+	@Test
+	public void testMapPrimitivesy() throws JSONObjectAdapterException{
+		Map<String, Object> row = new HashMap<String, Object>();
+		row.put("string", "stringValue");
+		row.put("integer", new Integer(123));
+		row.put("long", new Long(1234));
+		row.put("double", new Double(123.56));
+		// Adapter
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+		AdapterCollectionUtils.writeToObject(adapter, row);
+		System.out.println(adapter.toJSONString());
+		Map<String, Object> back = AdapterCollectionUtils.readMapFromObject(adapter);
+		assertNotNull(back);
+		assertEquals(row, back);
 	}
 	
 	@Test

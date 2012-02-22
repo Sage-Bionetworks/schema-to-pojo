@@ -1,16 +1,19 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
@@ -267,5 +270,44 @@ public class JSONObjectAdapterImplTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testDateRoundTrip() throws JSONObjectAdapterException{
+		Date dateValue = new Date(System.currentTimeMillis());
+		adapter.put("key", dateValue);
+		System.out.println(adapter.toJSONString());
+		Date clone = adapter.getDate("key");
+		assertEquals(dateValue, clone);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testDateNull() throws JSONObjectAdapterException{
+		Date dateValue = new Date(System.currentTimeMillis());
+		adapter.put(null, dateValue);
+	}
+	
+	@Test (expected=JSONObjectAdapterException.class)
+	public void testDateNullValue() throws JSONObjectAdapterException{
+		Date value = adapter.getDate("key");
+	}
+	
+	@Test
+	public void binary() throws UnsupportedEncodingException, JSONException{
+		JSONObject object =new JSONObject();
+		object.put("test", "To a byte array".getBytes("UTF-8"));
+		System.out.println(object.toString());
+	}
 
+	@Test
+	public void binaryRoundTrip() throws JSONObjectAdapterException, UnsupportedEncodingException {
+		// Make sure we can use base 64
+		String startString = "This string will be encoded";
+		byte[] value = startString.getBytes("UTF-8");
+		adapter.put("binary", value);
+		System.out.println(adapter.toJSONString());
+		// Get the value out
+		byte[] cloneArray = adapter.getBinary("binary");
+		String clone = new String(cloneArray, "UTF-8");
+		assertEquals(startString, clone);
+	}
 }

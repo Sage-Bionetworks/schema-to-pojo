@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+	<!-- We want all file in codec to be included in GWT client compile -->
+	<source path='codec' />
+
+</module>

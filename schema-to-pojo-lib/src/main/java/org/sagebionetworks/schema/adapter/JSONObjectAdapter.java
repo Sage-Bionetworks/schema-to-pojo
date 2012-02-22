@@ -43,7 +43,12 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	
 	public JSONObjectAdapter put(String key, long value) throws JSONObjectAdapterException;	
 	
+	public JSONObjectAdapter put(String key, Date value) throws JSONObjectAdapterException;	
+	
+	public JSONObjectAdapter put(String key, byte[] value) throws JSONObjectAdapterException;	
+	
 	public JSONObjectAdapter putNull(String key) throws JSONObjectAdapterException;	
+	
 	
 	/**
 	 * @param key
@@ -98,6 +103,22 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
     public int getInt(String key) throws JSONObjectAdapterException;
     
     /**
+     * Get a Date
+     * @param key
+     * @return
+     * @throws JSONObjectAdapterException 
+     */
+    public Date getDate(String key) throws JSONObjectAdapterException;
+    
+    /**
+     * Get a binary string.  This should be Base64 encoded.
+     * @param key
+     * @return
+     * @throws JSONObjectAdapterException
+     */
+    public byte[] getBinary(String key) throws JSONObjectAdapterException;
+    
+    /**
      * Get the JSONArray value associated with a key.
      *
      * @param key   A key string.
@@ -132,23 +153,6 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
      *  the value is the JSONObject.NULL object.
      */
 	public boolean isNull(String key);
-	
-	
-	/**
-	 * Convert a Date to a string of the given format.
-	 * @param format
-	 * @param toFormat
-	 * @return
-	 */
-	public String convertDateToString(FORMAT format, Date toFormat);
-	
-	/**
-	 * Convert a String to a Date of the given format.
-	 * @param format
-	 * @param toFormat
-	 * @return
-	 */
-	public Date convertStringToDate(FORMAT format, String toFormat);
 	
 	/**
 	 * Method to validate a regular expression string against a pattern.
