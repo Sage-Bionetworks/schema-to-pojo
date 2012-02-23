@@ -273,15 +273,14 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 		if(key == null) throw new IllegalArgumentException("Key cannot be null");
 		if(date == null) throw new IllegalArgumentException("Date cannot be null");
 		// first convert it to a date string
-		String dateString = DateUtils.convertDateToString(FORMAT.UTC_MILLISEC, date);
-		return put(key, dateString);
+		return put(key, date.getTime());
 	}
 
 	@Override
 	public Date getDate(String key) throws JSONObjectAdapterException {
 		// Get the string value
-		String stringValue = getString(key);
-		return DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, stringValue);
+		long longValue = getLong(key);
+		return new Date(longValue);
 	}
 	
 	@Override

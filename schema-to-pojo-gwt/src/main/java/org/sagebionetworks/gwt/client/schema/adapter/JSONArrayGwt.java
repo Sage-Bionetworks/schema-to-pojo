@@ -219,16 +219,14 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 	@Override
 	public Date getDate(int index) throws JSONObjectAdapterException {
 		// Get the string value
-		String stringValue = getString(index);
-		return DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, stringValue);
+		long longValue = getLong(index);
+		return new Date(longValue);
 	}
 
 	@Override
 	public JSONArrayAdapter put(int index, Date date) throws JSONObjectAdapterException {
 		if(date == null) throw new IllegalArgumentException("Date cannot be null");
-		// first convert it to a date string
-		String dateString = DateUtils.convertDateToString(FORMAT.UTC_MILLISEC, date);
-		return put(index, dateString);
+		return put(index, date.getTime());
 	}
 
 	@Override

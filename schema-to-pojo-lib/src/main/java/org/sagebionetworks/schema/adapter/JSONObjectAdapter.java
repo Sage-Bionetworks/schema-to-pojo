@@ -43,6 +43,13 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	
 	public JSONObjectAdapter put(String key, long value) throws JSONObjectAdapterException;	
 	
+	/**
+	 * Dates put here will be FORMAT.UTC_MILLISEC
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
 	public JSONObjectAdapter put(String key, Date value) throws JSONObjectAdapterException;	
 	
 	public JSONObjectAdapter put(String key, byte[] value) throws JSONObjectAdapterException;	

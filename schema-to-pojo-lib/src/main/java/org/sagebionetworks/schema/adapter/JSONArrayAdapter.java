@@ -96,6 +96,13 @@ public interface JSONArrayAdapter extends JSONAdapter{
     
     public JSONArrayAdapter put(int index, int value) throws JSONObjectAdapterException;
     
+    /**
+     * Dates put here will be FORMAT.UTC_MILLISEC
+     * @param index
+     * @param value
+     * @return
+     * @throws JSONObjectAdapterException
+     */
     public JSONArrayAdapter put(int index, Date value) throws JSONObjectAdapterException;
     
     public JSONArrayAdapter put(int index, byte[] value) throws JSONObjectAdapterException;
