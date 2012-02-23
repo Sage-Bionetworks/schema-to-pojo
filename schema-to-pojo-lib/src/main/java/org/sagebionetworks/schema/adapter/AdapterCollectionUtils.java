@@ -290,7 +290,9 @@ public class AdapterCollectionUtils {
 	public static <T> List<T> readListFromArray(JSONArrayAdapter array, Class<? extends T> clazz) throws JSONObjectAdapterException {
 		List<T> results = new ArrayList<T>();
 		for(int i=0; i<array.length(); i++){
-			if(String.class == clazz){
+			if(array.isNull(i)){
+				results.add(null);
+			}else if(String.class == clazz){
 				String string = array.getString(i);
 				results.add((T)string);
 			}else if(Double.class == clazz){
@@ -343,7 +345,10 @@ public class AdapterCollectionUtils {
 	public static <T> void writeToArray(JSONArrayAdapter newArray, List<T> list, Class<? extends T> clazz) throws JSONObjectAdapterException {
 		if(list != null){
 			for(int i=0; i<list.size(); i++){
-				if(clazz == String.class){
+				T value = list.get(i);
+				if(value == null){
+					newArray.putNull(i);
+				}else if(clazz == String.class){
 					newArray.put(i, (String)list.get(i));
 				}else if(Double.class == clazz){
 					newArray.put(i, (Double)list.get(i));
@@ -353,8 +358,8 @@ public class AdapterCollectionUtils {
 					Date date = (Date) list.get(i);
 					newArray.put(i, date);
 				}else if(byte[].class == clazz){
-					byte[] value = (byte[]) list.get(i);
-					newArray.put(i, value);
+					byte[] byteArray = (byte[]) list.get(i);
+					newArray.put(i, byteArray);
 				}else{
 					throw new IllegalArgumentException("Unknown type: "+clazz);
 				}
