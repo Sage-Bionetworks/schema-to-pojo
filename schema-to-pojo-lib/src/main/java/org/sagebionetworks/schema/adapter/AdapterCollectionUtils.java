@@ -268,9 +268,13 @@ public class AdapterCollectionUtils {
 		Iterator<String> it = object.keys();
 		while(it.hasNext()){
 			String key = it.next();
-			JSONArrayAdapter array = object.getJSONArray(key);
-			List<T> values = AdapterCollectionUtils.readListFromArray(array, clazz);
-			map.put(key, values);
+			if(object.isNull(key)){
+				map.put(key, null);
+			}else{
+				JSONArrayAdapter array = object.getJSONArray(key);
+				List<T> values = AdapterCollectionUtils.readListFromArray(array, clazz);
+				map.put(key, values);
+			}
 		}
 		return map;
 	}
@@ -317,9 +321,14 @@ public class AdapterCollectionUtils {
 	public static <T> void writeToAdapter(JSONObjectAdapter object, Map<String, List<T>> map, Class<? extends T> clazz) throws JSONObjectAdapterException{
 		for(String key: map.keySet()){
 			List<T> values = map.get(key);
-			JSONArrayAdapter array = object.createNewArray();
-			AdapterCollectionUtils.writeToArray(array, values, clazz);
-			object.put(key, array);
+			if(values == null){
+				object.putNull(key);
+			}else{
+				JSONArrayAdapter array = object.createNewArray();
+				AdapterCollectionUtils.writeToArray(array, values, clazz);
+				object.put(key, array);
+			}
+
 		}
 	}
 	
@@ -332,22 +341,24 @@ public class AdapterCollectionUtils {
 	 * @throws JSONObjectAdapterException
 	 */
 	public static <T> void writeToArray(JSONArrayAdapter newArray, List<T> list, Class<? extends T> clazz) throws JSONObjectAdapterException {
-		for(int i=0; i<list.size(); i++){
-			if(clazz == String.class){
-				newArray.put(i, (String)list.get(i));
-			}else if(Double.class == clazz){
-				newArray.put(i, (Double)list.get(i));
-			}else if(Long.class == clazz){
-				newArray.put(i, (Long)list.get(i));
-			}else if(Date.class == clazz){
-				Date date = (Date) list.get(i);
-				newArray.put(i, date);
-			}else if(byte[].class == clazz){
-				byte[] value = (byte[]) list.get(i);
-				newArray.put(i, value);
-			}else{
-				throw new IllegalArgumentException("Unknown type: "+clazz);
-			}
+		if(list != null){
+			for(int i=0; i<list.size(); i++){
+				if(clazz == String.class){
+					newArray.put(i, (String)list.get(i));
+				}else if(Double.class == clazz){
+					newArray.put(i, (Double)list.get(i));
+				}else if(Long.class == clazz){
+					newArray.put(i, (Long)list.get(i));
+				}else if(Date.class == clazz){
+					Date date = (Date) list.get(i);
+					newArray.put(i, date);
+				}else if(byte[].class == clazz){
+					byte[] value = (byte[]) list.get(i);
+					newArray.put(i, value);
+				}else{
+					throw new IllegalArgumentException("Unknown type: "+clazz);
+				}
+			}		
 		}
 	}
 
