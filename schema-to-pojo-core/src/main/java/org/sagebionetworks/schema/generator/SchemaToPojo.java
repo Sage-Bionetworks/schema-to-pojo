@@ -35,7 +35,7 @@ public class SchemaToPojo {
 	 * @throws JSONObjectAdapterException 
 	 * @throws ClassNotFoundException 
 	 */
-	public static void generatePojos(File schemaSource, File outputDir, HandlerFactory factory) throws IOException, JSONObjectAdapterException, ClassNotFoundException{
+	public static void generatePojos(File schemaSource, File outputDir, String createRegister, HandlerFactory factory) throws IOException, JSONObjectAdapterException, ClassNotFoundException{
 		if(schemaSource == null) throw new IllegalArgumentException("schemaSource cannot be null");
 		if(outputDir == null) throw new IllegalArgumentException("outputDir cannot be null");
 		if(factory == null) throw new IllegalArgumentException("The HandlerFactory cannot be null");
@@ -74,6 +74,15 @@ public class SchemaToPojo {
 		// The drive does the recursive work and drives the handlers
 		PojoGeneratorDriver driver = new PojoGeneratorDriver(factory);
 		driver.createAllClasses(codeModel, schemaList);
+		
+	
+		// When provided, create a register for all of the classes in the list.
+		if(createRegister != null){
+			RegisterGenerator regGen = new RegisterGenerator();
+			regGen.createRegister(codeModel, schemaList, createRegister);
+		}
+		
+		
 		// The final step is to generate the classes
 		if(!outputDir.exists()){
 			outputDir.mkdirs();

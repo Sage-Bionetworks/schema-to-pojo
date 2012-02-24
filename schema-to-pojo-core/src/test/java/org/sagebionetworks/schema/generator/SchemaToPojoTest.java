@@ -51,15 +51,22 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory);
 		// Make sure the file exists
 		File result = new File(outputDir, "Product.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
+		
+		// Make sure the register class exists
+		result = new File(outputDir, "org/sample/Register.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
 		// Load the file string
 		String resultString = FileUtil.readToString(result);
 		System.out.println(resultString);
 	}
+
 	@Ignore
 	@Test
 	public void loadAllFiles() throws IOException,
@@ -71,7 +78,7 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory);
 		// Make sure the file exists
 		File result = new File(outputDir, "org/sample/PackageSample.java");
 		System.out.println(result.getAbsolutePath());
@@ -86,6 +93,11 @@ public class SchemaToPojoTest {
 		assertTrue(result.exists());
 		
 		result = new File(outputDir, "org/sample/ValidPets.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		// Make sure the register class exists
+		result = new File(outputDir, "org/sample/Register.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
