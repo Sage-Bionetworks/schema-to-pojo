@@ -5,16 +5,23 @@ import static org.junit.Assert.*;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldRef;
+import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 
 /**
@@ -24,6 +31,21 @@ import com.sun.codemodel.JPackage;
  * 
  */
 public class RegisterGeneratorTest {
+	
+	List<ObjectSchema> list;
+	@Before
+	public void before(){
+		list = new ArrayList<ObjectSchema>();
+		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		schema.setName("one");
+		schema.setId("org.example.One");
+		list.add(schema);
+		
+		schema = new ObjectSchema(TYPE.OBJECT);
+		schema.setName("Two");
+		schema.setId("org.example.Two");
+		list.add(schema);
+	}
 
 	@Test
 	public void testGetClassName() {
@@ -38,25 +60,95 @@ public class RegisterGeneratorTest {
 				.getPackageName("org.sagebionetworks.model.Test");
 		assertEquals("org.sagebionetworks.model", result);
 	}
+	
+	@Test
+	public void testCreateMapRef() throws JClassAlreadyExistsException{
+		JCodeModel codeModel = new JCodeModel();
+		JPackage _package = codeModel._package("org.sample");
+		// Create the enum
+		JDefinedClass testClass = _package._class("Test");
+		JFieldRef mapRef = RegisterGenerator.createMapFieldRef(codeModel, testClass);
+		assertNotNull(mapRef);
+	}
+	
+	/**
+	 * Test
+	 * 
+	 * @throws JClassAlreadyExistsException
+	 */
+	@Test
+	public void testCreateConstructor() throws JClassAlreadyExistsException {
+		JCodeModel codeModel = new JCodeModel();
+		JPackage _package = codeModel._package("org.sample");
+		// Create the enum
+		JDefinedClass testClass = _package._class("Test");
+		JFieldRef mapRef = RegisterGenerator.createMapFieldRef(codeModel, testClass);
+		JMethod method = RegisterGenerator.createConstructor(codeModel, list, testClass, mapRef);
+		assertNotNull(method);
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String methodValue = writer.toString();
+//		System.out.println(methodValue);
+		assertTrue(methodValue.indexOf("public Test() {") >= 0);
+		assertTrue(methodValue.indexOf("this.map = new java.util.HashMap<java.lang.String, java.lang.Class>();") > 0);
+		assertTrue(methodValue.indexOf("this.map.put(org.example.One.class.getName(), org.example.One.class);") > 0);
+		assertTrue(methodValue.indexOf("this.map.put(org.example.Two.class.getName(), org.example.Two.class);") > 0);
+	}
+	
+	/**
+	 * Test
+	 * 
+	 * @throws JClassAlreadyExistsException
+	 */
+	@Test
+	public void testCreateClassForName() throws JClassAlreadyExistsException {
+		JCodeModel codeModel = new JCodeModel();
+		JPackage _package = codeModel._package("org.sample");
+		// Create the enum
+		JDefinedClass testClass = _package._class("Test");
+		JFieldRef mapRef = RegisterGenerator.createMapFieldRef(codeModel, testClass);
+		JMethod method = RegisterGenerator.createClassForName(codeModel, testClass, mapRef);
+		assertNotNull(method);
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String methodValue = writer.toString();
+//		System.out.println(methodValue);
+		assertTrue(methodValue.indexOf("Lookup a class using its full package name.  This works like Class.forName(className), but is GWT compatible.") >= 0);
+		assertTrue(methodValue.indexOf("public java.lang.Class forName(java.lang.String className) {") > 0);
+		assertTrue(methodValue.indexOf("return this.map.get(className);") > 0);
+	}
+	
+	/**
+	 * Test
+	 * 
+	 * @throws JClassAlreadyExistsException
+	 */
+	@Test
+	public void testGetKeySetIterator() throws JClassAlreadyExistsException {
+		JCodeModel codeModel = new JCodeModel();
+		JPackage _package = codeModel._package("org.sample");
+		// Create the enum
+		JDefinedClass testClass = _package._class("Test");
+		JFieldRef mapRef = RegisterGenerator.createMapFieldRef(codeModel, testClass);
+		JMethod method = RegisterGenerator.createKeySetIterator(codeModel, testClass, mapRef);
+		assertNotNull(method);
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String methodValue = writer.toString();
+		System.out.println(methodValue);
+		assertTrue(methodValue.indexOf("Get the key set iterator.") >= 0);
+		assertTrue(methodValue.indexOf("public java.util.Iterator<java.lang.String> getKeySetIterator() {") > 0);
+		assertTrue(methodValue.indexOf("return this.map.keySet().iterator();") > 0);
+	}
 
 	@Test
-	public void testCreateEnum() {
-		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
-		
-		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
-		schema.setName("one");
-		schema.setId("org.example.One");
-		list.add(schema);
-		
-		schema = new ObjectSchema(TYPE.OBJECT);
-		schema.setName("Two");
-		schema.setId("org.example.Two");
-		list.add(schema);
-
+	public void testCreateMap() {
 		RegisterGenerator regGen = new RegisterGenerator();
 		JCodeModel model = new JCodeModel();
-		JDefinedClass def = regGen.createRegister(model, list,
-				"org.example.Register");
+		JDefinedClass def = regGen.createRegister(model, list,	"org.example.Register");
 		assertNotNull(def);
 
 		StringWriter writer = new StringWriter();
@@ -64,33 +156,9 @@ public class RegisterGeneratorTest {
 		def.declare(formatter);
 		String value = writer.toString();
 		System.out.println(writer.toString());
-		assertTrue(value.indexOf("ORG_EXAMPLE_ONE(org.example.One.class),") > 0);
-		assertTrue(value.indexOf("ORG_EXAMPLE_TWO(org.example.Two.class);") > 0);
-		assertTrue(value.indexOf("private java.lang.Class<?> clazz;") > 0);
-		assertTrue(value.indexOf("private Register(java.lang.Class<?> clazz) {") > 0);
-		assertTrue(value.indexOf("public java.lang.Class<?> getRegisteredClass() {") > 0);
+		assertTrue(value.indexOf("Note: This class was auto-generated, and should not be directly modified") > 0);
+		assertTrue(value.indexOf("private java.util.Map<java.lang.String, java.lang.Class> map;") > 0);
 	}
 
-	/**
-	 * Test
-	 * 
-	 * @throws JClassAlreadyExistsException
-	 */
-	@Test
-	public void testCreateStaticLookup() throws JClassAlreadyExistsException {
-		JCodeModel codeModel = new JCodeModel();
-		JPackage _package = codeModel._package("org.sample");
-		// Create the enum
-		JDefinedClass enumClass = _package._enum("Test");
-		JMethod method = RegisterGenerator.createStaticLookup(codeModel, enumClass);
-		assertNotNull(method);
-		StringWriter writer = new StringWriter();
-		JFormatter formatter = new JFormatter(writer);
-		method.declare(formatter);
-		String methodValue = writer.toString();
-		System.out.println(methodValue);
-		assertTrue(methodValue.indexOf("public static org.sample.Test typeForName(java.lang.String fullClassName) {") > 0);
-		assertTrue(methodValue.indexOf("for (org.sample.Test reg: org.sample.Test.values()) {") > 0);
-		assertTrue(methodValue.indexOf("throw new java.lang.IllegalArgumentException((\"No class registered with the name: \"+ fullClassName));") > 0);
-	}
+
 }

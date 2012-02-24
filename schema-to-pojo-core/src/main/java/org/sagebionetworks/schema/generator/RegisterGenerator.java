@@ -1,6 +1,9 @@
 package org.sagebionetworks.schema.generator;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONString;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -15,8 +18,10 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JFieldRef;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JForEach;
+import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
@@ -45,98 +50,114 @@ public class RegisterGenerator {
 		String className = getClassName(registerClass);
 		JPackage _package = codeModel._package(packageName);
 		// Create the enum
-		JDefinedClass enumClass = null;
+		JDefinedClass regClass = null;
 		try {
-			enumClass = _package._enum(className);
+			regClass = _package._class(className);
 		} catch (JClassAlreadyExistsException e) {
-			enumClass = e.getExistingClass();
+			regClass = e.getExistingClass();
 		}
-		// Create an enum constant for each class.
-		createConstants(codeModel, list, enumClass);
+		// This field is the map
+		JFieldRef mapRef = createMapFieldRef(codeModel, regClass);
+		// Create the constructor.  This will build up the map.
+		createConstructor(codeModel, list, regClass, mapRef);
 		
-		// Add the class name field
-		createFieldsConstructorGetter(codeModel, enumClass);
+		// Create the classsForName method
+		createClassForName(codeModel, regClass, mapRef);
 		
-		// Create a static lookup method to lookup the type by classname
-		createStaticLookup(codeModel, enumClass);
+		createKeySetIterator(codeModel, regClass, mapRef);
 		
 		// Add the auto-generated title
 		// Add the comments to the class
-		JDocComment docs = enumClass.javadoc();
+		JDocComment docs = regClass.javadoc();
 		docs.add(AUTO_GENERATED_MESSAGE);
 		docs.add("\n\n");
-		docs.add("This is an enumeration of all of the classes that were auto-generated.  It can be used as a substitute for reflection in GWT client-side code.");
-		return enumClass;
+		docs.add("This is a map of all of the classes that were auto-generated.  It can be used as a substitute for reflection in GWT client-side code.");
+		return regClass;
 	}
 
 	/**
-	 * 
+	 * Create the keyset iterator.
 	 * @param codeModel
-	 * @param enumClass
+	 * @param regClass
+	 * @param mapRef
+	 * @return
 	 */
-	public static JMethod createStaticLookup(JCodeModel codeModel, JDefinedClass enumClass) {
-		JMethod getRegMethod = enumClass.method(JMod.PUBLIC | JMod.STATIC, enumClass, "typeForName");
-		JVar param = getRegMethod.param(String.class, "fullClassName");
-		getRegMethod.javadoc().add("Lookup a Class using its full package name");
-		JBlock body = getRegMethod.body();
-		JForEach loop = body.forEach(enumClass, "reg", enumClass.staticInvoke("values"));
-		JBlock loopBody = loop.body();
-		// If the parameter matches the 
-		JConditional con = loopBody._if(loop.var().ref("clazz").invoke("getName").invoke("equals").arg(param));
-		con._then()._return(loop.var());
-		// If the loop did not find the type then fail
-		body._throw(JExpr._new(codeModel._ref(IllegalArgumentException.class)).arg(JExpr.lit("No class registered with the name: ").plus(param)));
-		return getRegMethod;
+	protected static JMethod createKeySetIterator(JCodeModel codeModel, JDefinedClass regClass, JFieldRef mapRef) {
+		JClass itType = codeModel.ref(Iterator.class).narrow(String.class);
+		JMethod method = regClass.method(JMod.PUBLIC, itType, "getKeySetIterator");
+		method.body()._return(mapRef.invoke("keySet").invoke("iterator"));
+		JDocComment docs = method.javadoc();
+		docs.add("Get the key set iterator.");
+		return method;
 	}
 
 	/**
-	 * Create all fields, the constructor and getters.
+	 * Create the map field and return the references this.map
 	 * @param codeModel
-	 * @param enumClass
+	 * @param regClass
+	 * @return
 	 */
-	public static void createFieldsConstructorGetter(JCodeModel codeModel,
-			JDefinedClass enumClass) {
-		JClass classType = codeModel.ref(Class.class).narrow(codeModel.wildcard());
-		JFieldVar fieldClass = enumClass.field(JMod.PRIVATE, classType, "clazz");
-		
-		// Add the constructor that takes the class
-		JMethod constructor = enumClass.constructor(JMod.PRIVATE);
-		JVar constructorArg = constructor.param(classType, "clazz");
-		constructor.body().assign(JExpr._this().ref(fieldClass), constructorArg);
-		
-		// Add a method to get the class
-		JMethod method = enumClass.method(JMod.PUBLIC, classType, "getRegisteredClass");
-		method.javadoc().add("Get the Class registerd to this type");
-		method.body()._return(JExpr._this().ref(fieldClass));
+	protected static JFieldRef createMapFieldRef(JCodeModel codeModel,JDefinedClass regClass) {
+		JClass fieldType = codeModel.ref(Map.class).narrow(codeModel.ref(String.class), codeModel.ref(Class.class));
+		JFieldVar mapField = regClass.field(JMod.PRIVATE, fieldType, "map");
+		// get the reference to this.map
+		JFieldRef mapRef = JExpr._this().ref(mapField);
+		return mapRef;
 	}
 
 	/**
-	 * For each ObjectSchema create an enum constant.
+	 * Creates the constructor.  Will initialize the map and populate it with each schema class.
 	 * @param codeModel
 	 * @param list
-	 * @param enumClass
+	 * @param regClass
+	 * @return
 	 */
-	public static void createConstants(JCodeModel codeModel, List<ObjectSchema> list,
-			JDefinedClass enumClass) {
-		// Add all of the constants
+	protected static JMethod createConstructor(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, JFieldRef mapRef) {
+		// Create the Constructor
+		JMethod constructor = regClass.constructor(JMod.PUBLIC);
+		JBlock conBody = constructor.body();
+		// This is the hash map
+		JClass hashMap = codeModel.ref(HashMap.class).narrow(codeModel.ref(String.class), codeModel.ref(Class.class));
+
+		conBody.assign(mapRef, JExpr._new(hashMap));
+		// Populate it with the values
 		for(ObjectSchema schema: list){
-			// Add some constants
+			// Add each entry
 			if(schema.getId() == null) throw new IllegalArgumentException("Id cannot be null for an auto-generated Register");
-			// This will be the name of this enum value
-			String enumValue = schema.getId().toUpperCase().replaceAll("\\.", "_");
-			// Create the constant
-			JEnumConstant enumCon = enumClass.enumConstant(enumValue);
-			// The first argument is the full class name
 			JDefinedClass classToRegister = null;
 			try {
 				classToRegister = codeModel._class(schema.getId());
 			} catch (JClassAlreadyExistsException e) {
 				classToRegister = e.getExistingClass();
 			}
-			enumCon.arg(JExpr.dotclass(classToRegister));
+			JFieldRef classDotClass = classToRegister.staticRef("class");
+			
+			JInvocation putInvoke = mapRef.invoke("put");
+			// First arg
+			putInvoke.arg(classDotClass.invoke("getName"));
+			// second arg
+			putInvoke.arg(classDotClass);
+			conBody.add(putInvoke);
 		}
+		return constructor;
 	}
-	
+
+	/**
+	 * 
+	 * @param codeModel
+	 * @param regClass
+	 */
+	public static JMethod createClassForName(JCodeModel codeModel, JDefinedClass regClass, JFieldRef mapRef) {
+		JMethod getRegMethod = regClass.method(JMod.PUBLIC, codeModel.ref(Class.class), "forName");
+		JVar param = getRegMethod.param(String.class, "className");
+		getRegMethod.javadoc().add("Lookup a class using its full package name.  This works like Class.forName(className), but is GWT compatible.");
+		JBlock body = getRegMethod.body();
+		JInvocation getInvoke = mapRef.invoke("get");
+		getInvoke.arg(param);
+		body._return(getInvoke);
+		return getRegMethod;
+	}
+
 	/**
 	 * Extract the class name;
 	 * @param registerClass
