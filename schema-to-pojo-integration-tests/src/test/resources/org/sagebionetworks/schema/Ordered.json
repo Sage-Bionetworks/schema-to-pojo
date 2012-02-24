@@ -1,0 +1,30 @@
+{
+	"name":"Ordered",
+	"properties":{
+		"a0":{
+			"type":"integer",
+			"description":"Product identifier",
+			"required":true,
+		},
+		"a1":{
+			"description":"Name of the product",
+			"type":"string",
+			"required":true
+		},
+		"a2":{
+			"required":true,
+			"type": "number",
+			"minimum":0
+		},
+		"a3":{
+			"type":"array",
+			"items":{
+				"type":"string"
+			}
+		},
+		"a4":{
+			"type":"boolean",
+			"description":"I'm a random boolean prop",
+		},
+    },
+}

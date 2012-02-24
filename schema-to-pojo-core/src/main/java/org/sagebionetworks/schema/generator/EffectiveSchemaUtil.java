@@ -1,5 +1,7 @@
 package org.sagebionetworks.schema.generator;
 
+import java.util.LinkedHashMap;
+
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -44,7 +46,7 @@ public class EffectiveSchemaUtil {
 		// Clear the extends and and implements
 		copy.setExtends(null);
 		copy.setImplements(null);
-		copy.setProperties(schema.getObjectFieldMap());
+		copy.setProperties((LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap());
 		ObjectSchema.recursivelyAddAllExtendsProperties(copy.getProperties(), schema);
 		// Add any properties from the extends.
 		return copy;

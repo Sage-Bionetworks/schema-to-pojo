@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.joda.time.Period;
@@ -73,8 +74,8 @@ public class ObjectSchemaTest {
 			field.set(toTest, "StringValue");
 		}else if(field.getType() == TYPE.class){
 			field.set(toTest, TYPE.STRING);
-		}else if(field.getType() == Map.class){
-			HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
+		}else if(field.getType() == LinkedHashMap.class){
+			LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
 			map.put("somePropertyKey", new ObjectSchema(TYPE.BOOLEAN));
 			field.set(toTest, map);
 		}else if(field.getType() == ObjectSchema.class){

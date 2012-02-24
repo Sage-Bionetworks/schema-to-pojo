@@ -1,8 +1,8 @@
 package org.sagebionetworks.schema;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +88,8 @@ public class ObjectSchema implements JSONEntity {
 	 * Properties are considered unordered, the order of the instance properties
 	 * MAY be in any order.
 	 */
-	private Map<String, ObjectSchema> properties;
+	// We are using linked hash map for predictable iteration order.
+	private LinkedHashMap<String, ObjectSchema> properties;
 	/*
 	 * 5.4. additionalProperties
 	 * 
@@ -100,7 +101,8 @@ public class ObjectSchema implements JSONEntity {
 	 * default value is an empty schema which allows any value for additional
 	 * properties.
 	 */
-	private Map<String, ObjectSchema> additionalProperties;
+	// We are using linked hash map for predictable iteration order.
+	private LinkedHashMap<String, ObjectSchema> additionalProperties;
 	/*
 	 * 5.5. items
 	 * 
@@ -572,12 +574,17 @@ public class ObjectSchema implements JSONEntity {
 	 */
 	public void putProperty(String key, ObjectSchema property) {
 		if (properties == null) {
-			properties = new HashMap<String, ObjectSchema>();
+			// We want predictable iteration order so we are using linked HashMaps
+			properties = new LinkedHashMap<String, ObjectSchema>();
 		}
 		properties.put(key, property);
 	}
 
-	public void setProperties(Map<String, ObjectSchema> properties) {
+	/**
+	 * Set the primary properties.
+	 * @param properties
+	 */
+	public void setProperties(LinkedHashMap<String, ObjectSchema> properties) {
 		this.properties = properties;
 	}
 
@@ -613,13 +620,17 @@ public class ObjectSchema implements JSONEntity {
 	 */
 	public void putAdditionalProperty(String key, ObjectSchema property) {
 		if (additionalProperties == null) {
-			additionalProperties = new HashMap<String, ObjectSchema>();
+			// Using linked HashMaps for predictable iteration order.
+			additionalProperties = new LinkedHashMap<String, ObjectSchema>();
 		}
 		additionalProperties.put(key, property);
 	}
 
-	public void setAdditionalProperties(
-			Map<String, ObjectSchema> additionalProperties) {
+	/**
+	 * Set the additional properties.
+	 * @param additionalProperties
+	 */
+	public void setAdditionalProperties(LinkedHashMap<String, ObjectSchema> additionalProperties) {
 		this.additionalProperties = additionalProperties;
 	}
 
@@ -1948,7 +1959,8 @@ public class ObjectSchema implements JSONEntity {
 	 * @return
 	 */
 	public Map<String, ObjectSchema> getObjectFieldMap() {
-		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
+		// Using linked hash maps for predicatable iteration order.
+		LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
 		// First add all of the properties from the interfaces.
 		recursivelyAddAllInterfaceProperties(map, this);
 		// Now add all of the properties from this object.
@@ -2027,9 +2039,10 @@ public class ObjectSchema implements JSONEntity {
 	 * @return
 	 * @throws JSONObjectAdapterException
 	 */
-	private static Map<String, ObjectSchema> createMapFromAdapter(
+	private static LinkedHashMap<String, ObjectSchema> createMapFromAdapter(
 			JSONObjectAdapter in) throws JSONObjectAdapterException {
-		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
+		// Again, using linked hash map for predicatble iteration order.
+		LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
 		Iterator it = in.keys();
 		while (it.hasNext()) {
 			String key = (String) it.next();

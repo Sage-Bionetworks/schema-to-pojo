@@ -3,6 +3,7 @@ package org.sagebionetworks.schema.generator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -254,8 +255,8 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static Map<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
-		HashMap<String, ObjectSchema> newMap = new HashMap<String, ObjectSchema>();
+	protected static LinkedHashMap<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
+		LinkedHashMap<String, ObjectSchema> newMap = new LinkedHashMap<String, ObjectSchema>();
 		Iterator<String> it = toCheck.keySet().iterator();
 		while(it.hasNext()){
 			String key = it.next();

@@ -169,4 +169,21 @@ public class ObjectSchemaUnitTest {
 		assertEquals("", packageName);
 	}
 	
+	@Test
+	public void testIterationOrder(){
+		ObjectSchema schema = new ObjectSchema();
+		schema.setName("SampleClass");
+		schema.putProperty("0", new ObjectSchema(TYPE.STRING));
+		schema.putProperty("1", new ObjectSchema(TYPE.STRING));
+		schema.putProperty("2", new ObjectSchema(TYPE.STRING));
+		// Iterate over the properties
+		Iterator<String> keyIt =schema.getProperties().keySet().iterator();
+		int index = 0;
+		while(keyIt.hasNext()){
+			int key = Integer.parseInt(keyIt.next());
+			assertEquals("The iteration order of the schema must be consistent with the order they are added.",index, key);
+			index++;
+		}
+	}
+	
 }
