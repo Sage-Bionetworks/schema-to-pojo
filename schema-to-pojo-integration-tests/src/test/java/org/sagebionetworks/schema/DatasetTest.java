@@ -83,7 +83,7 @@ public class DatasetTest {
 		System.out.println(json);
 		
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		Dataset secondDataset = new Dataset(adapter);
 		assertEquals(dSet, secondDataset);
 	}

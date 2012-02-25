@@ -105,7 +105,7 @@ public class EffectiveSchemaUtilTest {
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(compositeSchema);
 		assertNotNull(effective);
 		// Create a clone from the json
-		ObjectSchema clone = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(json));
+		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(json));
 		assertNotNull(clone);
 		assertEquals(effective, clone);
 	}

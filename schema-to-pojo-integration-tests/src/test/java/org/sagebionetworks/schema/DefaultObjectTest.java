@@ -152,7 +152,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify the clone has the default value for stringWithDefault
@@ -183,7 +183,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify clone has the defined value for stringWithDefault
@@ -214,7 +214,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify the clone has the default value for double with default
@@ -246,7 +246,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify clone has the defined value for double with default
@@ -279,7 +279,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify the clone has the default value for integer with default
@@ -313,7 +313,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify clone has the defined value for int with default
@@ -344,7 +344,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify the clone has the default value for boolean with default
@@ -375,7 +375,7 @@ public class DefaultObjectTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		DefaultObject clone = new DefaultObject(adapter);
 		
 		//now verify clone has the defined value for boolean with default

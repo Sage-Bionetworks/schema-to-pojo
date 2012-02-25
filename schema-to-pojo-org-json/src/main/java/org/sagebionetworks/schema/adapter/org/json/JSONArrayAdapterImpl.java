@@ -18,7 +18,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  * @author John
  * 
  */
-public class JSONArrayAdapterImpl implements JSONArrayAdapter {
+public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArrayAdapter {
 
 	protected JSONArray wrapped;
 
@@ -30,8 +30,12 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 		wrapped = array;
 	}
 	
-	public JSONArrayAdapterImpl(String jsonString) throws JSONException{
-		wrapped = new JSONArray(jsonString);
+	public JSONArrayAdapterImpl(String jsonString) throws JSONObjectAdapterException {
+		try {
+			wrapped = new JSONArray(jsonString);
+		} catch (JSONException e) {
+			throw new JSONObjectAdapterException(e);
+		}
 	}
 
 	@Override
@@ -123,21 +127,6 @@ public class JSONArrayAdapterImpl implements JSONArrayAdapter {
 	@Override
 	public String toJSONString() {
 		return wrapped.toString();
-	}
-
-	@Override
-	public JSONObjectAdapter createNew() {
-		return new JSONObjectAdapterImpl();
-	}
-
-	@Override
-	public JSONArrayAdapter createNewArray() {
-		return new JSONArrayAdapterImpl();
-	}
-	
-	@Override
-	public JSONObjectAdapter createNew(String json) throws JSONObjectAdapterException {
-		return JSONObjectAdapterImpl.createAdapterFromJSONString(json);
 	}
 
 	@Override

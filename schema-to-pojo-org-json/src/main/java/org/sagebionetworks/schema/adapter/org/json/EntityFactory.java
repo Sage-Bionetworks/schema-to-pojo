@@ -61,7 +61,7 @@ public class EntityFactory {
 		if(jsonString == null) throw new IllegalArgumentException("JSON string cannot be null");
 		if(clazz == null) throw new IllegalArgumentException("JSONEntity class cannot be null");
 		// First create an adapter with the datat
-		JSONObjectAdapter adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(jsonString);
+		JSONObjectAdapter adapter = new JSONObjectAdapterImpl(jsonString);
 		return createEntityFromAdapter(clazz, adapter); 
 	}
 	

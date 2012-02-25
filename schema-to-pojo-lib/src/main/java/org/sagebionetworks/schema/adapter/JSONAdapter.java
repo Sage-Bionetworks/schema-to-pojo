@@ -4,27 +4,13 @@ import java.util.Date;
 
 import org.sagebionetworks.schema.FORMAT;
 
-public interface JSONAdapter {
-	
-	/**
-	 * Create a new Object.
-	 * @return
-	 */
-	public JSONObjectAdapter createNew();
-	
-	/**
-	 * Create a new Adapter using the passed JSON String
-	 * @param json
-	 * @return
-	 * @throws JSONObjectAdapterException 
-	 */
-	public JSONObjectAdapter createNew(String json) throws JSONObjectAdapterException;
-	
-	/**
-	 * Create a new array.
-	 * @return
-	 */
-	public JSONArrayAdapter createNewArray();
+/**
+ * Abstraction for all adapters.
+ * Adapters must also act as adapter factories
+ * @author John
+ *
+ */
+public interface JSONAdapter extends AdapterFactory {
 	
 	/**
 	 * Write this object to its JSON string.

@@ -34,7 +34,7 @@ public class AllTypesTest {
 		String json = adapter.toJSONString();
 		System.out.println(json);
 		// Now make the round trip
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(json);
+		adapter = new JSONObjectAdapterImpl(json);
 		AllTypes clone = new AllTypes(adapter);
 		assertEquals(allTypes, clone);
 		// Try equals both ways

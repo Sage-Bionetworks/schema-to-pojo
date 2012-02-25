@@ -78,9 +78,6 @@ public class RegisterGenerator {
 		
 		// the new instance method
 		createNewInstanceMethod(codeModel, classList, regClass, mapRef);
-		
-//		// Create the classsForName method
-//		createClassForName(codeModel, regClass, mapRef);
 
 		createKeySetIterator(codeModel, regClass, mapRef);
 		
@@ -150,6 +147,7 @@ public class RegisterGenerator {
 		jSwitch._default().body()._throw(newIllegalState);
 		
 		JDocComment comment = method.javadoc();
+		comment.add("Create a new instance of an auto-generated concrete class using the full class name.");
 		comment.addParam(parm).add("The full class name of the class to get a new instance of.");
 		comment.addReturn().add("New instance of the given class.");
 		comment.addThrows(IllegalArgumentException.class).add("For unknown class names");

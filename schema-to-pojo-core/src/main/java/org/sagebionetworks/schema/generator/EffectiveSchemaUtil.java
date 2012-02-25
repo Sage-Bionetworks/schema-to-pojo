@@ -41,7 +41,7 @@ public class EffectiveSchemaUtil {
 		if(schema == null) throw new IllegalArgumentException("Schema cannot be null");
 		// First make a copy of the schema
 		JSONObjectAdapter adapter = schema.writeToJSONObject(new JSONObjectAdapterImpl());;
-		adapter = JSONObjectAdapterImpl.createAdapterFromJSONString(adapter.toJSONString());
+		adapter = new JSONObjectAdapterImpl(adapter.toJSONString());
 		ObjectSchema copy = new ObjectSchema(adapter);
 		// Clear the extends and and implements
 		copy.setExtends(null);

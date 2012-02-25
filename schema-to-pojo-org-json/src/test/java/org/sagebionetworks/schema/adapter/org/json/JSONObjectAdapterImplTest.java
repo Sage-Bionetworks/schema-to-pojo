@@ -207,7 +207,7 @@ public class JSONObjectAdapterImplTest {
 
 	@Test
 	public void testNullInput() throws JSONObjectAdapterException{
-		adapter =  JSONObjectAdapterImpl.createAdapterFromJSONString("{\"name\":\"testAnonymousGet\",\"annotations\":null,\"id\":null,}");
+		adapter =  new  JSONObjectAdapterImpl("{\"name\":\"testAnonymousGet\",\"annotations\":null,\"id\":null,}");
 		assertTrue(adapter.has("name"));
 		assertFalse(adapter.isNull("name"));
 		

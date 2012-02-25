@@ -23,7 +23,7 @@ import com.google.gwt.json.client.JSONValue;
  * @author John
  *
  */
-public class JSONArrayGwt implements JSONArrayAdapter {
+public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter {
 	
 	protected JSONArray wrapped;
 
@@ -96,23 +96,6 @@ public class JSONArrayGwt implements JSONArrayAdapter {
 			throws JSONObjectAdapterException {
 		// The utility will do the value validation.
 		return new JSONObjectGwt(JSONValueUtil.getJSONObjectValue(wrapped.get(index), index));
-	}
-
-	@Override
-	public JSONObjectAdapter createNew() {
-		return new JSONObjectGwt(new JSONObject());
-	}
-	
-	@Override
-	public JSONObjectAdapter createNew(String json)
-			throws JSONObjectAdapterException {
-		JSONValue value = JSONParser.parseStrict(json);
-		return new JSONObjectGwt(value.isObject());
-	}
-
-	@Override
-	public JSONArrayAdapter createNewArray() {
-		return new JSONArrayGwt(new JSONArray());
 	}
 
 	@Override

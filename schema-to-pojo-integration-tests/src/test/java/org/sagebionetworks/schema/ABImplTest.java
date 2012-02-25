@@ -46,7 +46,7 @@ public class ABImplTest {
 		
 		JSONAdapter adapter = a.writeToJSONObject(new JSONObjectAdapterImpl());
 		
-		ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(a.getJSONSchema()));
+		ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(a.getJSONSchema()));
 	}
 	
 	@Test
@@ -78,7 +78,7 @@ public class ABImplTest {
 		String json = impl.getJSONSchema();
 		System.out.println(json);
 		assertNotNull(json);
-		ObjectSchema schema = new ObjectSchema(JSONObjectAdapterImpl.createAdapterFromJSONString(json));
+		ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(json));
 		assertNotNull(schema);
 		assertNotNull(schema.getProperties());
 		assertNotNull(schema.getProperties().get("alsoFromInterfaceA"));

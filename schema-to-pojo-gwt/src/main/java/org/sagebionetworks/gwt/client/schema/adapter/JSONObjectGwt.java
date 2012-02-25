@@ -26,14 +26,9 @@ import com.google.gwt.regexp.shared.RegExp;
  * @author John
  *
  */
-public class JSONObjectGwt implements JSONObjectAdapter {
+public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapter {
 	
 	protected JSONObject wrapped = null;
-
-	@Override
-	public JSONObjectAdapter createNew() {
-		return createNewAdapter();
-	}
 	
 	public JSONObjectGwt() {
 		this(new JSONObject());
@@ -49,11 +44,6 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 	 */
 	public static JSONObjectAdapter createNewAdapter(){
 		return new JSONObjectGwt(new JSONObject());
-	}
-
-	@Override
-	public JSONArrayAdapter createNewArray() {
-		return new JSONArrayGwt(new JSONArray());
 	}
 	
 	@Override
@@ -223,13 +213,6 @@ public class JSONObjectGwt implements JSONObjectAdapter {
 	@Override
 	public Date convertStringToDate(FORMAT format, String toFormat) {
 		return DateUtils.convertStringToDate(format, toFormat);
-	}
-
-	@Override
-	public JSONObjectAdapter createNew(String json)
-			throws JSONObjectAdapterException {
-		JSONValue value = JSONParser.parseStrict(json);
-		return new JSONObjectGwt(value.isObject());
 	}
 
 	/**
