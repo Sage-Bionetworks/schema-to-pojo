@@ -1,15 +1,19 @@
 package org.sagebionetworks.schema.generator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONString;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 
 import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JCase;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -18,6 +22,7 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldRef;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JForEach;
@@ -25,6 +30,8 @@ import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
+import com.sun.codemodel.JSwitch;
+import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 
 /**
@@ -44,7 +51,7 @@ public class RegisterGenerator {
 	 * @param registerClass
 	 * @throws JClassAlreadyExistsException 
 	 */
-	public JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, String registerClass) {
+	public static JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, String registerClass) {
 		// Create the enumeration
 		String packageName = getPackageName(registerClass);
 		String className = getClassName(registerClass);
@@ -56,22 +63,35 @@ public class RegisterGenerator {
 		} catch (JClassAlreadyExistsException e) {
 			regClass = e.getExistingClass();
 		}
+		
+		// Only concrete class are added
+		List<ObjectSchema> classList = new ArrayList<ObjectSchema>();
+		for(ObjectSchema schema: list){
+			if(isConcreteClass(schema)){
+				classList.add(schema);
+			}
+		}
 		// This field is the map
 		JFieldRef mapRef = createMapFieldRef(codeModel, regClass);
 		// Create the constructor.  This will build up the map.
-		createConstructor(codeModel, list, regClass, mapRef);
+		createConstructor(codeModel, classList, regClass, mapRef);
 		
-		// Create the classsForName method
-		createClassForName(codeModel, regClass, mapRef);
+		// the new instance method
+		createNewInstanceMethod(codeModel, classList, regClass, mapRef);
 		
+//		// Create the classsForName method
+//		createClassForName(codeModel, regClass, mapRef);
+
 		createKeySetIterator(codeModel, regClass, mapRef);
 		
 		// Add the auto-generated title
 		// Add the comments to the class
 		JDocComment docs = regClass.javadoc();
 		docs.add(AUTO_GENERATED_MESSAGE);
-		docs.add("\n\n");
-		docs.add("This is a map of all of the classes that were auto-generated.  It can be used as a substitute for reflection in GWT client-side code.");
+		docs.add("\n");
+		docs.add("\nThis class provides an alternative to reflection which is not allowed in GWT clients.");
+		docs.add("\nThe newInstance(String) method can be used to create new instances of any auto-generated");
+		docs.add("\nconcrete class.");
 		return regClass;
 	}
 
@@ -88,6 +108,53 @@ public class RegisterGenerator {
 		method.body()._return(mapRef.invoke("keySet").invoke("iterator"));
 		JDocComment docs = method.javadoc();
 		docs.add("Get the key set iterator.");
+		docs.addReturn();
+		return method;
+	}
+	
+	/**
+	 * Create the new instance method.
+	 * @param codeModel
+	 * @param regClass
+	 * @param mapRef
+	 * @param list
+	 * @return
+	 */
+	protected static JMethod createNewInstanceMethod(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, JFieldRef mapRef){
+		// Create the new instance method
+		JType returnType = codeModel.ref(JSONEntity.class);
+		JMethod method = regClass.method(JMod.PUBLIC, returnType, "newInstance");
+		JVar parm = method.param(codeModel.ref(String.class), "className");
+		JBlock body = method.body();
+		// First lookup the index for the class
+		JInvocation callMapGet = mapRef.invoke("get");
+		callMapGet.arg(parm);
+		JVar intObject = body.decl(codeModel.ref(Integer.class), "intObject", callMapGet);
+		JInvocation newIllegal = JExpr._new(codeModel.ref(IllegalArgumentException.class));
+		newIllegal.arg(JExpr.lit("Cannot create new instance. Unknown class: ").plus(parm));
+		// If the index is null then throw an IllegalArgumentException 
+		body._if(intObject.eq(JExpr._null()))._then()._throw(newIllegal);
+		// Create the index
+		Integer g = new Integer(12);
+		JVar index =body.decl(codeModel.INT, "index", intObject.invoke("intValue"));
+		JSwitch jSwitch = body._switch(index);
+		for(int i=0; i<list.size(); i++){
+			ObjectSchema schema = list.get(i);
+			JCase jCase = jSwitch._case(JExpr.lit(i));
+			JDefinedClass classToRegister = getJDefinedClassForSchema(codeModel, schema);
+			jCase.body()._return(JExpr._new(classToRegister));
+		}
+		JInvocation newIllegalState = JExpr._new(codeModel.ref(IllegalStateException.class));
+		newIllegalState.arg(JExpr.lit("No match found for index: ").plus(index).plus(JExpr.lit(" for class name: ")).plus(parm));
+		// This should not occur
+		jSwitch._default().body()._throw(newIllegalState);
+		
+		JDocComment comment = method.javadoc();
+		comment.addParam(parm).add("The full class name of the class to get a new instance of.");
+		comment.addReturn().add("New instance of the given class.");
+		comment.addThrows(IllegalArgumentException.class).add("For unknown class names");
+
+		
 		return method;
 	}
 
@@ -98,11 +165,24 @@ public class RegisterGenerator {
 	 * @return
 	 */
 	protected static JFieldRef createMapFieldRef(JCodeModel codeModel,JDefinedClass regClass) {
-		JClass fieldType = codeModel.ref(Map.class).narrow(codeModel.ref(String.class), codeModel.ref(Class.class));
+		JClass fieldType = codeModel.ref(Map.class).narrow(codeModel.ref(String.class), codeModel.ref(Integer.class));
 		JFieldVar mapField = regClass.field(JMod.PRIVATE, fieldType, "map");
 		// get the reference to this.map
 		JFieldRef mapRef = JExpr._this().ref(mapField);
 		return mapRef;
+	}
+	
+	/**
+	 * Is this a schema of a concrete class?
+	 * @param schema
+	 * @return
+	 */
+	protected static boolean isConcreteClass(ObjectSchema schema){
+		// First is it an object
+		if(TYPE.OBJECT != schema.getType()) return false;
+		if(schema.getEnum() != null) return false;
+		if(schema.getId() == null) return false;
+		return true;
 	}
 
 	/**
@@ -117,29 +197,36 @@ public class RegisterGenerator {
 		JMethod constructor = regClass.constructor(JMod.PUBLIC);
 		JBlock conBody = constructor.body();
 		// This is the hash map
-		JClass hashMap = codeModel.ref(HashMap.class).narrow(codeModel.ref(String.class), codeModel.ref(Class.class));
+		JClass hashMap = codeModel.ref(HashMap.class).narrow(codeModel.ref(String.class), codeModel.ref(Integer.class));
 
 		conBody.assign(mapRef, JExpr._new(hashMap));
 		// Populate it with the values
-		for(ObjectSchema schema: list){
+		for(int i=0; i<list.size(); i++){
+			ObjectSchema schema = list.get(i);
 			// Add each entry
-			if(schema.getId() == null) throw new IllegalArgumentException("Id cannot be null for an auto-generated Register");
-			JDefinedClass classToRegister = null;
-			try {
-				classToRegister = codeModel._class(schema.getId());
-			} catch (JClassAlreadyExistsException e) {
-				classToRegister = e.getExistingClass();
-			}
+			JDefinedClass classToRegister = getJDefinedClassForSchema(codeModel, schema);
 			JFieldRef classDotClass = classToRegister.staticRef("class");
 			
 			JInvocation putInvoke = mapRef.invoke("put");
 			// First arg
 			putInvoke.arg(classDotClass.invoke("getName"));
 			// second arg
-			putInvoke.arg(classDotClass);
+			putInvoke.arg(JExpr.lit(i));
 			conBody.add(putInvoke);
 		}
 		return constructor;
+	}
+
+	public static JDefinedClass getJDefinedClassForSchema(JCodeModel codeModel,
+			ObjectSchema schema) {
+		if(schema.getId() == null) throw new IllegalArgumentException("Id cannot be null for an auto-generated Register");
+		JDefinedClass classToRegister = null;
+		try {
+			classToRegister = codeModel._class(schema.getId());
+		} catch (JClassAlreadyExistsException e) {
+			classToRegister = e.getExistingClass();
+		}
+		return classToRegister;
 	}
 
 	/**

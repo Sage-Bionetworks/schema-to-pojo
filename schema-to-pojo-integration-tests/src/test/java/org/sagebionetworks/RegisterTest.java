@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Iterator;
 
 import org.junit.Test;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 
 /**
  * Test that the register is auto-generated.
@@ -20,9 +21,9 @@ public class RegisterTest {
 		Iterator<String> keyIt = reg.getKeySetIterator();
 		while(keyIt.hasNext()){
 			String fullClassName = keyIt.next();
-			Class clazz = reg.forName(fullClassName);
-			assertNotNull(clazz);
-			assertEquals(clazz.getName(), fullClassName);
+			JSONEntity newInstance = reg.newInstance(fullClassName);
+			assertNotNull(newInstance);
+			assertEquals(newInstance.getClass().getName(), fullClassName);
 		}
 	}
 }
