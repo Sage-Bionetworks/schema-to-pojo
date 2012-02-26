@@ -32,12 +32,13 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 		if(!classType.isInterface()){
 			// Create a field if this is not an interface
 			field = classType.field(JMod.PRIVATE, propertyType, propertyName);
+			// If there is a title then add it to the feild
+			if(propertySchema.getTitle() != null){
+				JDocComment doc = field.javadoc();
+				doc.add(propertySchema.getTitle());
+			}
 		}
-		// If there is a title then add it to the feild
-		if(propertySchema.getTitle() != null){
-			JDocComment doc = field.javadoc();
-			doc.add(propertySchema.getTitle());
-		}
+
 		// Create the getter and setter
 		createGetter(propertySchema, classType, propertyName, propertyType, field);
 		createSetter(propertySchema, classType, propertyName, propertyType, field);

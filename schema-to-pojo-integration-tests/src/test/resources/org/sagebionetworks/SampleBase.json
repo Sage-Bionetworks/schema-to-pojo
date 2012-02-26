@@ -2,7 +2,8 @@
     "type":"object",
     "properties":{
         "fromBase":{
-            "type":"string"
+            "type":"string",
+            "title":"title",
         }
     }
 }

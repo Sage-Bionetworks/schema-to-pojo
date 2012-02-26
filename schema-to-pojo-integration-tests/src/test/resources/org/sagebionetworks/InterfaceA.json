@@ -2,7 +2,8 @@
     "type":"interface",
     "properties":{
         "fromInterfaceA":{
-            "type":"string"
+            "type":"string",
+            "title":"From Interface A",
         },
         "alsoFromInterfaceA":{
             "type":"number"
