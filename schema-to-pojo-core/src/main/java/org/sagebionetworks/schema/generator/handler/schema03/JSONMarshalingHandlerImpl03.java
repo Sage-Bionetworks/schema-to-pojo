@@ -233,7 +233,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				loop.update(i.incr());
 				JBlock loopBody = loop.body();
 				loopBody.add(field.invoke("add").arg(
-						createExpresssionToGetFromArray(jsonArray, arrayType,
+						createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema,
 								arrayTypeClass, i)));
 			} else {
 				JClass typeClass = (JClass) field.type();
@@ -282,6 +282,18 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		FORMAT format = propertySchema.getFormat();
 		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
+		return convertStringAsNeeded(model, adapter, format, stringFromAdapter);
+	}
+
+	/**
+	 * If the string needst to be converted then do so.
+	 * @param model
+	 * @param adapter
+	 * @param format
+	 * @param stringFromAdapter
+	 * @return
+	 */
+	public JExpression convertStringAsNeeded(JCodeModel model, JVar adapter, FORMAT format, JExpression stringFromAdapter) {
 		if(format == null || format == FORMAT.URI){
 			// Null format is treated as a simple string.
 			return stringFromAdapter;
@@ -323,7 +335,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @param propertySchema
 	 * @param block
 	 */
-	protected JExpression assignPropertyToJSONString(JCodeModel model, JVar adapter, String propName, ObjectSchema propertySchema, JFieldVar field) {
+	protected JExpression assignPropertyToJSONString(JCodeModel model, JVar adapter, ObjectSchema propertySchema, JExpression field) {
 		// The format determines how to treat a string.
 		FORMAT format = propertySchema.getFormat();
 //		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
@@ -345,9 +357,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 	}
 	
-	protected JExpression createExpresssionToGetFromArray(JVar jsonArray, TYPE arrayType, JClass arrayTypeClass ,JVar index){
+	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JVar index){
+		TYPE arrayType = arrayTypeSchema.getType();
+		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//check if our array type is an enum
-		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String")){
+		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String") && arrayTypeClass instanceof JDefinedClass){
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
@@ -357,8 +371,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			}
 		}
 		
-		if(arrayType.isPrimitive() || TYPE.STRING == arrayType){
+		if(arrayType.isPrimitive()){
 			return jsonArray.invoke(arrayType.getMethodName()).arg(index);
+		}else if(TYPE.STRING == arrayType){
+			JExpression stringExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
+			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		}else{
@@ -448,7 +465,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				}else{
 					// This is just a string
 					valueToPut = assignPropertyToJSONString(
-							classType.owner(), param, propName, propSchema, field);
+							classType.owner(), param, propSchema, field);
 				}
 				thenBlock.add(param.invoke("put").arg(field.name())
 						.arg(valueToPut));
@@ -489,7 +506,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				loopBody.add(array
 						.invoke("put")
 						.arg(index)
-						.arg(createExpresssionToSetFromArray(arrayType,
+						.arg(createExpresssionToSetFromArray(arrayTypeSchema,
 								arrayTypeClass, it, param)));
 				loopBody.directStatement("index++;");
 				// Now set the new array
@@ -516,9 +533,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 	}
 	
-	protected JExpression createExpresssionToSetFromArray(TYPE arrayType, JClass arrayTypeClass, JVar iterator, JVar param){
+	protected JExpression createExpresssionToSetFromArray(ObjectSchema arrayTypeSchema, JClass arrayTypeClass, JVar iterator, JVar param){
+		TYPE arrayType = arrayTypeSchema.getType();
+		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//need to determine if we are dealing with an array of enumerations
-		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String")){
+		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String") && arrayTypeClass instanceof JDefinedClass){
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
@@ -526,8 +545,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			}
 		}
 		
-		if(arrayType.isPrimitive() || TYPE.STRING == arrayType){
+		if(arrayType.isPrimitive()){
 			return iterator.invoke("next");
+		}if(TYPE.STRING == arrayType){
+			JExpression stringValue = iterator.invoke("next");
+			return assignPropertyToJSONString(arrayTypeClass.owner(), param, arrayTypeSchema, stringValue); 
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		}else{

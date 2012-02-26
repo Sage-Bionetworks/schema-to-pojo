@@ -4,13 +4,13 @@
  	<parent>
  		<artifactId>schema-to-pojo</artifactId>
  		<groupId>org.sagebionetworks</groupId>
- 		<version>0.1.19</version>
+ 		<version>0.1.20</version>
  	</parent>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-maven-plugin</artifactId>
 	<name>schema-to-pojo-maven-plugin</name>
 	<packaging>maven-plugin</packaging>
-	<version>0.1.19</version>
+	<version>0.1.20</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

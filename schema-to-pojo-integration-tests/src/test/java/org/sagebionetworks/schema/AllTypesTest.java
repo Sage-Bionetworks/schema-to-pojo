@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+
 import org.junit.Test;
 import org.sagebionetworks.AllTypes;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -27,7 +29,16 @@ public class AllTypesTest {
 		allTypes.setSetOfStrings(new HashSet<String>());
 		assertNotNull(allTypes.getSetOfStrings());
 		allTypes.getSetOfStrings().add("set value");
-		
+		// Date list
+		List<Date> dateList = new ArrayList();
+		dateList.add(new Date(System.currentTimeMillis()));
+		dateList.add(new Date(System.currentTimeMillis()+2324));
+		allTypes.setDateList(dateList);
+		// Date 2
+		dateList = new ArrayList();
+		dateList.add(new Date(System.currentTimeMillis()-23234));
+		dateList.add(new Date(System.currentTimeMillis()-1232));
+		allTypes.setDateList2(dateList);
 		// Now create a clone by going to JSON
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		allTypes.writeToJSONObject(adapter);
