@@ -13,8 +13,8 @@
             "type" : "string",
             "format" : "date"
         },
-        "stringAsUtcMillisec" : {
-            "type" : "string",
+        "longAsUtcMillisec" : {
+            "type" : "integer",
             "format" : "utc-millisec"
         }
     }

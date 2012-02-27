@@ -1,7 +1,9 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +25,7 @@ public class AllTypesTest {
 		allTypes.setDoubleProp(123.4);
 		allTypes.setBooleanProp(true);
 		allTypes.setStringAsDate(new Date());
+		allTypes.setLongAsDate(new Date(System.currentTimeMillis()));
 		allTypes.setListOfStrings(new ArrayList<String>());
 		assertNotNull(allTypes.getListOfStrings());
 		allTypes.getListOfStrings().add("list value");
@@ -39,6 +42,15 @@ public class AllTypesTest {
 		dateList.add(new Date(System.currentTimeMillis()-23234));
 		dateList.add(new Date(System.currentTimeMillis()-1232));
 		allTypes.setDateList2(dateList);
+		
+		allTypes.setLongAsDate(new Date(System.currentTimeMillis()));
+		// Long list
+		allTypes.setLongList(new ArrayList<Long>());
+		allTypes.getLongList().add(new Long(99));
+		// Double List
+		allTypes.setDoubleList(new ArrayList<Double>());
+		allTypes.getDoubleList().add(new Double(99.77));
+	
 		// Now create a clone by going to JSON
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		allTypes.writeToJSONObject(adapter);

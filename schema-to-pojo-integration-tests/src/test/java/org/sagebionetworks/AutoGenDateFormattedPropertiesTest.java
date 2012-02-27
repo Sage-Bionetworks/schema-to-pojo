@@ -28,7 +28,7 @@ public class AutoGenDateFormattedPropertiesTest {
 		// Set a time
 		dfp.setStringAsTime(ISODateTimeFormat.time().parseDateTime(dateStrings[2]).toDate());
 		// Set a UTC
-		dfp.setStringAsUtcMillisec(ISODateTimeFormat.dateTime().parseDateTime(dateStrings[3]).toDate());
+		dfp.setLongAsUtcMillisec(ISODateTimeFormat.dateTime().parseDateTime(dateStrings[3]).toDate());
 		
 		// Now write this to JSON
 		// Now make sure we can go to JSON and back

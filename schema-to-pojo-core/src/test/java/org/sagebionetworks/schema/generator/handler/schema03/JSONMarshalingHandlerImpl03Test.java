@@ -310,23 +310,6 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
-	public void testAssignJSONStringToPropertyUTCMill(){
-		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STRING);
-		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
-		String propName = "dateName";
-		// Create an adapter
-		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
-		// add the parameter
-		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
-		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
-		String methodString = generateToString(rhs);
-//		System.out.println(methodString);
-		assertEquals("new java.util.Date(java.lang.Long.parseLong(adapter.getString(\"dateName\")))", methodString);
-	}
-	
-	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringFormateDateTime() throws JClassAlreadyExistsException {
 		// Add add a string property
 		ObjectSchema propertySchema = new ObjectSchema();
@@ -353,6 +336,32 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("return adapter;") > 0);
 	}
 	
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectLongFormatedUtcMilisecs() throws JClassAlreadyExistsException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.INTEGER);
+		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
+		String propName = "dateName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		assertNotNull(method);
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+//		System.out.println(declareToString(sampleClass));
+		System.out.println(methodString);
+		// It should check to see if the property exits in the adapter
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateName\")) {") > 0);
+		// This should convert from a string to a date.
+		assertTrue(methodString.indexOf("dateName = new java.util.Date(adapter.getLong(\"dateName\"));") > 0);
+		// It should also have an else that sets it to null
+		assertTrue(methodString.indexOf("} else {") > 0);
+		assertTrue(methodString.indexOf("dateName = null;") > 0);
+		assertTrue(methodString.indexOf("return adapter;") > 0);
+	}
 	
 	
 	@Test
@@ -660,24 +669,6 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
-	public void testAssignPropertyToJSONStringUTCMil(){
-		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STRING);
-		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
-		String propName = "dateName";
-		// Create an adapter
-		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
-		// add the parameter
-		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
-		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JFieldVar field = sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		JExpression rhs = handler.assignPropertyToJSONString(codeModel, adapter, propertySchema, field);
-		String methodString = generateToString(rhs);
-//		System.out.println(methodString);
-		assertEquals("java.lang.Long.toString(dateName.getTime())", methodString);
-	}
-	
-	@Test
 	public void testAssignPropertyToJSONStringURI(){
 		ObjectSchema propertySchema = new ObjectSchema();
 		propertySchema.setType(TYPE.STRING);
@@ -757,6 +748,26 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Is the primitive assigned correctly?
 		assertFalse(methodString.indexOf("if (longName!= null) {") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"longName\", longName);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectLongFormatedUTC() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.INTEGER);
+		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
+		String propName = "dateName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(method);;
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertFalse(methodString.indexOf("if (longName!= null) {") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"dateName\", dateName.getTime());") > 0);
 	}
 	
 	@Test
@@ -872,6 +883,97 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("array.put(index, adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), it.next()));") > 0);
 		assertTrue(methodString.indexOf("index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", array);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectArrayDateUTCMilisec() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "arrayDates";
+		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		arrayTypeSchema.setType(TYPE.INTEGER);
+		arrayTypeSchema.setFormat(FORMAT.UTC_MILLISEC);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		
+//		printClassToConsole(sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("if (arrayDates!= null) {") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> it = arrayDates.iterator();") > 0);
+		assertTrue(methodString.indexOf("int index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(index, it.next().getTime());") > 0);
+		assertTrue(methodString.indexOf("index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", array);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectArrayLong() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "longList";
+		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		arrayTypeSchema.setType(TYPE.INTEGER);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		
+//		printClassToConsole(sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("if (longList!= null) {") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Long> it = longList.iterator();") > 0);
+		assertTrue(methodString.indexOf("int index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
+		assertTrue(methodString.indexOf("index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"longList\", array);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectArrayDouble() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "doubleList";
+		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		arrayTypeSchema.setType(TYPE.NUMBER);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		
+//		printClassToConsole(sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("if (doubleList!= null) {") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Double> it = doubleList.iterator();") > 0);
+		assertTrue(methodString.indexOf("int index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
+		assertTrue(methodString.indexOf("index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"doubleList\", array);") > 0);
 	}
 	
 	@Test
@@ -1089,7 +1191,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-		System.out.println(methodString);
+//		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
 		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
@@ -1098,6 +1200,111 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
 		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
 		assertTrue(methodString.indexOf("dateList.add(adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), jsonArray.getString(i)));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromLongList() throws Exception {
+		//make a property that has default set with a string
+		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchema();
+		arrayType.setType(TYPE.INTEGER);
+		propertySchema.setType(TYPE.ARRAY);
+		propertySchema.setItems(arrayType);
+		String propName = "longList";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+		
+		// It check to see if the "if statement got generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"longList\")) {") > 0);
+		//check that assignment statement got generated
+		assertTrue(methodString.indexOf("longList = new java.util.ArrayList<java.lang.Long>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"longList\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("longList.add(jsonArray.getLong(i));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromDoubleList() throws Exception {
+		//make a property that has default set with a string
+		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchema();
+		arrayType.setType(TYPE.NUMBER);
+		propertySchema.setType(TYPE.ARRAY);
+		propertySchema.setItems(arrayType);
+		String propName = "doubleList";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+		
+		// It check to see if the "if statement got generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"doubleList\")) {") > 0);
+		//check that assignment statement got generated
+		assertTrue(methodString.indexOf("doubleList = new java.util.ArrayList<java.lang.Double>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"doubleList\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("doubleList.add(jsonArray.getDouble(i));") > 0);
+	}
+	@Test
+	public void testCreateMethodInitializeFromJSONDateListUtcMilisec() throws Exception {
+		//make a property that has default set with a string
+		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema dateType = new ObjectSchema();
+		dateType.setType(TYPE.INTEGER);
+		dateType.setFormat(FORMAT.UTC_MILLISEC);
+		propertySchema.setType(TYPE.ARRAY);
+		propertySchema.setItems(dateType);
+		String propName = "dateList";
+		
+		//add property to schema
+		schema.putProperty(propName, propertySchema);
+		
+		// put field in sampleClass
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
+		
+		//create the method
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		
+		assertNotNull(method);
+		
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+		
+		// It check to see if the "if statement got generated
+		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
+		//check that assignment statement got generated
+		assertTrue(methodString.indexOf("dateList = new java.util.ArrayList<java.util.Date>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
+		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
+		assertTrue(methodString.indexOf("dateList.add(new java.util.Date(jsonArray.getLong(i)));") > 0);
 	}
 	/**
 	 * Tests that initializeFromJSONObject works for properties 

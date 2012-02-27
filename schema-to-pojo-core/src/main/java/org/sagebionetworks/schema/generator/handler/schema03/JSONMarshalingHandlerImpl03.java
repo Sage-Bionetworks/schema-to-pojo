@@ -303,9 +303,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// These are all date formats
 				// Use the adapter to adapter to convert from a string to a date
 				return adapter.invoke("convertStringToDate").arg(model.ref(FORMAT.class).staticInvoke("valueOf").arg(format.name())).arg(stringFromAdapter);
-			}else if(format == FORMAT.UTC_MILLISEC){
+			}else {
+				throw new IllegalArgumentException("Unsupporetd format: "+format);
+			}
+		}
+	}
+	
+	public JExpression convertLongAsNeeded(JCodeModel model, JVar adapter, FORMAT format, JExpression value) {
+		if(format == null ){
+			// Null format is treated as a simple long.
+			return value;
+		}else{
+			// Each format is handled separately.
+			if(format == FORMAT.UTC_MILLISEC){
 				// Create a new date from the UTC string
-				return JExpr._new(model.ref(Date.class)).arg(model.ref(Long.class).staticInvoke("parseLong").arg(stringFromAdapter));
+				return JExpr._new(model.ref(Date.class)).arg(value);
 			}else {
 				throw new IllegalArgumentException("Unsupporetd format: "+format);
 			}
@@ -348,9 +360,23 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// These are all date formats
 				// Use the adapter to adapter to convert from a string to a date
 				return adapter.invoke("convertDateToString").arg(model.ref(FORMAT.class).staticInvoke("valueOf").arg(format.name())).arg(field);
-			}else if(format == FORMAT.UTC_MILLISEC){
-				// Create a new date from the UTC string
-				return model.ref(Long.class).staticInvoke("toString").arg(field.invoke("getTime"));
+			}else{
+				throw new IllegalArgumentException("Unsupporetd format: "+format);
+			}
+		}
+	}
+	
+	protected JExpression assignPropertyToJSONLong(JCodeModel model, ObjectSchema propertySchema, JExpression field) {
+		// The format determines how to treat a string.
+		FORMAT format = propertySchema.getFormat();
+		if(format == null ){
+			// Null format is treated as a simple string.
+			return field;
+		}else{
+			// Each format is handled separately.
+			if(format == FORMAT.UTC_MILLISEC){
+				// Use the long to create a date
+				return field.invoke("getTime");
 			}else{
 				throw new IllegalArgumentException("Unsupporetd format: "+format);
 			}
@@ -371,8 +397,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			}
 		}
 		
-		if(arrayType.isPrimitive()){
+		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
 			return jsonArray.invoke(arrayType.getMethodName()).arg(index);
+		}else if(TYPE.INTEGER == arrayType){
+			JExpression longExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
+			return convertLongAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, longExper);
 		}else if(TYPE.STRING == arrayType){
 			JExpression stringExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
 			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
@@ -445,9 +474,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				throw new IllegalArgumentException("Property: '" + propSchema
 						+ "' has a null TYPE on class: " + classType.name());
 			TYPE type = propSchema.getType();
+			FORMAT format = propSchema.getFormat();
 
 			// Primitives are easy, just assign them
-			if (field.type().isPrimitive()) {
+			if (field.type().isPrimitive() && format == null) {
 				body.add(param.invoke("put").arg(field.name()).arg(field));
 				continue;
 			}
@@ -469,7 +499,12 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				}
 				thenBlock.add(param.invoke("put").arg(field.name())
 						.arg(valueToPut));
-			}else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
+			}else if (TYPE.INTEGER == type) {
+				// Integers can be dates or longs
+				JExpression expr = assignPropertyToJSONLong(classType.owner(), propSchema, field);
+				// Basic assign
+				thenBlock.add(param.invoke("put").arg(field.name()).arg(expr));
+			} else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type) {
 				JClass typeClass = (JClass) field.type();
 				// Basic assign
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(field));
@@ -545,11 +580,14 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			}
 		}
 		
-		if(arrayType.isPrimitive()){
+		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
 			return iterator.invoke("next");
 		}if(TYPE.STRING == arrayType){
 			JExpression stringValue = iterator.invoke("next");
 			return assignPropertyToJSONString(arrayTypeClass.owner(), param, arrayTypeSchema, stringValue); 
+		}else if(TYPE.INTEGER == arrayType){
+			JExpression value = iterator.invoke("next");
+			return assignPropertyToJSONLong(arrayTypeClass.owner(), arrayTypeSchema, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		}else{

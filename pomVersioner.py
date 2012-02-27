@@ -4,8 +4,8 @@ Walk the complete PLFM hierarchy and bring all the pom.xml files up to new minor
 '''
 
 #Old and new minor versions
-oldVersion = '0.1.19'
-newVersion = '0.1.20'
+oldVersion = '0.1.20'
+newVersion = '0.1.21'
 #Path to PLFM on your system
 startPath = 'C:\\sage\\workspace\\\jstp'
 for root, subFolders, files in os.walk(startPath):    

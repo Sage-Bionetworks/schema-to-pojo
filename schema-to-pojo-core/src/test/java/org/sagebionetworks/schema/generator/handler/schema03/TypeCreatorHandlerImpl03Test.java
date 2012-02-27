@@ -190,18 +190,6 @@ public class TypeCreatorHandlerImpl03Test {
 		assertEquals(codeModel._ref(Date.class), clazz);
 	}
 	
-	@Test
-	public void testStringFormatedUTC_MILLISEC() throws ClassNotFoundException{
-		// String formated as date
-		schema.setType(TYPE.STRING);
-		schema.setFormat(FORMAT.UTC_MILLISEC);
-		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
-		// Create the class
-		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null);
-		assertNotNull(clazz);
-		assertEquals(codeModel._ref(Date.class), clazz);
-	}
-	
 	
 	@Test
 	public void testIntegerFormatedDateTime() throws ClassNotFoundException{
@@ -242,7 +230,7 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test
 	public void testIntegerFormatedUTC_MILLISEC() throws ClassNotFoundException{
 		// String formated as date
-		schema.setType(TYPE.STRING);
+		schema.setType(TYPE.INTEGER);
 		schema.setFormat(FORMAT.UTC_MILLISEC);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
