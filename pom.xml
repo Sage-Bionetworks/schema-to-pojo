@@ -72,7 +72,31 @@
 						</execution>
 					</executions>
 				</plugin>
-
+				<!-- Tell the eclipse m2e pluing to -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.sagebionetworks</groupId>
+										<artifactId>schema-to-pojo-maven-plugin</artifactId>
+										<versionRange>[0,)</versionRange>
+										<goals>
+											<goal>generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
 				<!-- Build number generator -->
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
