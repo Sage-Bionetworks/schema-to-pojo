@@ -3,7 +3,7 @@
   <parent>
     <artifactId>schema-to-pojo</artifactId>
     <groupId>org.sagebionetworks</groupId>
-    <version>0.1.21</version>
+    <version>0.1.3-SNAPSHOT</version>
   </parent>
   <groupId>org.sagebionetworks</groupId>
   <artifactId>schema-to-pojo-core</artifactId>
