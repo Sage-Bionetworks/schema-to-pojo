@@ -1,0 +1,9 @@
+{
+    "type":"interface",
+    "properties":{
+        "fromInterface":{
+            "type":"string",
+            "title":"This is defined in the interface",
+        }
+    }
+}

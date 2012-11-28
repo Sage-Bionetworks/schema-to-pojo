@@ -280,6 +280,37 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
+	public void testInterfaceField() throws JSONObjectAdapterException, ClassNotFoundException {
+		// Create an object with nesting
+		ObjectSchema inter = new ObjectSchema();
+		inter.setName("SomeInterface");
+		inter.setType(TYPE.INTERFACE);
+		inter.setId("SomeInterface");
+		
+		ObjectSchema root = new ObjectSchema();
+		root.setName("Root");
+		root.setId(new String("root"));
+		root.setType(TYPE.OBJECT);
+
+		// Create a child class
+		ObjectSchema child = new ObjectSchema();
+		String childId = new String("child");
+		child.setName("Child");
+		child.setId(childId);
+		child.setType(TYPE.OBJECT);
+		child.setRef(inter.getId());
+		root.putProperty("interfaceField", child);
+
+		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
+		list.add(inter);
+		list.add(root);
+//		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+//		List<ObjectSchema> schemaList = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
+		JCodeModel codeModel = new JCodeModel();
+		driver.createAllClasses(codeModel, list);
+	}
+	
+	@Test
 	public void testCycle() throws JSONObjectAdapterException {
 		// Create an object with nesting
 		ObjectSchema root = new ObjectSchema();

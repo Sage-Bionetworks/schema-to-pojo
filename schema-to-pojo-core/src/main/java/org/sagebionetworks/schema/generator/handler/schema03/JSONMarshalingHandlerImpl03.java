@@ -1,6 +1,5 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import java.awt.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -33,7 +32,6 @@ import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JPrimitiveType;
 import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
@@ -41,7 +39,7 @@ import com.sun.codemodel.JWhileLoop;
 public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
 	@Override
-	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType) {
+	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, JDefinedClass createRegister) {
 		// There is nothing to do for interfaces.
 		if(TYPE.INTERFACE == classSchema.getType()){
 			throw new IllegalArgumentException("Cannot add marshaling to an interface");
@@ -51,7 +49,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		createGetJSONSchemaMethod(classSchema, classType);
 	
 		// Create the init method
-		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType);
+		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, createRegister);
 		// setup a constructor.
 		createConstructor(classSchema, classType, initMethod);
 		
@@ -121,9 +119,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * 
 	 * @param classSchema
 	 * @param classType
+	 * @param createRegister 
 	 * @return
 	 */
-	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType) {
+	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType, JDefinedClass createRegister) {
 		// Now the method that takes a JSONObjectAdapter.
 		JMethod method = createBaseMethod(classSchema, classType, "initializeFromJSONObject");
 		JVar param = method.params().get(0);
@@ -236,11 +235,20 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 						createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema,
 								arrayTypeClass, i)));
 			} else {
-				JClass typeClass = (JClass) field.type();
-				thenBlock.assign(
-						field,
-						JExpr._new(typeClass).arg(
-								param.invoke("getJSONObject").arg(propName)));
+				// First extract the type
+//				thenBlock
+				// If we have a register then we need to use it
+				if(createRegister == null){
+					JClass typeClass = (JClass) field.type();
+					thenBlock.assign(
+							field,
+							JExpr._new(typeClass).arg(
+									param.invoke("getJSONObject").arg(propName)));
+				}else{
+					// Use the register to create the class
+					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(param.invoke("getString").arg("entityType"))));
+					thenBlock.add(field.invoke("initializeFromJSONObject").arg(param.invoke("getJSONObject").arg(propName)));
+				}
 			}
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired() && propSchema.getDefault() == null) {
@@ -457,6 +465,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JMethod method = createBaseMethod(classSchema, classType, "writeToJSONObject");
 		JVar param = method.params().get(0);
 		JBlock body = method.body();
+		// Add the object type.
+		this.getClass().getName();
+		body.add(param.invoke("put").arg("entityType").arg(JExpr._this().invoke("getClass").invoke("getName")));
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
 		Iterator<String> keyIt = fieldMap.keySet().iterator();
@@ -641,5 +652,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					+ propSchema.getDefault() + " as it is not a supported type");
 		}
 		return propShouldBe;
+	}
+
+	public JMethod createMethodInitializeFromJSONObject(ObjectSchema schema, JDefinedClass sampleClass) {
+		return createMethodInitializeFromJSONObject(schema, sampleClass, null);
 	}
 }

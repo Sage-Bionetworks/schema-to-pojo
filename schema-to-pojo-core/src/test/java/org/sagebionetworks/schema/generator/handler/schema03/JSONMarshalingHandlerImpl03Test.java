@@ -20,6 +20,7 @@ import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
+import org.sagebionetworks.schema.generator.RegisterGenerator;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -42,6 +43,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	JPackage _package;
 	JDefinedClass sampleClass;
 	JDefinedClass sampleInterface;
+	JDefinedClass registerClass;
 	JType type;
 	ObjectSchema schema;
 	ObjectSchema schemaInterface;
@@ -60,6 +62,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schemaInterface = new ObjectSchema();
 		schemaInterface.setType(TYPE.INTERFACE);
 		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
+		registerClass = RegisterGenerator.createClassFromFullName(codeModel, "org.sample.Register");
 	}
 
 	@Test
@@ -455,9 +458,28 @@ public class JSONMarshalingHandlerImpl03Test {
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-//		System.out.println(constructorString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(\"propName\"));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectObjectPropertyWithReg() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = schema;
+		String propName = "propName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// this time we provide a register.
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("propName = ((Sample) org.sample.Register.singleton().newInstance(adapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(adapter.getJSONObject(\"propName\"));") > 0);
 	}
 	
 	@Test
@@ -588,11 +610,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertNotNull(method);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
 		assertTrue(methodString.indexOf("if (stringName!= null) {") > 0);
 		// It should directly set the value
 		assertTrue(methodString.indexOf("adapter.put(\"stringName\", stringName);") > 0);
 		assertTrue(methodString.indexOf("return adapter;") > 0);
+		// Validate that the entity is written
+		assertTrue(methodString.indexOf("adapter.put(\"entityType\", this.getClass().getName());") > 0);
 	}
 	
 	@Test
@@ -1016,7 +1041,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
-//		printClassToConsole(sampleClass);
+		printClassToConsole(sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
@@ -1052,7 +1077,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		ObjectSchema interfaceSchema = new ObjectSchema();
 		interfaceSchema.setType(TYPE.INTERFACE);
 		interfaceSchema.setName("SampleInterface");
-		handler.addJSONMarshaling(interfaceSchema, sampleInterface);
+		handler.addJSONMarshaling(interfaceSchema, sampleInterface, null);
 	}
 	
 	@Test
