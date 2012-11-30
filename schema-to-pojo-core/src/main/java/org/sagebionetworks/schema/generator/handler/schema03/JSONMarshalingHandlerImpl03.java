@@ -233,22 +233,25 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JBlock loopBody = loop.body();
 				loopBody.add(field.invoke("add").arg(
 						createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema,
-								arrayTypeClass, i)));
+								arrayTypeClass, i, createRegister)));
 			} else {
 				// First extract the type
-//				thenBlock
 				// If we have a register then we need to use it
-				if(createRegister == null){
-					JClass typeClass = (JClass) field.type();
+				JClass typeClass = (JClass) field.type();
+				if(typeClass.isInterface() || typeClass.isAbstract()){
+					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					// Use the register to create the class
+					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(param.invoke("getString").arg("entityType"))));
+					thenBlock.add(field.invoke("initializeFromJSONObject").arg(param.invoke("getJSONObject").arg(propName)));
+
+				}else{
+					// We can just create a new type for this object.
 					thenBlock.assign(
 							field,
 							JExpr._new(typeClass).arg(
 									param.invoke("getJSONObject").arg(propName)));
-				}else{
-					// Use the register to create the class
-					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(param.invoke("getString").arg("entityType"))));
-					thenBlock.add(field.invoke("initializeFromJSONObject").arg(param.invoke("getJSONObject").arg(propName)));
 				}
+
 			}
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired() && propSchema.getDefault() == null) {
@@ -391,7 +394,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 	}
 	
-	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JVar index){
+	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JVar index, JDefinedClass createRegister){
 		TYPE arrayType = arrayTypeSchema.getType();
 		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//check if our array type is an enum
@@ -416,8 +419,16 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		}else{
-			// Now we need to create an object of the the type
-			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
+			// For an interface or abstract class we need to use the register to create it from the entity type.
+			if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
+				if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+				// Use the register to create the class
+				return JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(jsonArray.invoke("getJSONObject").arg(index).invoke("getString").arg("entityType")).invoke("initializeFromJSONObject").arg(jsonArray.invoke("getJSONObject").arg(index)));
+			}else{
+				// Now we need to create an object of the the type
+				return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
+			}
+
 		}
 	}
 	

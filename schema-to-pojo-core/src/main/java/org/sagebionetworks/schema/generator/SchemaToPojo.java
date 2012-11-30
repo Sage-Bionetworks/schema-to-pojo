@@ -87,8 +87,7 @@ public class SchemaToPojo {
 	
 		// When provided, create a register for all of the classes in the list.
 		if(createRegister != null){
-			RegisterGenerator regGen = new RegisterGenerator();
-			regGen.createRegister(codeModel, schemaList, registerClass);
+			RegisterGenerator.createRegister(codeModel, schemaList, registerClass);
 		}
 		
 		

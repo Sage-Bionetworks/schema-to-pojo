@@ -307,7 +307,8 @@ public class PojoGeneratorDriverTest {
 //		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 //		List<ObjectSchema> schemaList = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 		JCodeModel codeModel = new JCodeModel();
-		driver.createAllClasses(codeModel, list);
+		JDefinedClass register = RegisterGenerator.createClassFromFullName(codeModel, "org.example.Register");
+		driver.createAllClasses(codeModel, list, register);
 	}
 	
 	@Test

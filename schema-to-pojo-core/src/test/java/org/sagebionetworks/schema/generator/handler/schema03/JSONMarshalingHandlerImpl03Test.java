@@ -464,7 +464,26 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
-	public void testCreateMethodInitializeFromJSONObjectObjectPropertyWithReg() throws JClassAlreadyExistsException, ClassNotFoundException {
+	public void testCreateMethodInitializeFromJSONObjectInterface() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = schema;
+		String propName = "propName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, sampleInterface, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// this time we provide a register.
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(adapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(adapter.getJSONObject(\"propName\"));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectConcreteClass() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Set the property type to be the same as the object
 		ObjectSchema propertySchema = schema;
 		String propName = "propName";
@@ -478,8 +497,29 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = ((Sample) org.sample.Register.singleton().newInstance(adapter.getString(\"entityType\")));") > 0);
-		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(adapter.getJSONObject(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(\"propName\"));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectArrayWithReg() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.ARRAY);
+		String propName = "arrayName";
+		ObjectSchema arrayTypeSchema = schema;
+		arrayTypeSchema.setType(TYPE.INTERFACE);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleInterface), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// this time we provide a register.
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("arrayName.add(((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(jsonArray.getJSONObject(i).getString(\"entityType\")).initializeFromJSONObject(jsonArray.getJSONObject(i))));") > 0);
 	}
 	
 	@Test

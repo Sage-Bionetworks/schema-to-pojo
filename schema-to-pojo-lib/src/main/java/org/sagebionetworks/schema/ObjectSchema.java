@@ -59,6 +59,11 @@ public class ObjectSchema implements JSONEntity {
 	public static final String SELF_REFERENCE = "#";
 	public static final String JSON_DEFAULT = "default";
 	public static final String JSON_LINKS = "links";
+	
+	/**
+	 * This is a string property that all objects have by default.
+	 */
+	public static final String ENTITY_TYPE = "entityType";
 
 	/*
 	 * The name of this object.
