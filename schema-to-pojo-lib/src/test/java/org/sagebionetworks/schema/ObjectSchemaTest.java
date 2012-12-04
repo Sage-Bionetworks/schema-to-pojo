@@ -10,7 +10,7 @@ public class ObjectSchemaTest {
 		ObjectSchema schema  = new ObjectSchema(TYPE.OBJECT);
 		ObjectSchema propSchema = new ObjectSchema(TYPE.STRING);
 		// The entityType property can (and must be a string).
-		schema.putProperty(ObjectSchema.ENTITY_TYPE, propSchema);
+		schema.putProperty(ObjectSchema.CONCRETE_TYPE, propSchema);
 	}
 
 	@Test (expected=IllegalArgumentException.class)
@@ -19,6 +19,6 @@ public class ObjectSchemaTest {
 		ObjectSchema schema  = new ObjectSchema(TYPE.OBJECT);
 		ObjectSchema propSchema = new ObjectSchema(TYPE.ARRAY);
 		// The entityType property can (and must be a string).
-		schema.putProperty(ObjectSchema.ENTITY_TYPE, propSchema);
+		schema.putProperty(ObjectSchema.CONCRETE_TYPE, propSchema);
 	}
 }

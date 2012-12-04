@@ -9,7 +9,7 @@
         "fromTwo":{
             "type":"string"
         },
-        "entityType":{
+        "concreteType":{
             "type":"string"
         }
     }

@@ -297,17 +297,17 @@ public class PropertyHandlerImpl03Test {
 	}
 	
 	@Test
-	public void testEntityType(){
+	public void testConcreteType(){
 		// Now handle the 
 		PropertyHandler handler = new PropertyHandlerImpl03();
 		// Make this property required
-		JFieldVar field = handler.createProperty(schema, sampleClass, ObjectSchema.ENTITY_TYPE, type);
+		JFieldVar field = handler.createProperty(schema, sampleClass, ObjectSchema.CONCRETE_TYPE, type);
 		StringWriter writer = new StringWriter();
 		JFormatter formatter = new JFormatter(writer);
 		sampleClass.declare(formatter);
 		String classString = writer.toString();
 		System.out.println(classString);
-		 assertTrue(classString.indexOf("private java.lang.String entityType = org.sample.Sample.class.getName();") > 0);
+		 assertTrue(classString.indexOf("private java.lang.String concreteType = org.sample.Sample.class.getName();") > 0);
 	}
 	
 }

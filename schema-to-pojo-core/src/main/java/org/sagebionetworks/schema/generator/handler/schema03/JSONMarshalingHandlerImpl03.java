@@ -237,7 +237,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// first get the JSONObject for this array element
 					JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), "indexAdapter", jsonArray.invoke("getJSONObject").arg(i));
 					// Create the object from the register
-					JVar indexObject = loopBody.decl(arrayTypeClass, "indexObject", JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(indexAdapter.invoke("getString").arg(ObjectSchema.ENTITY_TYPE))));
+					JVar indexObject = loopBody.decl(arrayTypeClass, "indexObject", JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					// Initialize the object from the adapter.
 					loopBody.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
 					// add the object to the list
@@ -257,7 +257,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize an interfaces or abstract classes.");
 					// Use the register to create the class
 					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), "localAdapter", param.invoke("getJSONObject").arg(propName));
-					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(localAdapter.invoke("getString").arg("entityType"))));
+					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(localAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					thenBlock.add(field.invoke("initializeFromJSONObject").arg(localAdapter));
 
 				}else{

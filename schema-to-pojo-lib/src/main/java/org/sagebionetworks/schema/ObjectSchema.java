@@ -61,9 +61,12 @@ public class ObjectSchema implements JSONEntity {
 	public static final String JSON_LINKS = "links";
 	
 	/**
-	 * This is a string property that all objects have by default.
+	 * For the case where a POJO's fields types are an interfaces or abstract class,
+	 * we need to know the type of the concrete class used at runtime, to support parsing
+	 * these POJOs from JSON.  To support such abstractions the 'concreteType' property
+	 * is used to capture the concrete type used.
 	 */
-	public static final String ENTITY_TYPE = "entityType";
+	public static final String CONCRETE_TYPE = "concreteType";
 
 	/*
 	 * The name of this object.
@@ -584,9 +587,9 @@ public class ObjectSchema implements JSONEntity {
 			// We want predictable iteration order so we are using linked HashMaps
 			properties = new LinkedHashMap<String, ObjectSchema>();
 		}
-		if(ENTITY_TYPE.equals(key)){
+		if(CONCRETE_TYPE.equals(key)){
 			if(!TYPE.STRING.equals(property.getType())){
-				throw new IllegalArgumentException("The property key: "+ENTITY_TYPE+" is reserved and must be of TYPE.STRING if included.");
+				throw new IllegalArgumentException("The property key: "+CONCRETE_TYPE+" is reserved and must be of TYPE.STRING if included.");
 			}
 		}
 		properties.put(key, property);

@@ -479,7 +479,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter localAdapter = adapter.getJSONObject(\"propName\");") > 0);
-		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(localAdapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(localAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(localAdapter);") > 0);
 	}
 	
@@ -521,7 +521,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter indexAdapter = jsonArray.getJSONObject(i);") > 0);
-		assertTrue(methodString.indexOf("org.sample.SampleInterface indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(indexAdapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("org.sample.SampleInterface indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(indexAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("indexObject.initializeFromJSONObject(indexAdapter);") > 0);
 		assertTrue(methodString.indexOf("arrayName.add(indexObject);") > 0);
 	}
