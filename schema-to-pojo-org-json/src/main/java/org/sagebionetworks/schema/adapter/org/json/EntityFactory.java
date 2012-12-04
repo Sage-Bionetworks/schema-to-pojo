@@ -1,6 +1,7 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
 import org.json.JSONObject;
+import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -93,7 +94,15 @@ public class EntityFactory {
 	private static <T extends JSONEntity> T createEntityFromAdapter(Class<? extends T> clazz, JSONObjectAdapter adapter) throws JSONObjectAdapterException {
 		// Now create a new instance of the class
 		try {
-			T newInstance = clazz.newInstance();
+			T newInstance = null;
+			if(clazz.isInterface()){
+				// we need to determine the concrete type
+				String concreteType = adapter.getString(ObjectSchema.CONCRETE_TYPE);
+				// Use the concrete type to instanciate the object.
+				newInstance = (T)Class.forName(concreteType).newInstance();
+			}else{
+				newInstance = clazz.newInstance();
+			}
 			newInstance.initializeFromJSONObject(adapter);
 			return newInstance;
 		} catch (Exception e) {

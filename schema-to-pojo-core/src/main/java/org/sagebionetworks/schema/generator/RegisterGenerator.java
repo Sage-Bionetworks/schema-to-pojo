@@ -51,19 +51,8 @@ public class RegisterGenerator {
 	 * @param registerClass
 	 * @throws JClassAlreadyExistsException 
 	 */
-	public static JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, String registerClass) {
-		// Create the enumeration
-		String packageName = getPackageName(registerClass);
-		String className = getClassName(registerClass);
-		JPackage _package = codeModel._package(packageName);
-		// Create the enum
-		JDefinedClass regClass = null;
-		try {
-			regClass = _package._class(className);
-		} catch (JClassAlreadyExistsException e) {
-			regClass = e.getExistingClass();
-		}
-		
+	public static JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass) {
+	
 		// Only concrete class are added
 		List<ObjectSchema> classList = new ArrayList<ObjectSchema>();
 		for(ObjectSchema schema: list){
@@ -81,6 +70,9 @@ public class RegisterGenerator {
 
 		createKeySetIterator(codeModel, regClass, mapRef);
 		
+		// Create the singleton
+		createSingleton(codeModel, regClass);
+		
 		// Add the auto-generated title
 		// Add the comments to the class
 		JDocComment docs = regClass.javadoc();
@@ -89,6 +81,26 @@ public class RegisterGenerator {
 		docs.add("\nThis class provides an alternative to reflection which is not allowed in GWT clients.");
 		docs.add("\nThe newInstance(String) method can be used to create new instances of any auto-generated");
 		docs.add("\nconcrete class.");
+		return regClass;
+	}
+
+	/**
+	 * @param codeModel
+	 * @param registerClass
+	 * @return
+	 */
+	public static JDefinedClass createClassFromFullName(JCodeModel codeModel,
+			String registerClass) {
+		String packageName = getPackageName(registerClass);
+		String className = getClassName(registerClass);
+		JPackage _package = codeModel._package(packageName);
+		// Create the enum
+		JDefinedClass regClass = null;
+		try {
+			regClass = _package._class(className);
+		} catch (JClassAlreadyExistsException e) {
+			regClass = e.getExistingClass();
+		}
 		return regClass;
 	}
 
@@ -213,6 +225,23 @@ public class RegisterGenerator {
 			conBody.add(putInvoke);
 		}
 		return constructor;
+	}
+	
+	/**
+	 * Creates the singleton.
+	 * @param codeModel
+	 * @param list
+	 * @param regClass
+	 * @return
+	 */
+	protected static void createSingleton(JCodeModel codeModel, JDefinedClass regClass) {
+		// Create the Constructor
+		JFieldVar singletonField = regClass.field(JMod.PRIVATE | JMod.STATIC | JMod.FINAL, regClass, "SINGLETON", JExpr._new(regClass));
+
+		JMethod method = regClass.method(JMod.PUBLIC | JMod.STATIC, regClass, "singleton");
+		method.javadoc().add("The singleton of this register.");
+		method.body()._return(singletonField);
+
 	}
 
 	public static JDefinedClass getJDefinedClassForSchema(JCodeModel codeModel,

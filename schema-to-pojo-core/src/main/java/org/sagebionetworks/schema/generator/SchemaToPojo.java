@@ -14,7 +14,9 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
+import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
 
 /**
  * Generates DTO type POJOs from JSON schema files.
@@ -71,15 +73,21 @@ public class SchemaToPojo {
 		}
 		// JCodeModel is used as the document model for the classes.
 		JCodeModel codeModel = new JCodeModel();
+		
+		// Create the register class if it is provided
+		JDefinedClass registerClass = null;
+		if(createRegister != null){
+			registerClass = RegisterGenerator.createClassFromFullName(codeModel, createRegister);
+		}
+		
 		// The drive does the recursive work and drives the handlers
 		PojoGeneratorDriver driver = new PojoGeneratorDriver(factory);
-		driver.createAllClasses(codeModel, schemaList);
+		driver.createAllClasses(codeModel, schemaList, registerClass);
 		
 	
 		// When provided, create a register for all of the classes in the list.
 		if(createRegister != null){
-			RegisterGenerator regGen = new RegisterGenerator();
-			regGen.createRegister(codeModel, schemaList, createRegister);
+			RegisterGenerator.createRegister(codeModel, schemaList, registerClass);
 		}
 		
 		
