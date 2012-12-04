@@ -478,8 +478,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(adapter.getString(\"entityType\")));") > 0);
-		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(adapter.getJSONObject(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter localAdapter = adapter.getJSONObject(\"propName\");") > 0);
+		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(localAdapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(localAdapter);") > 0);
 	}
 	
 	@Test
@@ -519,7 +520,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("arrayName.add(((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(jsonArray.getJSONObject(i).getString(\"entityType\")).initializeFromJSONObject(jsonArray.getJSONObject(i))));") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter indexAdapter = jsonArray.getJSONObject(i);") > 0);
+		assertTrue(methodString.indexOf("org.sample.SampleInterface indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(indexAdapter.getString(\"entityType\")));") > 0);
+		assertTrue(methodString.indexOf("indexObject.initializeFromJSONObject(indexAdapter);") > 0);
+		assertTrue(methodString.indexOf("arrayName.add(indexObject);") > 0);
 	}
 	
 	@Test
@@ -634,30 +638,6 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
 		assertTrue(methodString.indexOf("catch (java.lang.IllegalArgumentException _x)") > 0);
 		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"'enumName' must be one of the following: 'A', 'B'.\")") > 0);
-	}
-	
-	@Test
-	public void testWriteToJSONObjectStringProperty() throws JClassAlreadyExistsException {
-		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STRING);
-		String propName = "stringName";
-		schema.putProperty(propName, propertySchema);
-		// Make sure this field exits
-		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
-		assertNotNull(method);
-		// Now get the string and check it.
-		String methodString = declareToString(method);
-		System.out.println(methodString);
-		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (stringName!= null) {") > 0);
-		// It should directly set the value
-		assertTrue(methodString.indexOf("adapter.put(\"stringName\", stringName);") > 0);
-		assertTrue(methodString.indexOf("return adapter;") > 0);
-		// Validate that the entity is written
-		assertTrue(methodString.indexOf("adapter.put(\"entityType\", this.getClass().getName());") > 0);
 	}
 	
 	@Test

@@ -31,7 +31,12 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 		JFieldVar field = null;
 		if(!classType.isInterface()){
 			// Create a field if this is not an interface
-			field = classType.field(JMod.PRIVATE, propertyType, propertyName);
+			if(ObjectSchema.ENTITY_TYPE.equals(propertyName)){
+				// Initialize the entity type property with the full class name.
+				field = classType.field(JMod.PRIVATE, propertyType, propertyName, classType.staticRef("class").invoke("getName"));
+			}else{
+				field = classType.field(JMod.PRIVATE, propertyType, propertyName);
+			}
 			// If there is a title then add it to the feild
 			if(propertySchema.getTitle() != null){
 				JDocComment doc = field.javadoc();

@@ -8,6 +8,9 @@
     "properties":{
         "fromTwo":{
             "type":"string"
+        },
+        "entityType":{
+            "type":"string"
         }
     }
 }

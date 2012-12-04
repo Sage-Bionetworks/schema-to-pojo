@@ -8,6 +8,9 @@
     "properties":{
         "fromOne":{
             "type":"string"
+        },
+        "entityType":{
+            "type":"string"
         }
     }
 }

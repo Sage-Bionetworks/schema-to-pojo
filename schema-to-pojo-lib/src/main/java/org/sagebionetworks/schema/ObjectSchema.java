@@ -578,9 +578,16 @@ public class ObjectSchema implements JSONEntity {
 	 * @param properties
 	 */
 	public void putProperty(String key, ObjectSchema property) {
+		if(key == null) throw new IllegalArgumentException("Key canot be null");
+		if(property == null) throw new IllegalArgumentException("Property cannot be null");
 		if (properties == null) {
 			// We want predictable iteration order so we are using linked HashMaps
 			properties = new LinkedHashMap<String, ObjectSchema>();
+		}
+		if(ENTITY_TYPE.equals(key)){
+			if(!TYPE.STRING.equals(property.getType())){
+				throw new IllegalArgumentException("The property key: "+ENTITY_TYPE+" is reserved and must be of TYPE.STRING if included.");
+			}
 		}
 		properties.put(key, property);
 	}
@@ -2046,7 +2053,7 @@ public class ObjectSchema implements JSONEntity {
 	 */
 	private static LinkedHashMap<String, ObjectSchema> createMapFromAdapter(
 			JSONObjectAdapter in) throws JSONObjectAdapterException {
-		// Again, using linked hash map for predicatble iteration order.
+		// Again, using linked hash map for predictable iteration order.
 		LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
 		Iterator it = in.keys();
 		while (it.hasNext()) {
