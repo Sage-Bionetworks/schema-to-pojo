@@ -64,5 +64,23 @@ public class EntityFactoryTest {
 		// The stub and clone should be the same
 		assertEquals(stub, clone);
 	}
+	
+	/**
+	 * For this case we are testing that we can instantiate the POJO using the interfaces as the type.
+	 * @throws JSONObjectAdapterException
+	 */
+	@Test
+	public void testRoundTripInterface() throws JSONObjectAdapterException{
+		SimpleEntityStub stub = new SimpleEntityStub();
+		stub.setValue("This value should make a round trip");
+		String json = EntityFactory.createJSONStringForEntity(stub);
+		assertNotNull(json);
+		System.out.println(json);
+		// Make sure we can use the interface as the type and that we get what we expect.
+		SimpleInterface clone = EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
+		assertNotNull(clone);
+		// The stub and clone should be the same
+		assertEquals(stub, clone);
+	}
 
 }
