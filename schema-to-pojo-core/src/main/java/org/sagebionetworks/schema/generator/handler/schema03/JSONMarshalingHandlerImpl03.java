@@ -493,12 +493,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		while (keyIt.hasNext()) {
 			String propName = keyIt.next();
 			ObjectSchema propSchema = fieldMap.get(propName);
-//			// The entityType field name has special meaning.  It always contains the full class name of the POJO implementation.
-//			// The EntityType is used to initialize fields that are interfaces or abstract classes.
-//			if(ObjectSchema.ENTITY_TYPE.equals(propName)){
-//				body.add(param.invoke("put").arg(ObjectSchema.ENTITY_TYPE).arg(JExpr._this().invoke("getClass").invoke("getName")));
-//				continue;
-//			}
 			// Look up the field for this property
 			JFieldVar field = classType.fields().get(propName);
 			if (field == null)
