@@ -8,9 +8,6 @@
     "properties":{
         "fromOne":{
             "type":"string"
-        },
-        "concreteType":{
-            "type":"string"
         }
     }
 }
