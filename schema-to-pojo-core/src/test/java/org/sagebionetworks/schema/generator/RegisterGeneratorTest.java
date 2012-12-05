@@ -170,9 +170,23 @@ public class RegisterGeneratorTest {
 
 	@Test
 	public void testCreateMap() {
-		RegisterGenerator regGen = new RegisterGenerator();
 		JCodeModel model = new JCodeModel();
-		JDefinedClass def = regGen.createRegister(model, list,	"org.example.Register");
+		JDefinedClass def = RegisterGenerator.createRegister(model, list,	RegisterGenerator.createClassFromFullName(model,"org.example.Register"));
+		assertNotNull(def);
+
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		def.declare(formatter);
+		String value = writer.toString();
+//		System.out.println(writer.toString());
+		assertTrue(value.indexOf("Note: This class was auto-generated, and should not be directly modified") > 0);
+		assertTrue(value.indexOf("private java.util.Map<java.lang.String, java.lang.Integer> map;") > 0);
+	}
+
+	@Test
+	public void testSingleton() {
+		JCodeModel model = new JCodeModel();
+		JDefinedClass def = RegisterGenerator.createRegister(model, list,	RegisterGenerator.createClassFromFullName(model,"org.example.Register"));
 		assertNotNull(def);
 
 		StringWriter writer = new StringWriter();
@@ -180,8 +194,9 @@ public class RegisterGeneratorTest {
 		def.declare(formatter);
 		String value = writer.toString();
 		System.out.println(writer.toString());
-		assertTrue(value.indexOf("Note: This class was auto-generated, and should not be directly modified") > 0);
-		assertTrue(value.indexOf("private java.util.Map<java.lang.String, java.lang.Integer> map;") > 0);
+		assertTrue(value.indexOf("private final static org.example.Register SINGLETON = new org.example.Register();") > 0);
+		assertTrue(value.indexOf("public static org.example.Register singleton() {") > 0);
+		assertTrue(value.indexOf("return SINGLETON;") > 0);
 	}
 
 

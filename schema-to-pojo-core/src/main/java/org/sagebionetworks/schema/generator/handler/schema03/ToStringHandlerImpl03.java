@@ -110,7 +110,8 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.BOOLEAN == type || 
 					TYPE.ARRAY == type || 
 					TYPE.OBJECT == type ||
-					TYPE.STRING == type){
+					TYPE.STRING == type ||
+					TYPE.INTERFACE == type){
 				//add an assignment statements to the body
 				body.add(result.invoke("append").arg(keyName + "="));
 				body.add(result.invoke("append").arg(field));

@@ -1,0 +1,12 @@
+{
+    "type":"object",
+    "properties":{
+        "list":{
+            "type":"array",
+            "uniqueItems": false,
+            "items": {
+                "$ref": "org.sagebionetworks.jstp20.SomeInterface"
+            }
+        }
+    }
+}

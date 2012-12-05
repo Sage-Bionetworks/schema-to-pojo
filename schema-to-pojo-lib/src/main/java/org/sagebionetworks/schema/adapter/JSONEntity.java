@@ -26,6 +26,5 @@ public interface JSONEntity {
 	 */
 	public String getJSONSchema();
 	
-	
 
 }

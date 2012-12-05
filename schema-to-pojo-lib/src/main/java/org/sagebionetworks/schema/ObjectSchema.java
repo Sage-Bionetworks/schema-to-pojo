@@ -59,6 +59,14 @@ public class ObjectSchema implements JSONEntity {
 	public static final String SELF_REFERENCE = "#";
 	public static final String JSON_DEFAULT = "default";
 	public static final String JSON_LINKS = "links";
+	
+	/**
+	 * For the case where a POJO's fields types are an interfaces or abstract class,
+	 * we need to know the type of the concrete class used at runtime, to support parsing
+	 * these POJOs from JSON.  To support such abstractions the 'concreteType' property
+	 * is used to capture the concrete type used.
+	 */
+	public static final String CONCRETE_TYPE = "concreteType";
 
 	/*
 	 * The name of this object.
@@ -573,9 +581,16 @@ public class ObjectSchema implements JSONEntity {
 	 * @param properties
 	 */
 	public void putProperty(String key, ObjectSchema property) {
+		if(key == null) throw new IllegalArgumentException("Key canot be null");
+		if(property == null) throw new IllegalArgumentException("Property cannot be null");
 		if (properties == null) {
 			// We want predictable iteration order so we are using linked HashMaps
 			properties = new LinkedHashMap<String, ObjectSchema>();
+		}
+		if(CONCRETE_TYPE.equals(key)){
+			if(!TYPE.STRING.equals(property.getType())){
+				throw new IllegalArgumentException("The property key: "+CONCRETE_TYPE+" is reserved and must be of TYPE.STRING if included.");
+			}
 		}
 		properties.put(key, property);
 	}
@@ -2041,7 +2056,7 @@ public class ObjectSchema implements JSONEntity {
 	 */
 	private static LinkedHashMap<String, ObjectSchema> createMapFromAdapter(
 			JSONObjectAdapter in) throws JSONObjectAdapterException {
-		// Again, using linked hash map for predicatble iteration order.
+		// Again, using linked hash map for predictable iteration order.
 		LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
 		Iterator it = in.keys();
 		while (it.hasNext()) {

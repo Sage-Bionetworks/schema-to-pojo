@@ -1,0 +1,13 @@
+{
+    "type":"object",
+     "implements":[
+        {
+            "$ref":"org.sagebionetworks.jstp20.SomeInterface"
+        }
+    ],
+    "properties":{
+        "fromOne":{
+            "type":"string"
+        }
+    }
+}

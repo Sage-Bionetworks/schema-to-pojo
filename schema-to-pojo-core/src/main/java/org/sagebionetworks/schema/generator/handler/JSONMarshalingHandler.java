@@ -11,5 +11,5 @@ public interface JSONMarshalingHandler {
 	 * @param propertySchema
 	 * @param classType
 	 */
-	public void addJSONMarshaling(ObjectSchema classSchema, JDefinedClass classType);
+	public void addJSONMarshaling(ObjectSchema classSchema, JDefinedClass classType, JDefinedClass registerClass);
 }

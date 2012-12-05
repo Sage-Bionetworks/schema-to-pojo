@@ -1,0 +1,9 @@
+{
+    "type":"object",
+    "properties":{
+        "interfaceField":{
+            "type":"object",
+            "$ref":"org.sagebionetworks.jstp20.SomeInterface"
+        }
+    }
+}

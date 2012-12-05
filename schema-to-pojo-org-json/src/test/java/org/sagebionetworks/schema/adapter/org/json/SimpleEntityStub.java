@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -10,9 +11,10 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  * @author jmhill
  *
  */
-public class SimpleEntityStub implements JSONEntity{
+public class SimpleEntityStub implements SimpleInterface{
 	
 	private String value;
+	private String concreteType = SimpleEntityStub.class.getName();
 
 	@Override
 	public JSONObjectAdapter initializeFromJSONObject(JSONObjectAdapter toInitFrom) throws JSONObjectAdapterException {
@@ -28,6 +30,7 @@ public class SimpleEntityStub implements JSONEntity{
 		if(value != null){
 			writeTo.put("value", value);
 		}
+		writeTo.put(ObjectSchema.CONCRETE_TYPE, concreteType);
 		return writeTo;
 	}
 
@@ -40,9 +43,25 @@ public class SimpleEntityStub implements JSONEntity{
 	}
 
 	@Override
+	public String getJSONSchema() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public String getConcreteType(){
+		return this.concreteType;
+	}
+	
+	public void setConcreteType(String type){
+		this.concreteType = type;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((concreteType == null) ? 0 : concreteType.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
@@ -56,6 +75,11 @@ public class SimpleEntityStub implements JSONEntity{
 		if (getClass() != obj.getClass())
 			return false;
 		SimpleEntityStub other = (SimpleEntityStub) obj;
+		if (concreteType == null) {
+			if (other.concreteType != null)
+				return false;
+		} else if (!concreteType.equals(other.concreteType))
+			return false;
 		if (value == null) {
 			if (other.value != null)
 				return false;
@@ -66,12 +90,9 @@ public class SimpleEntityStub implements JSONEntity{
 
 	@Override
 	public String toString() {
-		return "SimpleEntityStub [value=" + value + "]";
+		return "SimpleEntityStub [value=" + value + ", concreteType="
+				+ concreteType + "]";
 	}
-
-	@Override
-	public String getJSONSchema() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
+	
 }
