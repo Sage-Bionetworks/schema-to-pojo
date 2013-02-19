@@ -36,6 +36,10 @@ public enum TYPE {
 	 */
 	ARRAY("array", false, "[]", "getJSONArray"),
 	/*
+	 * Value MUST be a map
+	 */
+	MAP("map", false, "[]", "getJSONObject"),
+	/*
 	 * Value MUST be null. Note this is mainly for purpose of being able use
 	 * union types to define nullability. If this type is not included in a
 	 * union, null values are not allowed (the primitives listed above do not

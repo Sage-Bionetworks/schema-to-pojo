@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -527,6 +528,33 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreateMethodInitializeFromJSONObjectMapOfStrings() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.MAP);
+		String propName = "mapName";
+		ObjectSchema arrayTypeSchema = schema;
+		arrayTypeSchema.setType(TYPE.STRING);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(String.class).narrow(String.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// this time we provide a register.
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("mapName = new java.util.LinkedHashMap<java.lang.String, java.lang.String>();") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter jsonObject = adapter.getJSONObject(\"mapName\");") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> keys = jsonObject.keys();") > 0);
+		assertTrue(methodString.indexOf("while (keys.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("java.lang.String key = keys.next();") > 0);
+		assertTrue(methodString.indexOf(" mapName.put(key, jsonObject.getString(key));") > 0);
+	}
+	
+	@Test
 	public void testCreateMethodInitializeFromJSONObjectValidate() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Set the property type to be the same as the object
 		ObjectSchema propertySchema = schema;
@@ -989,6 +1017,35 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
 		assertTrue(methodString.indexOf("index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"longList\", array);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectMapLong() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Add add a string property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.MAP);
+		String propName = "longMap";
+		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		arrayTypeSchema.setType(TYPE.INTEGER);
+		propertySchema.setItems(arrayTypeSchema);
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(String.class).narrow(Long.class), propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		
+//		printClassToConsole(sampleClass);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		// Is the primitive assigned correctly?
+		assertTrue(methodString.indexOf("if (longMap!= null) {") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter object = adapter.createNew();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> it = longMap.keySet().iterator();") > 0);
+		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("java.lang.String key = it.next();") > 0);
+		assertTrue(methodString.indexOf("object.put(key, longMap.get(key));") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"longMap\", object);") > 0);
 	}
 	
 	@Test

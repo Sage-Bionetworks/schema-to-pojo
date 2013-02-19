@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
@@ -192,62 +193,12 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Basic assign
 				thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke(type.getMethodName()).arg(propName)));
 			} else if (TYPE.ARRAY == type) {
-				// Determine the type of the field
-				JClass typeClass = (JClass) field.type();
-				if (typeClass.getTypeParameters().size() != 1)
-					throw new IllegalArgumentException(
-							"Cannot determine the type of an array: "
-									+ typeClass.fullName());
-				JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
-				ObjectSchema arrayTypeSchema = propSchema.getItems();
-				if (arrayTypeSchema == null)
-					throw new IllegalArgumentException(
-							"A property type is ARRAY but the getItems() returned null");
-				TYPE arrayType = arrayTypeSchema.getType();
-				if (arrayType == null)
-					throw new IllegalArgumentException(
-							"TYPE cannot be null for an ObjectSchema");
-				// Type arrayType =
-				if (!propSchema.getUniqueItems()) {
-					// Create a list
-					thenBlock.assign(
-							field,
-							JExpr._new(classType.owner().ref(ArrayList.class)
-									.narrow(arrayTypeClass)));
-				} else {
-					// Create a set
-					thenBlock.assign(
-							field,
-							JExpr._new(classType.owner().ref(HashSet.class)
-									.narrow(arrayTypeClass)));
-				}
-				// Create a local array
-				JVar jsonArray = thenBlock
-						.decl(classType.owner().ref(JSONArrayAdapter.class),
-								"jsonArray",
-								param.invoke("getJSONArray").arg(propName));
-				JForLoop loop = thenBlock._for();
-				JVar i = loop.init(classType.owner().INT, "i", JExpr.lit(0));
-				loop.test(i.lt(jsonArray.invoke("length")));
-				loop.update(i.incr());
-				JBlock loopBody = loop.body();
-				// Handle abstract classes and interfaces
-				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
-					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
-					// first get the JSONObject for this array element
-					JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), "indexAdapter", jsonArray.invoke("getJSONObject").arg(i));
-					// Create the object from the register
-					JVar indexObject = loopBody.decl(arrayTypeClass, "indexObject", JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
-					// Initialize the object from the adapter.
-					loopBody.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
-					// add the object to the list
-					loopBody.add(field.invoke("add").arg(indexObject));
-				}else{
-					// concrete classes
-					loopBody.add(field.invoke("add").arg(
-							createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema,
-									arrayTypeClass, i)));
-				}
+				createArrayFromObject(classType, createRegister, param,
+						propName, propSchema, field, thenBlock);
+
+			} else if (TYPE.MAP == type) {
+				createMapFromObject(classType, createRegister, param, propName,
+						propSchema, field, thenBlock);
 
 			} else {
 				// First extract the type
@@ -293,6 +244,109 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         // Always return the param
         body._return(param);
 		return method;
+	}
+
+	private void createMapFromObject(JDefinedClass classType,
+			JDefinedClass createRegister, JVar param, String propName,
+			ObjectSchema propSchema, JFieldVar field, JBlock thenBlock) {
+		// Determine the type of the field
+		JClass typeClass = (JClass) field.type();
+		if (typeClass.getTypeParameters().size() != 2)
+			throw new IllegalArgumentException(
+					"Cannot determine the type of an map: "
+							+ typeClass.fullName());
+		JClass arrayTypeClass = typeClass.getTypeParameters().get(1);
+		ObjectSchema arrayTypeSchema = propSchema.getItems();
+		if (arrayTypeSchema == null)
+			throw new IllegalArgumentException(
+					"A property type is MAP but the getItems() returned null");
+		TYPE arrayType = arrayTypeSchema.getType();
+		if (arrayType == null)
+			throw new IllegalArgumentException(
+					"TYPE cannot be null for an ObjectSchema");
+
+		// Create a Map
+		thenBlock.assign(
+				field,
+				JExpr._new(classType.owner().ref(LinkedHashMap.class).narrow(String.class)
+						.narrow(arrayTypeClass)));
+		// Create a local array
+		JVar jsonObject = thenBlock
+				.decl(classType.owner().ref(JSONObjectAdapter.class),
+						"jsonObject",
+						param.invoke("getJSONObject").arg(propName));
+		JVar iterator = thenBlock
+				.decl(classType.owner().ref(Iterator.class).narrow(String.class),
+						"keys",
+						jsonObject.invoke("keys"));
+		JWhileLoop loop = thenBlock._while(iterator.invoke("hasNext"));
+		JBlock loopBody = loop.body();
+		JVar key = loopBody.decl(classType.owner().ref(String.class), "key", iterator.invoke("next"));
+		// Add the value to the map
+		loopBody.add(field.invoke("put").arg(key).arg(
+				createExpresssionToGetFromArray(param, arrayTypeSchema,
+						arrayTypeClass, jsonObject.invoke(arrayType.getMethodName()).arg(key))));
+	}
+
+	private void createArrayFromObject(JDefinedClass classType,
+			JDefinedClass createRegister, JVar param, String propName,
+			ObjectSchema propSchema, JFieldVar field, JBlock thenBlock) {
+		// Determine the type of the field
+		JClass typeClass = (JClass) field.type();
+		if (typeClass.getTypeParameters().size() != 1)
+			throw new IllegalArgumentException(
+					"Cannot determine the type of an array: "
+							+ typeClass.fullName());
+		JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
+		ObjectSchema arrayTypeSchema = propSchema.getItems();
+		if (arrayTypeSchema == null)
+			throw new IllegalArgumentException(
+					"A property type is ARRAY but the getItems() returned null");
+		TYPE arrayType = arrayTypeSchema.getType();
+		if (arrayType == null)
+			throw new IllegalArgumentException(
+					"TYPE cannot be null for an ObjectSchema");
+		// Type arrayType =
+		if (!propSchema.getUniqueItems()) {
+			// Create a list
+			thenBlock.assign(
+					field,
+					JExpr._new(classType.owner().ref(ArrayList.class)
+							.narrow(arrayTypeClass)));
+		} else {
+			// Create a set
+			thenBlock.assign(
+					field,
+					JExpr._new(classType.owner().ref(HashSet.class)
+							.narrow(arrayTypeClass)));
+		}
+		// Create a local array
+		JVar jsonArray = thenBlock
+				.decl(classType.owner().ref(JSONArrayAdapter.class),
+						"jsonArray",
+						param.invoke("getJSONArray").arg(propName));
+		JForLoop loop = thenBlock._for();
+		JVar i = loop.init(classType.owner().INT, "i", JExpr.lit(0));
+		loop.test(i.lt(jsonArray.invoke("length")));
+		loop.update(i.incr());
+		JBlock loopBody = loop.body();
+		// Handle abstract classes and interfaces
+		if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
+			if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+			// first get the JSONObject for this array element
+			JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), "indexAdapter", jsonArray.invoke("getJSONObject").arg(i));
+			// Create the object from the register
+			JVar indexObject = loopBody.decl(arrayTypeClass, "indexObject", JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
+			// Initialize the object from the adapter.
+			loopBody.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
+			// add the object to the list
+			loopBody.add(field.invoke("add").arg(indexObject));
+		}else{
+			// concrete classes
+			loopBody.add(field.invoke("add").arg(
+					createExpresssionToGetFromArray(param, arrayTypeSchema,
+							arrayTypeClass, jsonArray.invoke(arrayType.getMethodName()).arg(i))));
+		}
 	}
 
 
@@ -410,7 +464,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 	}
 	
-	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JVar index){
+	protected JExpression createExpresssionToGetFromArray(JVar adapter, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JInvocation value){
 		TYPE arrayType = arrayTypeSchema.getType();
 		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//check if our array type is an enum
@@ -419,24 +473,23 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
-				JExpression stringFromAdapter = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-				return arrayTypeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+				return arrayTypeClass.staticInvoke("valueOf").arg(value);
 			}
 		}
 		
 		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
-			return jsonArray.invoke(arrayType.getMethodName()).arg(index);
+			return value;
 		}else if(TYPE.INTEGER == arrayType){
-			JExpression longExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-			return convertLongAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, longExper);
+			return convertLongAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, value);
 		}else if(TYPE.STRING == arrayType){
-			JExpression stringExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
+			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		}else if(TYPE.MAP == arrayType){
+			throw new IllegalArgumentException("Map of Arrays are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
-			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
+			return JExpr._new(arrayTypeClass).arg(value);
 		}
 	}
 	
@@ -539,44 +592,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Basic assign
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(field));
 			} else if (TYPE.ARRAY == type) {
-				// Determine the type of the field
-				JClass typeClass = (JClass) field.type();
-				if (typeClass.getTypeParameters().size() != 1)
-					throw new IllegalArgumentException(
-							"Cannot determine the type of an array: "
-									+ typeClass.fullName());
-				JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
-				ObjectSchema arrayTypeSchema = propSchema.getItems();
-				if (arrayTypeSchema == null)
-					throw new IllegalArgumentException(
-							"A property type is ARRAY but the getItems() returned null");
-				TYPE arrayType = arrayTypeSchema.getType();
-				if (arrayType == null)
-					throw new IllegalArgumentException(
-							"TYPE cannot be null for an ObjectSchema");
-				// Create the new JSONArray
-				JVar array = thenBlock.decl(JMod.NONE,
-						classType.owner().ref(JSONArrayAdapter.class), "array",
-						param.invoke("createNewArray"));
-				JVar it = thenBlock.decl(
-						JMod.NONE,
-						classType.owner().ref(Iterator.class)
-								.narrow(arrayTypeClass), "it",
-						field.invoke("iterator"));
-				JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT,
-						"index", JExpr.lit(0));
-				// Create a local array
-				JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
-				JBlock loopBody = loop.body();
-				loopBody.add(array
-						.invoke("put")
-						.arg(index)
-						.arg(createExpresssionToSetFromArray(arrayTypeSchema,
-								arrayTypeClass, it, param)));
-				loopBody.directStatement("index++;");
-				// Now set the new array
-				thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
-			} else {
+				writeToArray(classType, param, propSchema, field, thenBlock);
+			} else if (TYPE.MAP == type) {
+				writeToMap(classType, param, propSchema, field, thenBlock);
+			}  else {
 				// All others are treated as objects.
 				thenBlock.add(param
 						.invoke("put")
@@ -597,8 +616,84 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         return method;
 		
 	}
+
+	private void writeToArray(JDefinedClass classType, JVar param,
+			ObjectSchema propSchema, JFieldVar field, JBlock thenBlock) {
+		// Determine the type of the field
+		JClass typeClass = (JClass) field.type();
+		if (typeClass.getTypeParameters().size() != 1)
+			throw new IllegalArgumentException(
+					"Cannot determine the type of an array: "
+							+ typeClass.fullName());
+		JClass arrayTypeClass = typeClass.getTypeParameters().get(0);
+		ObjectSchema arrayTypeSchema = propSchema.getItems();
+		if (arrayTypeSchema == null)
+			throw new IllegalArgumentException(
+					"A property type is ARRAY but the getItems() returned null");
+		TYPE arrayType = arrayTypeSchema.getType();
+		if (arrayType == null)
+			throw new IllegalArgumentException(
+					"TYPE cannot be null for an ObjectSchema");
+		// Create the new JSONArray
+		JVar array = thenBlock.decl(JMod.NONE,
+				classType.owner().ref(JSONArrayAdapter.class), "array",
+				param.invoke("createNewArray"));
+		JVar it = thenBlock.decl(
+				JMod.NONE,
+				classType.owner().ref(Iterator.class)
+						.narrow(arrayTypeClass), "it",
+				field.invoke("iterator"));
+		JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT,
+				"index", JExpr.lit(0));
+		// Create a local array
+		JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
+		JBlock loopBody = loop.body();
+		loopBody.add(array
+				.invoke("put")
+				.arg(index)
+				.arg(createExpresssionToSetFromArray(arrayTypeSchema,
+						arrayTypeClass, it.invoke("next"), param)));
+		loopBody.directStatement("index++;");
+		// Now set the new array
+		thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
+	}
 	
-	protected JExpression createExpresssionToSetFromArray(ObjectSchema arrayTypeSchema, JClass arrayTypeClass, JVar iterator, JVar param){
+	private void writeToMap(JDefinedClass classType, JVar param,
+			ObjectSchema propSchema, JFieldVar field, JBlock thenBlock) {
+		// Determine the type of the field
+		JClass typeClass = (JClass) field.type();
+		if (typeClass.getTypeParameters().size() != 2)
+			throw new IllegalArgumentException(
+					"Cannot determine the type of an array: "
+							+ typeClass.fullName());
+		JClass mapTypeClass = typeClass.getTypeParameters().get(1);
+		ObjectSchema arrayTypeSchema = propSchema.getItems();
+		if (arrayTypeSchema == null)
+			throw new IllegalArgumentException(
+					"A property type is MAP but the getItems() returned null");
+		TYPE arrayType = arrayTypeSchema.getType();
+		if (arrayType == null)
+			throw new IllegalArgumentException(
+					"TYPE cannot be null for an ObjectSchema");
+		// Create the new JSONObject
+		JVar object = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), "object",
+				param.invoke("createNew"));
+		JVar it = thenBlock.decl(
+				JMod.NONE,
+				classType.owner().ref(Iterator.class)
+						.narrow(String.class), "it",
+				field.invoke("keySet").invoke("iterator"));
+		// Create a local array
+		JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
+		JBlock loopBody = loop.body();
+		JVar key = loopBody.decl(classType.owner().ref(String.class), "key", it.invoke("next"));
+		loopBody.add(object.invoke("put").arg(key).arg(createExpresssionToSetFromArray(arrayTypeSchema, mapTypeClass, field.invoke("get").arg(key), param)));
+		
+		// Now set the new array
+		thenBlock.add(param.invoke("put").arg(field.name()).arg(object));
+	}
+	
+	protected JExpression createExpresssionToSetFromArray(ObjectSchema arrayTypeSchema, JClass arrayTypeClass, JInvocation value, JVar param){
 		TYPE arrayType = arrayTypeSchema.getType();
 		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//need to determine if we are dealing with an array of enumerations
@@ -606,23 +701,24 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
-				return iterator.invoke("next").invoke("name");
+				return value.invoke("name");
 			}
 		}
 		
 		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
-			return iterator.invoke("next");
+			return value;
 		}if(TYPE.STRING == arrayType){
-			JExpression stringValue = iterator.invoke("next");
+			JExpression stringValue = value;
 			return assignPropertyToJSONString(arrayTypeClass.owner(), param, arrayTypeSchema, stringValue); 
 		}else if(TYPE.INTEGER == arrayType){
-			JExpression value = iterator.invoke("next");
 			return assignPropertyToJSONLong(arrayTypeClass.owner(), arrayTypeSchema, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		}else if(TYPE.MAP == arrayType){
+			throw new IllegalArgumentException("Map of Arrays are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
-			return iterator.invoke("next").invoke("writeToJSONObject").arg(param.invoke("createNew"));
+			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
 		}
 	}
 

@@ -2,6 +2,7 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.sagebionetworks.schema.ObjectSchema;
@@ -92,6 +93,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				// This is a list
 				return codeModel.ref(List.class).narrow(arrayType);
 			}
+		}else if(TYPE.MAP == schema.getType()){
+			// We must have Items
+			if(arrayType == null) throw new IllegalArgumentException("A schema with TYPE.ARRAY must have a items that defines the type of the array");
+			// Get the array type
+			return codeModel.ref(Map.class).narrow(String.class).narrow(arrayType);
 		}
 		// The last category is objects.
 		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){
