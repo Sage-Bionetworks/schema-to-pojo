@@ -8,7 +8,6 @@
 	<inherits name="com.google.gwt.junit.JUnit"/>
 	<inherits name="org.sagebionetworks.SchemaToPojoLib"/>
 	<inherits name="com.google.gwt.json.JSON"/>
-	<inherits name="org.gwttime.Time"/>
 	<inherits name="com.google.gwt.junit.JUnit"/>
 
 </module>
