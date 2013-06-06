@@ -2,12 +2,15 @@ package org.sagebionetworks.gwt.client.schema.adapter;
 
 import java.util.Date;
 
-import org.gwttime.time.DateTime;
-import org.gwttime.time.format.ISODateTimeFormat;
 import org.sagebionetworks.schema.FORMAT;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+
 public class DateUtils {
-	
+	private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
+	private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat("HH:mm:ss.SSSZZ");
+		
 	/**
 	 * Convert a date to a string of the given format.
 	 * @param format
@@ -19,14 +22,11 @@ public class DateUtils {
 		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
 		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
 		if(FORMAT.DATE_TIME == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.dateTime().print(dt);
+			return DATE_TIME_FORMAT.format(toFormat);
 		}else if(FORMAT.DATE == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.date().print(dt);
+			return DATE_FORMAT.format(toFormat);
 		}else if(FORMAT.TIME == format){
-			DateTime dt = new DateTime(toFormat.getTime());
-			return ISODateTimeFormat.time().print(dt);
+			return TIME_FORMAT.format(toFormat);
 		}else if(FORMAT.UTC_MILLISEC == format){
 			return ""+toFormat.getTime();
 		}else{
@@ -40,19 +40,21 @@ public class DateUtils {
 	 * @param toFormat
 	 * @return
 	 */
-	public static Date convertStringToDate(FORMAT format, String toFormat) {
+	public static Date convertStringToDate(FORMAT format, String toFormat) {		
 		if(format == null) throw new IllegalArgumentException("FORMAT cannot be null");
 		if(toFormat == null) throw new IllegalArgumentException("Date cannot be null");
 		if(!format.isDateFormat()) throw new IllegalArgumentException("Not a date format: "+format.name());
+		// GWT doesn't understand Zulu time, replace with GMT 
+		// http://stackoverflow.com/questions/4959073/gwt-datetimeformat-throws-illegalargumentexception-when-date-value-contains-z
+		if (toFormat.endsWith("Z")) {
+			toFormat = toFormat.substring(0, toFormat.length()-1) + "GMT-00:00";
+		}
 		if(FORMAT.DATE_TIME == format){
-			DateTime dt = ISODateTimeFormat.dateTime().parseDateTime(toFormat);
-			return dt.toDate();
+			return DATE_TIME_FORMAT.parse(toFormat);
 		}else if(FORMAT.DATE == format){
-			DateTime dt = ISODateTimeFormat.date().parseDateTime(toFormat);
-			return dt.toDate();
+			return DATE_FORMAT.parse(toFormat);
 		}else if(FORMAT.TIME == format){
-			DateTime dt = ISODateTimeFormat.time().parseDateTime(toFormat);
-			return dt.toDate();
+			return TIME_FORMAT.parse(toFormat);
 		}else if(FORMAT.UTC_MILLISEC == format){
 			long time = Long.parseLong(toFormat);
 			return new Date(time);
