@@ -37,12 +37,6 @@
 			<artifactId>gwt-servlet</artifactId>
 			<version>${gwtVersion}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>com-google-gwt</groupId>
-			<artifactId>gwt-time</artifactId>
-			<version>alpha</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<resources>
