@@ -56,7 +56,16 @@ public class SchemaToPojo {
 			File file = iterator.next();
 			String string = FileUtil.readToString(file);
 			// Create a new schema
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(string));
+			ObjectSchema schema;
+			try {
+				schema = new ObjectSchema(new JSONObjectAdapterImpl(string));
+			} catch (JSONObjectAdapterException e) {
+				if (e.getCause() instanceof JSONException) {
+					JSONException e2 = (JSONException) e.getCause();
+					throw new JSONObjectAdapterException(file.getAbsolutePath() + ": " + e2.getMessage(), e2);
+				}
+				throw e;
+			}
 			// Now if the schema does not have a name use the file name
 			if(schema.getName() == null){
 				schema.setName(extractSchemaNameFromFileName(file));
