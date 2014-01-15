@@ -2,6 +2,7 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.sagebionetworks.schema.ObjectSchema;
@@ -35,7 +36,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 
 	@Override
-	public JType handelCreateType(JCodeModel codeModel, ObjectSchema schema, JType superType, JType arrayType, JType[] interfanceTypes) throws ClassNotFoundException {
+	public JType handelCreateType(JCodeModel codeModel, ObjectSchema schema, JType superType, JType arrayType, JType keyType,
+			JType valueType, JType[] interfanceTypes) throws ClassNotFoundException {
 		// Is this an enumeration
 		if(schema.getEnum() != null){
 			// Create or get the enumeration class.
@@ -92,6 +94,16 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				// This is a list
 				return codeModel.ref(List.class).narrow(arrayType);
 			}
+		}
+		if(TYPE.MAP == schema.getType()){
+			// We must have Items
+			if (keyType == null)
+				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the key");
+			// We must have Items
+			if (valueType == null)
+				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the value");
+			// This is a map
+			return codeModel.ref(Map.class).narrow(keyType.boxify(), valueType.boxify());
 		}
 		// The last category is objects.
 		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){

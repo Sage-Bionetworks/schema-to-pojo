@@ -1,5 +1,7 @@
 package org.sagebionetworks.schema;
 
+import java.util.Map;
+
 /**
  * This attribute defines what the primitive type or the schema of the instance
  * MUST be in order to validate. This attribute can take one of two forms:
@@ -36,6 +38,10 @@ public enum TYPE {
 	 */
 	ARRAY("array", false, "[]", "getJSONArray"),
 	/*
+	 * Value MUST be a map
+	 */
+	MAP("map", false, Map.class.getName(), "getJSONMap()"),
+	/*
 	 * Value MUST be null. Note this is mainly for purpose of being able use
 	 * union types to define nullability. If this type is not included in a
 	 * union, null values are not allowed (the primitives listed above do not
@@ -50,7 +56,7 @@ public enum TYPE {
 	/*
 	 * This is a custom type used to indicate the schema describes an interface. 
 	 */
-	INTERFACE("interface", false, "Interface", null)
+	INTERFACE("interface", false, "Interface", null),
 	;
 
 	/*

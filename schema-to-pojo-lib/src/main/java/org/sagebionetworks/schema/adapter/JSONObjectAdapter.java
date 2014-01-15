@@ -67,6 +67,7 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	
 	public JSONObjectAdapter put(String key, JSONArrayAdapter value) throws JSONObjectAdapterException;
 	
+	public JSONObjectAdapter put(String key, JSONMapAdapter value) throws JSONObjectAdapterException;
 	
     /**
      * Get the long value associated with a key. If the number value is too
@@ -136,13 +137,21 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
     public JSONArrayAdapter getJSONArray(String key) throws JSONObjectAdapterException;
     
     /**
-     * Get the JSONObject value associated with a key.
-     *
-     * @param key   A key string.
-     * @return      A JSONObject which is the value.
-     * @throws   JSONObjectAdapterException if the key is not found or
-     *  if the value is not a JSONObject.
-     */
+	 * Get the JSONMap value associated with a key.
+	 * 
+	 * @param key A key string.
+	 * @return A JSONMap which is the value.
+	 * @throws JSONObjectAdapterException if the key is not found or if the value is not a JSONMap.
+	 */
+	public JSONMapAdapter getJSONMap(String key) throws JSONObjectAdapterException;
+
+	/**
+	 * Get the JSONObject value associated with a key.
+	 * 
+	 * @param key A key string.
+	 * @return A JSONObject which is the value.
+	 * @throws JSONObjectAdapterException if the key is not found or if the value is not a JSONObject.
+	 */
     public JSONObjectAdapter getJSONObject(String key) throws JSONObjectAdapterException;
 	
     /**

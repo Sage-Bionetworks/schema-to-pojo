@@ -156,8 +156,16 @@ public class PojoGeneratorDriver {
 		if( schema.getItems() != null){
 			arrayType = createOrGetType(codeModel, schema.getItems());
 		}
+		JType keyType = null;
+		if (schema.getKey() != null) {
+			keyType = createOrGetType(codeModel, schema.getKey());
+		}
+		JType valueType = null;
+		if (schema.getValue() != null) {
+			valueType = createOrGetType(codeModel, schema.getValue());
+		}
 		// Let the handler do most of the work.
-		return factory.getTypeCreatorHandler().handelCreateType(codeModel, schema, superType, arrayType, implementsArray);
+		return factory.getTypeCreatorHandler().handelCreateType(codeModel, schema, superType, arrayType, keyType, valueType, implementsArray);
 	}
 	
 	/**
@@ -245,6 +253,14 @@ public class PojoGeneratorDriver {
 		// Items
 		if(schema.getItems() != null){
 			schema.setItems(replaceRefrence(map, schema.getItems(), schema));
+		}
+		// Key
+		if (schema.getKey() != null) {
+			schema.setKey(replaceRefrence(map, schema.getKey(), schema));
+		}
+		// Value
+		if (schema.getValue() != null) {
+			schema.setValue(replaceRefrence(map, schema.getValue(), schema));
 		}
 		// AdditionItems
 		if(schema.getAdditionalItems() != null){

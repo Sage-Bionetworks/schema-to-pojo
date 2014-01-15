@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
+import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -46,6 +47,8 @@ public class ObjectSchema implements JSONEntity {
 	public static final String JSON_ITEMS = "items";
 	public static final String JSON_UNIQUE_ITEMS = "uniqueItems";
 	public static final String JSON_ADDITIONAL_ITEMS = "additionalItems";
+	public static final String JSON_KEY = "key";
+	public static final String JSON_VALUE = "value";
 	public static final String JSON_REQUIRED = "required";
 	public static final String JSON_MINIMUM = "minimum";
 	public static final String JSON_MAXIMUM = "maximum";
@@ -143,11 +146,26 @@ public class ObjectSchema implements JSONEntity {
 	private ObjectSchema additionalItems;
 
 	/*
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines what the primitive type or the schema of the key MUST be in order to validate.
+	 */
+	private ObjectSchema key;
+	/*
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines what the primitive type or the schema of the value MUST be in order to validate.
+	 */
+	private ObjectSchema value;
+
+	/*
 	 * 5.7. required
 	 * 
 	 * 
-	 * This attribute indicates if the instance must have a value, and not be
-	 * undefined. This is false by default, making the instance optional.
+	 * This attribute indicates if the instance must have a value, and not be undefined. This is false by default,
+	 * making the instance optional.
 	 */
 	private Boolean required;
 	/*
@@ -726,6 +744,53 @@ public class ObjectSchema implements JSONEntity {
 		this.additionalItems = additionalItems;
 	}
 
+	/**
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines the key type of an instance map, and MUST be a schema.
+	 * 
+	 * @return
+	 */
+	public ObjectSchema getKey() {
+		return key;
+	}
+
+	/**
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines the key type of an instance map, and MUST be a schema.
+	 * 
+	 * @param key
+	 */
+	public void setKey(ObjectSchema key) {
+		this.key = key;
+	}
+
+	/**
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines the value type of an instance map, and MUST be a schema.
+	 * 
+	 * @return
+	 */
+	public ObjectSchema getValue() {
+		return value;
+	}
+
+	/**
+	 * Sage added
+	 * 
+	 * 
+	 * This attribute defines the value type of an instance map, and MUST be a schema.
+	 * 
+	 * @param key
+	 */
+	public void setValue(ObjectSchema value) {
+		this.value = value;
+	}
 	/**
 	 * 5.7. required
 	 * 
@@ -1797,6 +1862,12 @@ public class ObjectSchema implements JSONEntity {
 			copy.put(JSON_ADDITIONAL_ITEMS,
 					this.additionalItems.writeToJSONObject(copy.createNew()));
 		}
+		if (this.key != null) {
+			copy.put(JSON_KEY, this.key.writeToJSONObject(copy.createNew()));
+		}
+		if (this.value != null) {
+			copy.put(JSON_VALUE, this.value.writeToJSONObject(copy.createNew()));
+		}
 		if (this.required != null) {
 			copy.put(JSON_REQUIRED, this.required.booleanValue());
 		}
@@ -2099,6 +2170,14 @@ public class ObjectSchema implements JSONEntity {
 					.getJSONObject(JSON_ADDITIONAL_ITEMS);
 			this.additionalItems = new ObjectSchema(additionalItems);
 		}
+		if (adapter.has(JSON_KEY)) {
+			JSONObjectAdapter key = adapter.getJSONObject(JSON_KEY);
+			this.key = new ObjectSchema(key);
+		}
+		if (adapter.has(JSON_VALUE)) {
+			JSONObjectAdapter value = adapter.getJSONObject(JSON_VALUE);
+			this.value = new ObjectSchema(value);
+		}
 		if (adapter.has(JSON_REQUIRED)) {
 			this.required = adapter.getBoolean(JSON_REQUIRED);
 		}
@@ -2297,6 +2376,13 @@ public class ObjectSchema implements JSONEntity {
 			}
 			JSONArrayAdapter defaultArray = (JSONArrayAdapter) defaultObject;
 			adapter.put(JSON_DEFAULT, defaultArray);
+		} else if (TYPE.MAP == type) {
+			if (!(defaultObject instanceof JSONMapAdapter)) {
+				throw new JSONObjectAdapterException("TYPE of " + type + " does not match the type of the default value: "
+						+ defaultObject.getClass().getName());
+			}
+			JSONMapAdapter defaultMap = (JSONMapAdapter) defaultObject;
+			adapter.put(JSON_DEFAULT, defaultMap);
 		} else {
 			throw new JSONObjectAdapterException("Object " + defaultObject
 					+ " can't be added to adapter " + adapter
@@ -2344,6 +2430,9 @@ public class ObjectSchema implements JSONEntity {
 		} else if (TYPE.ARRAY == type) {
 			Object defaultArray = adapter.getJSONArray(JSON_DEFAULT);
 			schema.setDefault(defaultArray);
+		} else if (TYPE.MAP == type) {
+			Object defaultMap = adapter.getJSONMap(JSON_DEFAULT);
+			schema.setDefault(defaultMap);
 		} else {
 			throw new JSONObjectAdapterException("can't add default object to "
 					+ schema + "because adapter " + "has a invalid type of "

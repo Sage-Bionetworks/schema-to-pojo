@@ -67,7 +67,6 @@ public class SchemaToPojoTest {
 		System.out.println(resultString);
 	}
 
-	@Ignore
 	@Test
 	public void loadAllFiles() throws IOException,
 			JSONObjectAdapterException, ClassNotFoundException {
