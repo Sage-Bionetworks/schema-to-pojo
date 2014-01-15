@@ -14,9 +14,12 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
+import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.writer.FileCodeWriter;
+import com.sun.codemodel.writer.ProgressCodeWriter;
 
 /**
  * Generates DTO type POJOs from JSON schema files.
@@ -104,7 +107,12 @@ public class SchemaToPojo {
 		if(!outputDir.exists()){
 			outputDir.mkdirs();
 		}
-		codeModel.build(outputDir);
+
+		CodeWriter sources = new ChangeFileCodeWriter(outputDir);
+		CodeWriter resources = new FileCodeWriter(outputDir);
+		sources = new ProgressCodeWriter(sources, System.out);
+		resources = new ProgressCodeWriter(resources, System.out);
+		codeModel.build(sources, resources);
 	}
 	
 	/**
