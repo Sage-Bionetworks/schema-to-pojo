@@ -7,11 +7,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.sagebionetworks.AllTypes;
+import org.sagebionetworks.PetType;
+import org.sagebionetworks.StandaloneEnum;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -50,6 +54,20 @@ public class AllTypesTest {
 		// Double List
 		allTypes.setDoubleList(new ArrayList<Double>());
 		allTypes.getDoubleList().add(new Double(99.77));
+		// string integer map
+		Map<String, Long> stringIntegerMap = new HashMap<String, Long>();
+		stringIntegerMap.put("a", 20L);
+		stringIntegerMap.put("b", 30L);
+		allTypes.setStringIntegerMap(stringIntegerMap);
+		// object boolean map
+		Map<PetType, Boolean> enumBooleanMap = new HashMap<PetType, Boolean>();
+		enumBooleanMap.put(PetType.DOG, true);
+		enumBooleanMap.put(PetType.CAT, false);
+		allTypes.setEnumBooleanMap(enumBooleanMap);
+		Map<Object, StandaloneEnum> objectEnumMap = new HashMap<Object, StandaloneEnum>();
+		objectEnumMap.put("a", StandaloneEnum.four);
+		objectEnumMap.put(20, StandaloneEnum.two);
+		allTypes.setObjectEnumMap(objectEnumMap);
 	
 		// Now create a clone by going to JSON
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();

@@ -13,7 +13,7 @@
                 "description":"JSON schema for Disease Data POJO",
     			"name": "DiseaseNames",
     			"type":"string",
-    			"id":"DiseaseNames",
+    			"id":"DiseaseNames2",
     			"enum":[
         			"Alzheimers",
         			"Asthma",

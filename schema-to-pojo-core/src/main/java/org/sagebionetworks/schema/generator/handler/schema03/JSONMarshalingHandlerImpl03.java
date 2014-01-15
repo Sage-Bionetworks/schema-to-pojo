@@ -2,6 +2,7 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -12,29 +13,12 @@ import org.sagebionetworks.schema.ObjectValidator;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
+import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
-import com.sun.codemodel.ClassType;
-import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JCatchBlock;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JCommentPart;
-import com.sun.codemodel.JConditional;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JDocComment;
-import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JExpression;
-import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JForLoop;
-import com.sun.codemodel.JInvocation;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMod;
-import com.sun.codemodel.JTryBlock;
-import com.sun.codemodel.JVar;
-import com.sun.codemodel.JWhileLoop;
+import com.sun.codemodel.*;
 
 public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
@@ -249,6 +233,35 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 									arrayTypeClass, i)));
 				}
 
+			} else if (TYPE.MAP == type) {
+				// Determine the type of the key
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 2)
+					throw new IllegalArgumentException(
+							"Cannot determine the key and value type of a map: "
+									+ typeClass.fullName());
+				ObjectSchema keyTypeSchema = propSchema.getKey();
+				if (keyTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getKey() returned null");
+				ObjectSchema valueTypeSchema = propSchema.getValue();
+				if (valueTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
+				JClass keyTypeClass = typeClass.getTypeParameters().get(0);
+				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
+				thenBlock.assign(
+						field,
+						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass,valueTypeClass)));
+
+				JType keyObject = classType.owner().ref(Object.class);
+				JForEach loop = thenBlock.forEach(keyObject, "keyObject", param.invoke("getJSONMap").arg(propName).invoke("keys"));
+				JBlock loopBody = loop.body();
+				JVar value = loopBody.decl(
+						valueTypeClass,
+						"value",
+						createExpressionToGetFromMap(param, param.invoke("getJSONMap").arg(propName), loop.var(), valueTypeSchema,
+								valueTypeClass));
+				JVar key = loopBody.decl(keyTypeClass, "key", createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
+				loopBody.add(field.invoke("put").arg(key).arg(value));
 			} else {
 				// First extract the type
 				// If we have a register then we need to use it
@@ -410,12 +423,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 	}
 	
-	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass ,JVar index){
+	protected JExpression createExpresssionToGetFromArray(JVar adapter, JVar jsonArray, ObjectSchema arrayTypeSchema, JClass arrayTypeClass,
+			JVar index) {
 		TYPE arrayType = arrayTypeSchema.getType();
 		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//check if our array type is an enum
-		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String") && arrayTypeClass instanceof JDefinedClass){
-			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
+		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String") && arrayTypeClass instanceof JDefinedClass) {
+			JDefinedClass getTheClass = (JDefinedClass) arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
@@ -434,13 +448,79 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		} else if (TYPE.MAP == arrayType) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
 			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
 		}
 	}
 	
-	
+	protected JExpression createExpressionToGetFromMap(JVar adapter, JInvocation jsonMap, JVar jsonKey, ObjectSchema typeSchema,
+			JClass typeClass) {
+		TYPE type = typeSchema.getType();
+		FORMAT format = typeSchema.getFormat();
+		//check if our array type is an enum
+		String methodName = type.getMethodName();
+		if (!typeClass.isPrimitive() && !typeClass.fullName().equals("java.lang.String") && typeClass instanceof JDefinedClass) {
+			JDefinedClass getTheClass = (JDefinedClass) typeClass;
+			ClassType shouldHaveEnum = getTheClass.getClassType();
+			if (ClassType.ENUM == shouldHaveEnum){
+				//here we know we are dealing with an enum
+				JExpression stringFromAdapter = jsonMap.invoke(methodName).arg(jsonKey);
+				return typeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+			}
+		}
+		
+		if(type.isPrimitive() || TYPE.NUMBER == type || TYPE.BOOLEAN == type){
+			return jsonMap.invoke(methodName).arg(jsonKey);
+		}else if(TYPE.INTEGER == type){
+			JExpression longExper = jsonMap.invoke(methodName).arg(jsonKey);
+			return convertLongAsNeeded(typeClass.owner(), adapter, format, longExper);
+		}else if(TYPE.STRING == type){
+			JExpression stringExper = jsonMap.invoke(methodName).arg(jsonKey);
+			return convertStringAsNeeded(typeClass.owner(), adapter, format, stringExper);
+		}else if(TYPE.ARRAY == type){
+			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		} else if (TYPE.MAP == type) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+		}else{
+			// Now we need to create an object of the the type
+			return JExpr._new(typeClass).arg(jsonMap.invoke("getJSONObject").arg(jsonKey));
+		}
+	}
+
+	protected JExpression createExpressionToGetKey(JVar adapter, JVar jsonValue, ObjectSchema typeSchema,
+			JClass typeClass) {
+		TYPE type = typeSchema.getType();
+		FORMAT format = typeSchema.getFormat();
+		//check if our array type is an enum
+		String methodName = type.getMethodName();
+		if (!typeClass.isPrimitive() && !typeClass.fullName().equals("java.lang.String") && typeClass instanceof JDefinedClass) {
+			JDefinedClass getTheClass = (JDefinedClass) typeClass;
+			ClassType shouldHaveEnum = getTheClass.getClassType();
+			if (ClassType.ENUM == shouldHaveEnum){
+				//here we know we are dealing with an enum
+				return typeClass.staticInvoke("valueOf").arg(JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
+			}
+		}
+		
+		if(type.isPrimitive() || TYPE.NUMBER == type || TYPE.BOOLEAN == type){
+			return JExpr.cast(typeClass.owner()._ref(type.getClass()), jsonValue);
+		}else if(TYPE.INTEGER == type){
+			return convertLongAsNeeded(typeClass.owner(), adapter, format, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
+		}else if(TYPE.STRING == type){
+			return convertStringAsNeeded(typeClass.owner(), adapter, format, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
+		}else if(TYPE.ARRAY == type){
+			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		} else if (TYPE.MAP == type) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+		}else{
+			// Now we need to create an object of the the type
+			return jsonValue;
+		}
+	}
+
 	/**
 	 * Create the base method that is common to both initializeFromJSONObject() and writeToJSONObject()
 	 * @param classSchema
@@ -576,6 +656,29 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				loopBody.directStatement("index++;");
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
+			} else if (TYPE.MAP == type) {
+				// Determine the type of the key
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 2)
+					throw new IllegalArgumentException("Cannot determine the key and value type of a map: " + typeClass.fullName());
+				ObjectSchema keyTypeSchema = propSchema.getKey();
+				if (keyTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getKey() returned null");
+				ObjectSchema valueTypeSchema = propSchema.getValue();
+				if (valueTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
+				JClass keyTypeClass = typeClass.getTypeParameters().get(0);
+				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
+
+				// Create the new JSONArray
+				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONMapAdapter.class), "map", param.invoke("createNewMap"));
+				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
+				JForEach loop = thenBlock.forEach(entry, "entry", field.invoke("entrySet"));
+				JBlock loopBody = loop.body();
+				loopBody.add(map.invoke("put").arg(loop.var().invoke("getKey"))
+						.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
+				// Now set the new array
+				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
 			} else {
 				// All others are treated as objects.
 				thenBlock.add(param
@@ -620,9 +723,39 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return assignPropertyToJSONLong(arrayTypeClass.owner(), arrayTypeSchema, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		} else if (TYPE.MAP == arrayType) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
 			return iterator.invoke("next").invoke("writeToJSONObject").arg(param.invoke("createNew"));
+		}
+	}
+
+	protected JExpression createExpresssionToSetFromMap(ObjectSchema typeSchema, JClass typeClass, JInvocation value, JVar param) {
+		TYPE type = typeSchema.getType();
+		// need to determine if we are dealing with an array of enumerations
+		if (!typeClass.isPrimitive() && !typeClass.fullName().equals("java.lang.String") && typeClass instanceof JDefinedClass) {
+			JDefinedClass getTheClass = (JDefinedClass) typeClass;
+			ClassType shouldHaveEnum = getTheClass.getClassType();
+			if (ClassType.ENUM == shouldHaveEnum) {
+				return value.invoke("name");
+			}
+		}
+
+		if (type.isPrimitive() || TYPE.NUMBER == type || TYPE.BOOLEAN == type) {
+			return value;
+		}
+		if (TYPE.STRING == type) {
+			return assignPropertyToJSONString(typeClass.owner(), param, typeSchema, value);
+		} else if (TYPE.INTEGER == type) {
+			return assignPropertyToJSONLong(typeClass.owner(), typeSchema, value);
+		} else if (TYPE.ARRAY == type) {
+			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+		} else if (TYPE.MAP == type) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+		} else {
+			// Now we need to create an object of the the type
+			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
 		}
 	}
 

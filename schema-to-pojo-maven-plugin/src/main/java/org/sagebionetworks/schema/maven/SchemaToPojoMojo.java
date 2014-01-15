@@ -72,11 +72,11 @@ public class SchemaToPojoMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {
 			// Add all of the auto-generated classes to the project
-			project.addCompileSourceRoot(outputDirectory.getPath());
-			// Hard code the factory for now
-			HandlerFactoryImpl03 factory = new HandlerFactoryImpl03();
-			// Generate the classes from their schemas.
-			SchemaToPojo.generatePojos(sourceDirectory, outputDirectory, createRegister, factory);
+			 project.addCompileSourceRoot(outputDirectory.getPath());
+			 // Hard code the factory for now
+			 HandlerFactoryImpl03 factory = new HandlerFactoryImpl03();
+			 // Generate the classes from their schemas.
+			 SchemaToPojo.generatePojos(sourceDirectory, outputDirectory, createRegister, factory);
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to execute mojo: "+e.getMessage(), e);
 		} 

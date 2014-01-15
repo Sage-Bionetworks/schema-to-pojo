@@ -81,15 +81,6 @@
 	            "type":"integer"
 	        },
         },
-        "objectEnumMap":{
-            "type":"map",
-	        "key":{
-	            "type":"object"
-	        },
-	        "value":{
-	            "$ref":"org.sagebionetworks.StandaloneEnum",
-	        },
-        },
         "enumBooleanMap":{
             "type":"map",
 	        "key":{
