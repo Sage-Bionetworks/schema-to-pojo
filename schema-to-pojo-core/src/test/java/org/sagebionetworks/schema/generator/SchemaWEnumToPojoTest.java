@@ -58,7 +58,7 @@ public class SchemaWEnumToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, null, factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, null, factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "DatasetWithEnum.java");
 		System.out.println(result.getAbsolutePath());

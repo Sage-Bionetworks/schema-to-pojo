@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.2</version>
 	<packaging>pom</packaging>
 	<name>schema-to-pojo</name>
 	<description>Container for the rest of the sub-projects</description>
@@ -156,4 +156,21 @@
 			</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<profiles>
+		<profile>
+	      	<id>release-parent-pom</id>
+			<distributionManagement>
+				<repository>
+					<id>sagebionetworks</id>
+					<name>sagebionetworks-releases</name>
+					<url>http://sagebionetworks.artifactoryonline.com/sagebionetworks/plugins-releases-local</url>
+				</repository>
+				<snapshotRepository>
+					<id>sagebionetworks</id>
+					<name>sagebionetworks-snapshots</name>
+					<url>http://sagebionetworks.artifactoryonline.com/sagebionetworks/plugins-snapshots-local</url>
+				</snapshotRepository>
+			</distributionManagement>
+     </profile>
+	</profiles>
 </project>

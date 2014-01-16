@@ -4,8 +4,8 @@ Walk the complete PLFM hierarchy and bring all the pom.xml files up to new minor
 '''
 
 #Old and new minor versions
-oldVersion = '0.1.4.2'
-newVersion = '0.2.0'
+oldVersion = '0.3.1'
+newVersion = '0.3.2'
 #Path to PLFM on your system
 startPath = os.getcwd()
 count = 0;

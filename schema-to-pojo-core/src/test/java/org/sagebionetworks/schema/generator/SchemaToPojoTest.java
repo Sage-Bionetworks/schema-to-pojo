@@ -51,7 +51,7 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "Product.java");
 		System.out.println(result.getAbsolutePath());
@@ -77,7 +77,7 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory);
+		SchemaToPojo.generatePojos(sampleFile, outputDir, "org.sample.Register", factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "org/sample/PackageSample.java");
 		System.out.println(result.getAbsolutePath());

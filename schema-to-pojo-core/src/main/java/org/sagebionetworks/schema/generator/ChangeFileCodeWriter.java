@@ -19,6 +19,7 @@ public class ChangeFileCodeWriter extends CodeWriter {
 
 	/** The target directory to put source code. */
 	private final File target;
+	private final StringBuilder log;
 
 	public class WriteOnChangedOutputStream extends OutputStream {
 
@@ -60,6 +61,7 @@ public class ChangeFileCodeWriter extends CodeWriter {
 					}
 					byte[] md5old = digestOldFile.getMessageDigest().digest();
 					if (MessageDigest.isEqual(md5new, md5old)) {
+						log.append("Not overwriting " + file.toString() + " because it did not change\n");
 						return;
 					}
 				}
@@ -75,8 +77,9 @@ public class ChangeFileCodeWriter extends CodeWriter {
 		}
 	}
 
-	public ChangeFileCodeWriter(File target) throws IOException {
+	public ChangeFileCodeWriter(File target, StringBuilder log) throws IOException {
 		this.target = target;
+		this.log = log;
 	}
 
 	@Override
