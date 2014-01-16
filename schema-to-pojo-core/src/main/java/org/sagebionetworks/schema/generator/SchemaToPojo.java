@@ -32,15 +32,18 @@ public class SchemaToPojo {
 	/**
 	 * Will read all schemas in the passed directory (or file) and create java files for each in the output directory.
 	 * All classes will be created using the provided package name.
+	 * 
 	 * @param schemaSource - can be single schema file or directory of schema files.
 	 * @param outputDir
+	 * @param tmplog
 	 * @param packageName
-	 * @throws IOException 
-	 * @throws JSONException 
-	 * @throws JSONObjectAdapterException 
-	 * @throws ClassNotFoundException 
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws JSONObjectAdapterException
+	 * @throws ClassNotFoundException
 	 */
-	public static void generatePojos(File schemaSource, File outputDir, String createRegister, HandlerFactory factory) throws IOException, JSONObjectAdapterException, ClassNotFoundException{
+	public static void generatePojos(File schemaSource, File outputDir, String createRegister, HandlerFactory factory, StringBuilder log)
+			throws IOException, JSONObjectAdapterException, ClassNotFoundException {
 		if(schemaSource == null) throw new IllegalArgumentException("schemaSource cannot be null");
 		if(outputDir == null) throw new IllegalArgumentException("outputDir cannot be null");
 		if(factory == null) throw new IllegalArgumentException("The HandlerFactory cannot be null");
@@ -108,7 +111,7 @@ public class SchemaToPojo {
 			outputDir.mkdirs();
 		}
 
-		CodeWriter sources = new ChangeFileCodeWriter(outputDir);
+		CodeWriter sources = new ChangeFileCodeWriter(outputDir, log);
 		CodeWriter resources = new FileCodeWriter(outputDir);
 		sources = new ProgressCodeWriter(sources, System.out);
 		resources = new ProgressCodeWriter(resources, System.out);
