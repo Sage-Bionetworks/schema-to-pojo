@@ -14,9 +14,12 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
+import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.writer.FileCodeWriter;
+import com.sun.codemodel.writer.ProgressCodeWriter;
 
 /**
  * Generates DTO type POJOs from JSON schema files.
@@ -56,7 +59,16 @@ public class SchemaToPojo {
 			File file = iterator.next();
 			String string = FileUtil.readToString(file);
 			// Create a new schema
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(string));
+			ObjectSchema schema;
+			try {
+				schema = new ObjectSchema(new JSONObjectAdapterImpl(string));
+			} catch (JSONObjectAdapterException e) {
+				if (e.getCause() instanceof JSONException) {
+					JSONException e2 = (JSONException) e.getCause();
+					throw new JSONObjectAdapterException(file.getAbsolutePath() + ": " + e2.getMessage(), e2);
+				}
+				throw e;
+			}
 			// Now if the schema does not have a name use the file name
 			if(schema.getName() == null){
 				schema.setName(extractSchemaNameFromFileName(file));
@@ -95,7 +107,12 @@ public class SchemaToPojo {
 		if(!outputDir.exists()){
 			outputDir.mkdirs();
 		}
-		codeModel.build(outputDir);
+
+		CodeWriter sources = new ChangeFileCodeWriter(outputDir);
+		CodeWriter resources = new FileCodeWriter(outputDir);
+		sources = new ProgressCodeWriter(sources, System.out);
+		resources = new ProgressCodeWriter(resources, System.out);
+		codeModel.build(sources, resources);
 	}
 	
 	/**
