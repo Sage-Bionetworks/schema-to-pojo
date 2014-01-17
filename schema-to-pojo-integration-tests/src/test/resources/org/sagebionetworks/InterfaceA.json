@@ -1,6 +1,9 @@
 {
     "type":"interface",
     "properties":{
+        "concreteType":{
+            "type":"string"
+        },
         "fromInterfaceA":{
             "type":"string",
             "title":"From Interface A",

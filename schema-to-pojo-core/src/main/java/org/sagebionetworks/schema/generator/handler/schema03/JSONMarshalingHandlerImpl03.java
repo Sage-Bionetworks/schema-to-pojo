@@ -22,6 +22,8 @@ import com.sun.codemodel.*;
 
 public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
+	private static final String VAR_PREFIX = "__";
+
 	@Override
 	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, JDefinedClass createRegister) {
 		// There is nothing to do for interfaces.
@@ -206,12 +208,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 									.narrow(arrayTypeClass)));
 				}
 				// Create a local array
-				JVar jsonArray = thenBlock
-						.decl(classType.owner().ref(JSONArrayAdapter.class),
-								"jsonArray",
-								param.invoke("getJSONArray").arg(propName));
+				JVar jsonArray = thenBlock.decl(classType.owner().ref(JSONArrayAdapter.class), VAR_PREFIX + "jsonArray",
+						param.invoke("getJSONArray").arg(propName));
 				JForLoop loop = thenBlock._for();
-				JVar i = loop.init(classType.owner().INT, "i", JExpr.lit(0));
+				JVar i = loop.init(classType.owner().INT, VAR_PREFIX + "i", JExpr.lit(0));
 				loop.test(i.lt(jsonArray.invoke("length")));
 				loop.update(i.incr());
 				JBlock loopBody = loop.body();
@@ -219,9 +219,16 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
 					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
 					// first get the JSONObject for this array element
-					JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), "indexAdapter", jsonArray.invoke("getJSONObject").arg(i));
+					JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
+							.invoke("getJSONObject").arg(i));
 					// Create the object from the register
-					JVar indexObject = loopBody.decl(arrayTypeClass, "indexObject", JExpr.cast(arrayTypeClass, createRegister.staticInvoke("singleton").invoke("newInstance").arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
+					JVar indexObject = loopBody.decl(
+							arrayTypeClass,
+							VAR_PREFIX + "indexObject",
+							JExpr.cast(
+									arrayTypeClass,
+									createRegister.staticInvoke("singleton").invoke("newInstance")
+											.arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					// Initialize the object from the adapter.
 					loopBody.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
 					// add the object to the list
@@ -251,16 +258,36 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				thenBlock.assign(
 						field,
 						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass,valueTypeClass)));
+				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "jsonMap", param.invoke("getJSONMap")
+						.arg(propName));
 
 				JType keyObject = classType.owner().ref(Object.class);
-				JForEach loop = thenBlock.forEach(keyObject, "keyObject", param.invoke("getJSONMap").arg(propName).invoke("keys"));
+				JForEach loop = thenBlock.forEach(keyObject, VAR_PREFIX + "keyObject", jsonMap.invoke("keys"));
 				JBlock loopBody = loop.body();
-				JVar value = loopBody.decl(
-						valueTypeClass,
-						"value",
-						createExpressionToGetFromMap(param, param.invoke("getJSONMap").arg(propName), loop.var(), valueTypeSchema,
-								valueTypeClass));
-				JVar key = loopBody.decl(keyTypeClass, "key", createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
+				// Handle abstract classes and interfaces
+				JVar value;
+				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
+					if (createRegister == null)
+						throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					// first get the JSONObject for this array element
+					JVar valueAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter", jsonMap
+							.invoke("getJSONObject").arg(loop.var()));
+					// Create the object from the register
+					value = loopBody.decl(
+							valueTypeClass,
+							VAR_PREFIX + "value",
+							JExpr.cast(
+									valueTypeClass,
+									createRegister.staticInvoke("singleton").invoke("newInstance")
+											.arg(valueAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
+					// Initialize the object from the adapter.
+					loopBody.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+				} else {
+					value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value",
+							createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
+				}
+				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
+						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
 				loopBody.add(field.invoke("put").arg(key).arg(value));
 			} else {
 				// First extract the type
@@ -269,7 +296,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				if(typeClass.isInterface() || typeClass.isAbstract()){
 					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize an interfaces or abstract classes.");
 					// Use the register to create the class
-					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), "localAdapter", param.invoke("getJSONObject").arg(propName));
+					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
+							.invoke("getJSONObject").arg(propName));
 					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(localAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					thenBlock.add(field.invoke("initializeFromJSONObject").arg(localAdapter));
 
@@ -456,7 +484,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 	}
 	
-	protected JExpression createExpressionToGetFromMap(JVar adapter, JInvocation jsonMap, JVar jsonKey, ObjectSchema typeSchema,
+	protected JExpression createExpressionToGetFromMap(JVar adapter, JExpression jsonMap, JVar jsonKey, ObjectSchema typeSchema,
 			JClass typeClass) {
 		TYPE type = typeSchema.getType();
 		FORMAT format = typeSchema.getFormat();
@@ -635,16 +663,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					throw new IllegalArgumentException(
 							"TYPE cannot be null for an ObjectSchema");
 				// Create the new JSONArray
-				JVar array = thenBlock.decl(JMod.NONE,
-						classType.owner().ref(JSONArrayAdapter.class), "array",
+				JVar array = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONArrayAdapter.class), VAR_PREFIX + "array",
 						param.invoke("createNewArray"));
-				JVar it = thenBlock.decl(
-						JMod.NONE,
-						classType.owner().ref(Iterator.class)
-								.narrow(arrayTypeClass), "it",
+				JVar it = thenBlock.decl(JMod.NONE, classType.owner().ref(Iterator.class).narrow(arrayTypeClass), VAR_PREFIX + "it",
 						field.invoke("iterator"));
-				JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT,
-						"index", JExpr.lit(0));
+				JVar index = thenBlock.decl(JMod.NONE, classType.owner().INT, VAR_PREFIX + "index", JExpr.lit(0));
 				// Create a local array
 				JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
 				JBlock loopBody = loop.body();
@@ -653,7 +676,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 						.arg(index)
 						.arg(createExpresssionToSetFromArray(arrayTypeSchema,
 								arrayTypeClass, it, param)));
-				loopBody.directStatement("index++;");
+				loopBody.directStatement(VAR_PREFIX + "index++;");
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
 			} else if (TYPE.MAP == type) {
@@ -671,9 +694,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 
 				// Create the new JSONArray
-				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONMapAdapter.class), "map", param.invoke("createNewMap"));
+				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "map",
+						param.invoke("createNewMap"));
 				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
-				JForEach loop = thenBlock.forEach(entry, "entry", field.invoke("entrySet"));
+				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();
 				loopBody.add(map.invoke("put").arg(loop.var().invoke("getKey"))
 						.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));

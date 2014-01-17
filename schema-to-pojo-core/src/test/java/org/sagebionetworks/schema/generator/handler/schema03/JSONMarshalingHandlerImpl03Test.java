@@ -9,8 +9,8 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -478,9 +478,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter localAdapter = adapter.getJSONObject(\"propName\");") > 0);
-		assertTrue(methodString.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(localAdapter.getString(\"concreteType\")));") > 0);
-		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(localAdapter);") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(\"propName\");") > 0);
+		assertTrue(methodString
+				.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
+		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(__localAdapter);") > 0);
 	}
 	
 	@Test
@@ -520,10 +522,12 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter indexAdapter = jsonArray.getJSONObject(i);") > 0);
-		assertTrue(methodString.indexOf("org.sample.SampleInterface indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(indexAdapter.getString(\"concreteType\")));") > 0);
-		assertTrue(methodString.indexOf("indexObject.initializeFromJSONObject(indexAdapter);") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(indexObject);") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);") > 0);
+		assertTrue(methodString
+				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
+		assertTrue(methodString.indexOf("__indexObject.initializeFromJSONObject(__indexAdapter);") > 0);
+		assertTrue(methodString.indexOf("arrayName.add(__indexObject);") > 0);
 	}
 	
 	@Test
@@ -563,8 +567,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<java.lang.String>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(jsonArray.getString(i));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
+		assertTrue(methodString.indexOf("arrayName.add(__jsonArray.getString(__i));") > 0);
 	}
 	
 	@Test
@@ -611,8 +616,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<Sample>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(new Sample(jsonArray.getJSONObject(i)))") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
+		assertTrue(methodString.indexOf("arrayName.add(new Sample(__jsonArray.getJSONObject(__i)))") > 0);
 	}
 	
 	@Test
@@ -890,13 +896,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
-		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> it = arrayName.iterator();") > 0);
-		assertTrue(methodString.indexOf("int index = 0;") > 0);
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
-		assertTrue(methodString.indexOf("index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayName\", array);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> __it = arrayName.iterator();") > 0);
+		assertTrue(methodString.indexOf("int __index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("__index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"arrayName\", __array);") > 0);
 	}
 	
 	@Test
@@ -921,13 +927,14 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("if (arrayDates!= null) {") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
-		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> it = arrayDates.iterator();") > 0);
-		assertTrue(methodString.indexOf("int index = 0;") > 0);
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), it.next()));") > 0);
-		assertTrue(methodString.indexOf("index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", array);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> __it = arrayDates.iterator();") > 0);
+		assertTrue(methodString.indexOf("int __index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString
+				.indexOf("array.put(__index, adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __it.next()));") > 0);
+		assertTrue(methodString.indexOf("__index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
 	}
 	
 	@Test
@@ -952,13 +959,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("if (arrayDates!= null) {") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
-		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> it = arrayDates.iterator();") > 0);
-		assertTrue(methodString.indexOf("int index = 0;") > 0);
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next().getTime());") > 0);
-		assertTrue(methodString.indexOf("index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", array);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> __it = arrayDates.iterator();") > 0);
+		assertTrue(methodString.indexOf("int __index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next().getTime());") > 0);
+		assertTrue(methodString.indexOf("__index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
 	}
 	
 	@Test
@@ -982,13 +989,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("if (longList!= null) {") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
-		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Long> it = longList.iterator();") > 0);
-		assertTrue(methodString.indexOf("int index = 0;") > 0);
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
-		assertTrue(methodString.indexOf("index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"longList\", array);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Long> __it = longList.iterator();") > 0);
+		assertTrue(methodString.indexOf("int __index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("__index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"longList\", __array);") > 0);
 	}
 	
 	@Test
@@ -1012,13 +1019,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("if (doubleList!= null) {") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter array = adapter.createNewArray();") > 0);
-		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Double> it = doubleList.iterator();") > 0);
-		assertTrue(methodString.indexOf("int index = 0;") > 0);
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
-		assertTrue(methodString.indexOf("index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"doubleList\", array);") > 0);
+		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Double> __it = doubleList.iterator();") > 0);
+		assertTrue(methodString.indexOf("int __index = 0;") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("__index++;") > 0);
+		assertTrue(methodString.indexOf("adapter.put(\"doubleList\", __array);") > 0);
 	}
 	
 	@Test
@@ -1042,8 +1049,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 //		System.out.println(declareToString(constructor));
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("while (it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0);
+		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
 	}
 	
 	@Test
@@ -1065,7 +1072,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("array.put(index, it.next().writeToJSONObject(adapter.createNew()));") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, __it.next().writeToJSONObject(adapter.createNew()));") > 0);
 	}
 	
 	@Test
@@ -1242,9 +1249,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("dateList = new java.util.ArrayList<java.util.Date>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("dateList.add(adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), jsonArray.getString(i)));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString
+				.indexOf("dateList.add(adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __jsonArray.getString(__i)));") > 0);
 	}
 	
 	@Test
@@ -1277,9 +1286,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("if (!adapter.isNull(\"longList\")) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("longList = new java.util.ArrayList<java.lang.Long>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"longList\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("longList.add(jsonArray.getLong(i));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"longList\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("longList.add(__jsonArray.getLong(__i));") > 0);
 	}
 	
 	@Test
@@ -1312,9 +1322,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("if (!adapter.isNull(\"doubleList\")) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("doubleList = new java.util.ArrayList<java.lang.Double>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"doubleList\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("doubleList.add(jsonArray.getDouble(i));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"doubleList\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("doubleList.add(__jsonArray.getDouble(__i));") > 0);
 	}
 	@Test
 	public void testCreateMethodInitializeFromJSONDateListUtcMilisec() throws Exception {
@@ -1347,9 +1358,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("dateList = new java.util.ArrayList<java.util.Date>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("dateList.add(new java.util.Date(jsonArray.getLong(i)));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("dateList.add(new java.util.Date(__jsonArray.getLong(__i)));") > 0);
 	}
 	/**
 	 * Tests that initializeFromJSONObject works for properties 
@@ -1541,9 +1553,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		//check that array of enumeration got created successfully, and 
 		//assignments are correct
 		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(jsonArray.getString(i)));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(__jsonArray.getString(__i)));") > 0);
 	}
 	
 	/**
@@ -1602,15 +1615,17 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//check that everything was created correctly for the array with an enum
 		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(jsonArray.getString(i)));") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(__jsonArray.getString(__i)));") > 0);
 		
 		//check that everything was created correctly for the array without an enum
 		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();") > 0);
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsNotEnum\");") > 0);
-		assertTrue(methodString.indexOf("for (int i = 0; (i<jsonArray.length()); i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add(jsonArray.getString(i));") > 0);       
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsNotEnum\");") > 0);
+		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add(__jsonArray.getString(__i));") > 0);
 	}
 	
 	/**
@@ -1654,7 +1669,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		
 		//make sure everything was created correctly
-		assertTrue(methodString.indexOf("array.put(index, it.next().name());") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, __it.next().name());") > 0);
 	}
 	
 	/**
@@ -1710,11 +1725,127 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(method);
 		
 		//make sure everything is in order for the property that has an enum
-		assertTrue(methodString.indexOf("java.util.Iterator<org.sample.Animals> it = arrayWhoseItemIsAnEnum.iterator();") > 0);
-		assertTrue(methodString.indexOf(" array.put(index, it.next().name());") > 0);
+		assertTrue(methodString.indexOf("java.util.Iterator<org.sample.Animals> __it = arrayWhoseItemIsAnEnum.iterator();") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, __it.next().name());") > 0);
 		
 		//make sure everything is in order for the property that does not have an enum
-		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> it = arrayWhoseItemIsNotEnum.iterator();") > 0);
-		assertTrue(methodString.indexOf("array.put(index, it.next());") > 0); 
+		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> __it = arrayWhoseItemIsNotEnum.iterator();") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, __it.next());") > 0);
 	}
+
+	/**
+	 * Tests that an schema that has a property of type MAP, whose item is an enumeration is supported in
+	 * initializeFromJSONObject methods created by handler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectMapWithKeyValueEnumItem() throws Exception {
+		// create a property that is an Map
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.MAP);
+		String propName = "mapWhoseItemIsAnEnum";
+
+		// create an enum ObjectSchema and add it to propertySchema's items
+		// it must have a name, id, and it's type must be STRING
+		// it must have an enum defined
+		ObjectSchema keyEnum = new ObjectSchema();
+		keyEnum.setType(TYPE.STRING);
+		keyEnum.setName("Animals");
+		keyEnum.setId("Animals");
+		keyEnum.setEnum(new String[] { "puppy", "mouse", "elephant" });
+
+		ObjectSchema valueEnum = new ObjectSchema();
+		valueEnum.setType(TYPE.STRING);
+		valueEnum.setName("Pets");
+		valueEnum.setId("pets");
+		valueEnum.setEnum(new String[] { "dog", "cat" });
+
+		// add enum to property's key and value
+		propertySchema.setKey(keyEnum);
+		propertySchema.setValue(valueEnum);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to sampleClass
+		codeModel._package("org.sample");
+		JDefinedClass testKeyClass = _package._enum("Animals");
+		testKeyClass.enumConstant("puppy");
+		testKeyClass.enumConstant("mouse");
+		testKeyClass.enumConstant("elephant");
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+
+		// check that map of enumeration got created successfully, and
+		// assignments are correct
+		assertTrue(methodString.indexOf("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();") > 0);
+		assertTrue(methodString
+				.indexOf("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(\"mapWhoseItemIsAnEnum\");") > 0);
+		assertTrue(methodString.indexOf("org.sample.Pets __value = org.sample.Pets.valueOf(__jsonMap.getString(__keyObject));") > 0);
+		assertTrue(methodString.indexOf("org.sample.Animals __key = org.sample.Animals.valueOf(((java.lang.String) __keyObject));") > 0);
+		assertTrue(methodString.indexOf("mapWhoseItemIsAnEnum.put(__key, __value);") > 0);
+	}
+
+	/**
+	 * Tests that writeToJSONObject works for Array type that has an Enum for it's key.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testWriteToJSONObjectMapWKeyEnum() throws Exception {
+		// make an array property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.MAP);
+		String propName = "arrayPropWithEnum";
+
+		// make the ObjectSchema that represents the array's items that contains an enum
+		ObjectSchema keyEnum = new ObjectSchema();
+		keyEnum.setType(TYPE.STRING);
+		keyEnum.setName("Animals");
+		keyEnum.setId("Animals");
+		keyEnum.setEnum(new String[] { "puppy", "mouse", "elephant" });
+
+		ObjectSchema valueEnum = new ObjectSchema();
+		valueEnum.setType(TYPE.STRING);
+		valueEnum.setName("Pets");
+		valueEnum.setId("pets");
+		valueEnum.setEnum(new String[] { "dog", "cat" });
+
+		// add enum to property's key and value
+		propertySchema.setKey(keyEnum);
+		propertySchema.setValue(valueEnum);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to test JDefinedClass
+		codeModel._package("org.sample");
+		JDefinedClass testKeyClass = _package._enum("Animals");
+		testKeyClass.enumConstant("puppy");
+		testKeyClass.enumConstant("mouse");
+		testKeyClass.enumConstant("elephant");
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+
+		// make sure everything was created correctly
+		assertTrue(methodString.indexOf("__map.put(__entry.getKey(), __entry.getValue().name())") > 0);
+	}
+
 }
