@@ -1,0 +1,23 @@
+{
+    "type":"object",
+    "properties":{
+        "map":{
+            "type":"map",
+            "key":{
+            	"type":"string"
+            },
+            "value":{
+            	"$ref":"org.sagebionetworks.InterfaceA"
+            }
+        },
+        "mapConcrete":{
+            "type":"map",
+            "key":{
+            	"type":"string"
+            },
+            "value":{
+            	"$ref":"org.sagebionetworks.ABImpl"
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "type":"object",
+    "properties":{
+        "fromMe2":{
+            "type":"string"
+        }
+    },
+    "implements":[
+        {
+            "$ref":"org.sagebionetworks.InterfaceB",
+        },
+    ]
+}
