@@ -188,7 +188,7 @@ public class ObjectSchemaTest {
 		
 		validateSchemaRoundTrip(example);
 	}
-	
+
 	/**
 	 * Given an ObjectSchema, first write it to JSON, then create a clone from the JSON. Finally, validates that the original schema
 	 * and the clone are equal.
