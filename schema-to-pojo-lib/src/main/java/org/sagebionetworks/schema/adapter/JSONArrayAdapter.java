@@ -88,13 +88,13 @@ public interface JSONArrayAdapter extends JSONAdapter{
     
     public JSONArrayAdapter put(int index, String value) throws JSONObjectAdapterException;
     
-    public JSONArrayAdapter put(int index, long value) throws JSONObjectAdapterException;
+	public JSONArrayAdapter put(int index, Long value) throws JSONObjectAdapterException;
     
-    public JSONArrayAdapter put(int index, double value) throws JSONObjectAdapterException;
+	public JSONArrayAdapter put(int index, Double value) throws JSONObjectAdapterException;
     
-    public JSONArrayAdapter put(int index, boolean value) throws JSONObjectAdapterException;
+	public JSONArrayAdapter put(int index, Boolean value) throws JSONObjectAdapterException;
     
-    public JSONArrayAdapter put(int index, int value) throws JSONObjectAdapterException;
+	public JSONArrayAdapter put(int index, Integer value) throws JSONObjectAdapterException;
     
     /**
      * Dates put here will be FORMAT.UTC_MILLISEC

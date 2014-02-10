@@ -569,7 +569,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<java.lang.String>();") > 0);
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(__jsonArray.getString(__i));") > 0);
+		assertTrue(methodString.indexOf("arrayName.add((__jsonArray.isNull(__i)?null:__jsonArray.getString(__i)));") > 0);
 	}
 	
 	@Test
@@ -618,7 +618,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<Sample>();") > 0);
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(new Sample(__jsonArray.getJSONObject(__i)))") > 0);
+		assertTrue(methodString.indexOf("arrayName.add((__jsonArray.isNull(__i)?null:new Sample(__jsonArray.getJSONObject(__i))));") > 0);
 	}
 	
 	@Test
@@ -900,7 +900,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> __it = arrayName.iterator();") > 0);
 		assertTrue(methodString.indexOf("int __index = 0;") > 0);
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("String __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"arrayName\", __array);") > 0);
 	}
@@ -931,8 +932,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> __it = arrayDates.iterator();") > 0);
 		assertTrue(methodString.indexOf("int __index = 0;") > 0);
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
+		assertTrue(methodString.indexOf("java.util.Date __value = __it.next();") > 0);
 		assertTrue(methodString
-				.indexOf("array.put(__index, adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __it.next()));") > 0);
+				.indexOf("__array.put(__index, ((__value == null)?null:adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __value)));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
 	}
@@ -963,7 +965,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Iterator<java.util.Date> __it = arrayDates.iterator();") > 0);
 		assertTrue(methodString.indexOf("int __index = 0;") > 0);
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(__index, __it.next().getTime());") > 0);
+		assertTrue(methodString.indexOf("java.util.Date __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value.getTime()));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
 	}
@@ -993,7 +996,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Long> __it = longList.iterator();") > 0);
 		assertTrue(methodString.indexOf("int __index = 0;") > 0);
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("java.lang.Long __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"longList\", __array);") > 0);
 	}
@@ -1023,7 +1027,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.Double> __it = doubleList.iterator();") > 0);
 		assertTrue(methodString.indexOf("int __index = 0;") > 0);
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("java.lang.Double __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
 		assertTrue(methodString.indexOf("adapter.put(\"doubleList\", __array);") > 0);
 	}
@@ -1050,7 +1055,8 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(declareToString(constructor));
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("while (__it.hasNext()) {") > 0);
-		assertTrue(methodString.indexOf("array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("String __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 	}
 	
 	@Test
@@ -1072,7 +1078,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("__array.put(__index, __it.next().writeToJSONObject(adapter.createNew()));") > 0);
+		assertTrue(methodString.indexOf("Sample __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value.writeToJSONObject(adapter.createNew())));") > 0);
 	}
 	
 	@Test
@@ -1253,7 +1260,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString
-				.indexOf("dateList.add(adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __jsonArray.getString(__i)));") > 0);
+				.indexOf("dateList.add((__jsonArray.isNull(__i)?null:adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __jsonArray.getString(__i))));") > 0);
 	}
 	
 	@Test
@@ -1289,7 +1296,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"longList\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("longList.add(__jsonArray.getLong(__i));") > 0);
+		assertTrue(methodString.indexOf("longList.add((__jsonArray.isNull(__i)?null:__jsonArray.getLong(__i)));") > 0);
 	}
 	
 	@Test
@@ -1325,7 +1332,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"doubleList\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("doubleList.add(__jsonArray.getDouble(__i));") > 0);
+		assertTrue(methodString.indexOf("doubleList.add((__jsonArray.isNull(__i)?null:__jsonArray.getDouble(__i)));") > 0);
 	}
 	@Test
 	public void testCreateMethodInitializeFromJSONDateListUtcMilisec() throws Exception {
@@ -1361,7 +1368,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("dateList.add(new java.util.Date(__jsonArray.getLong(__i)));") > 0);
+		assertTrue(methodString.indexOf("dateList.add((__jsonArray.isNull(__i)?null:new java.util.Date(__jsonArray.getLong(__i))));") > 0);
 	}
 	/**
 	 * Tests that initializeFromJSONObject works for properties 
@@ -1556,7 +1563,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(__jsonArray.getString(__i)));") > 0);
+		assertTrue(methodString
+				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));") > 0);
 	}
 	
 	/**
@@ -1618,14 +1626,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum.add(org.sample.Animals.valueOf(__jsonArray.getString(__i)));") > 0);
+		assertTrue(methodString
+				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));") > 0);
 		
 		//check that everything was created correctly for the array without an enum
 		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();") > 0);
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsNotEnum\");") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add(__jsonArray.getString(__i));") > 0);
+		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add((__jsonArray.isNull(__i)?null:__jsonArray.getString(__i)));") > 0);
 	}
 	
 	/**
@@ -1669,7 +1678,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		
 		//make sure everything was created correctly
-		assertTrue(methodString.indexOf("array.put(__index, __it.next().name());") > 0);
+		assertTrue(methodString.indexOf("org.sample.Animals __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:__value.name()));") > 0);
 	}
 	
 	/**
@@ -1726,11 +1736,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//make sure everything is in order for the property that has an enum
 		assertTrue(methodString.indexOf("java.util.Iterator<org.sample.Animals> __it = arrayWhoseItemIsAnEnum.iterator();") > 0);
-		assertTrue(methodString.indexOf("__array.put(__index, __it.next().name());") > 0);
+		assertTrue(methodString.indexOf("org.sample.Animals __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:__value.name()));") > 0);
 		
 		//make sure everything is in order for the property that does not have an enum
 		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> __it = arrayWhoseItemIsNotEnum.iterator();") > 0);
-		assertTrue(methodString.indexOf("__array.put(__index, __it.next());") > 0);
+		assertTrue(methodString.indexOf("java.lang.String __value = __it.next();") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:__value));") > 0);
 	}
 
 	/**

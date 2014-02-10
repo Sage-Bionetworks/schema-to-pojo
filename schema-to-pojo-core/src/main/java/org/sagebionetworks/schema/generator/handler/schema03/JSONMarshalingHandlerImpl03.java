@@ -218,11 +218,18 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Handle abstract classes and interfaces
 				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
 					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					JConditional ifNull = loopBody._if(jsonArray.invoke("isNull").arg(i));
+					// if null
+					JBlock ifNulThenBlock = ifNull._then();
+					// then add(null)
+					ifNulThenBlock.add(field.invoke("add").arg(JExpr._null()));
+					// else add(value)
+					JBlock ifNullElseBlock = ifNull._else();
 					// first get the JSONObject for this array element
-					JVar indexAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
+					JVar indexAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
 							.invoke("getJSONObject").arg(i));
 					// Create the object from the register
-					JVar indexObject = loopBody.decl(
+					JVar indexObject = ifNullElseBlock.decl(
 							arrayTypeClass,
 							VAR_PREFIX + "indexObject",
 							JExpr.cast(
@@ -230,14 +237,14 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 									createRegister.staticInvoke("singleton").invoke("newInstance")
 											.arg(indexAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					// Initialize the object from the adapter.
-					loopBody.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
+					ifNullElseBlock.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
 					// add the object to the list
-					loopBody.add(field.invoke("add").arg(indexObject));
+					ifNullElseBlock.add(field.invoke("add").arg(indexObject));
 				}else{
 					// concrete classes
 					loopBody.add(field.invoke("add").arg(
-							createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema,
-									arrayTypeClass, i)));
+							createIsNullCheck(jsonArray, i,
+									createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema, arrayTypeClass, i))));
 				}
 
 			} else if (TYPE.MAP == type) {
@@ -337,6 +344,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	}
 
 
+
+	private JExpression createIsNullCheck(JVar jsonArray, JVar index, JExpression createExpresssionToGetFromArray) {
+		return JOp.cond(jsonArray.invoke("isNull").arg(index), JExpr._null(), createExpresssionToGetFromArray);
+	}
 
 	/**
 	 * Assign a JSON String to a property.  The format determines how it will be treated.
@@ -671,11 +682,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Create a local array
 				JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
 				JBlock loopBody = loop.body();
-				loopBody.add(array
-						.invoke("put")
-						.arg(index)
-						.arg(createExpresssionToSetFromArray(arrayTypeSchema,
-								arrayTypeClass, it, param)));
+				JVar value = loopBody.decl(arrayTypeClass, VAR_PREFIX + "value", it.invoke("next"));
+				loopBody.add(array.invoke("put").arg(index)
+						.arg(createEqNullCheck(value, createExpresssionToSetFromArray(arrayTypeSchema, arrayTypeClass, value, param))));
 				loopBody.directStatement(VAR_PREFIX + "index++;");
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(array));
@@ -725,25 +734,27 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 	}
 	
-	protected JExpression createExpresssionToSetFromArray(ObjectSchema arrayTypeSchema, JClass arrayTypeClass, JVar iterator, JVar param){
+	private JExpression createEqNullCheck(JVar value, JExpression createExpresssionToSetFromArray) {
+		return JOp.cond(value.eq(JExpr._null()), JExpr._null(), createExpresssionToSetFromArray);
+	}
+
+	protected JExpression createExpresssionToSetFromArray(ObjectSchema arrayTypeSchema, JClass arrayTypeClass, JVar value, JVar param) {
 		TYPE arrayType = arrayTypeSchema.getType();
-		FORMAT arrayFormat = arrayTypeSchema.getFormat();
 		//need to determine if we are dealing with an array of enumerations
 		if (!arrayTypeClass.isPrimitive() && !arrayTypeClass.fullName().equals("java.lang.String") && arrayTypeClass instanceof JDefinedClass){
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
-				return iterator.invoke("next").invoke("name");
+				return value.invoke("name");
 			}
 		}
 		
 		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
-			return iterator.invoke("next");
+			return value;
 		}if(TYPE.STRING == arrayType){
-			JExpression stringValue = iterator.invoke("next");
+			JExpression stringValue = value;
 			return assignPropertyToJSONString(arrayTypeClass.owner(), param, arrayTypeSchema, stringValue); 
 		}else if(TYPE.INTEGER == arrayType){
-			JExpression value = iterator.invoke("next");
 			return assignPropertyToJSONLong(arrayTypeClass.owner(), arrayTypeSchema, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
@@ -751,7 +762,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
-			return iterator.invoke("next").invoke("writeToJSONObject").arg(param.invoke("createNew"));
+			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
 		}
 	}
 

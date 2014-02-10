@@ -134,7 +134,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 			throws JSONObjectAdapterException {
 		JSONArrayAdapterImpl impl = (JSONArrayAdapterImpl) value;
 		try {
-			wrapped.put(index, impl.wrapped);
+			wrapped.put(index, value == null ? JSONObject.NULL : impl.wrapped);
 			return this;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
@@ -145,7 +145,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	public JSONArrayAdapter put(int index, JSONObjectAdapter value)	throws JSONObjectAdapterException {
 		JSONObjectAdapterImpl impl = (JSONObjectAdapterImpl) value;
 		try {
-			wrapped.put(index, impl.wrapped);
+			wrapped.put(index, value == null ? JSONObject.NULL : impl.wrapped);
 			return this;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
@@ -164,7 +164,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, long value)
+	public JSONArrayAdapter put(int index, Long value)
 			throws JSONObjectAdapterException {
 		try {
 			wrapped.put(index, value);
@@ -175,7 +175,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, double value)
+	public JSONArrayAdapter put(int index, Double value)
 			throws JSONObjectAdapterException {
 		try {
 			wrapped.put(index, value);
@@ -186,7 +186,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, boolean value)
+	public JSONArrayAdapter put(int index, Boolean value)
 			throws JSONObjectAdapterException {
 		try {
 			wrapped.put(index, value);
@@ -197,7 +197,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, int value)
+	public JSONArrayAdapter put(int index, Integer value)
 			throws JSONObjectAdapterException {
 		try {
 			wrapped.put(index, value);

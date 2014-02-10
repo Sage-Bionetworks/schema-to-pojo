@@ -72,6 +72,18 @@
             },
             
         },
+        "interfaceList":{
+            "type":"array",
+            "items":{
+        		"$ref":"org.sagebionetworks.InterfaceA"
+        	}
+        },
+        "enumList":{
+            "type":"array",
+            "items":{
+        		"$ref":"org.sagebionetworks.StandaloneEnum"
+        	}
+        },
         "stringIntegerMap":{
             "type":"map",
 	        "key":{

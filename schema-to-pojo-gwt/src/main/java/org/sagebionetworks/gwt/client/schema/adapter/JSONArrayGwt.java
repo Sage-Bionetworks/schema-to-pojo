@@ -102,7 +102,7 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 	public JSONArrayAdapter put(int index, JSONArrayAdapter value)
 			throws JSONObjectAdapterException {
 		if(value == null){
-			this.wrapped.set(index, null);
+			this.wrapped.set(index, JSONNull.getInstance());
 		}else{
 			JSONArrayGwt impl = (JSONArrayGwt) value;
 			// Pass the wrapped object to the wrapped.
@@ -116,7 +116,7 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 	public JSONArrayAdapter put(int index, JSONObjectAdapter value)
 			throws JSONObjectAdapterException {
 		if(value == null){
-			this.wrapped.set(index, null);
+			this.wrapped.set(index, JSONNull.getInstance());
 		}else{
 			JSONObjectGwt impl = (JSONObjectGwt) value;
 			this.wrapped.set(index, impl.wrapped);
@@ -128,7 +128,7 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 	public JSONArrayAdapter put(int index, String value)
 			throws JSONObjectAdapterException {
 		if(value == null){
-			this.wrapped.set(index, null);
+			this.wrapped.set(index, JSONNull.getInstance());
 		}else{
 			this.wrapped.set(index, new JSONString(value));
 		}
@@ -143,30 +143,46 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, long value)
+	public JSONArrayAdapter put(int index, Long value)
 			throws JSONObjectAdapterException {
-		this.wrapped.set(index, JSONValueUtil.createJSONNumberForLong(value));
+		if (value == null) {
+			this.wrapped.set(index, JSONNull.getInstance());
+		} else {
+			this.wrapped.set(index, JSONValueUtil.createJSONNumberForLong(value));
+		}
 		return this;
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, double value)
+	public JSONArrayAdapter put(int index, Double value)
 			throws JSONObjectAdapterException {
-		this.wrapped.set(index, new JSONNumber(value));
+		if (value == null) {
+			this.wrapped.set(index, JSONNull.getInstance());
+		} else {
+			this.wrapped.set(index, new JSONNumber(value));
+		}
 		return this;
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, boolean value)
+	public JSONArrayAdapter put(int index, Boolean value)
 			throws JSONObjectAdapterException {
-		this.wrapped.set(index, JSONBoolean.getInstance(value));
+		if (value == null) {
+			this.wrapped.set(index, JSONNull.getInstance());
+		} else {
+			this.wrapped.set(index, JSONBoolean.getInstance(value));
+		}
 		return this;
 	}
 
 	@Override
-	public JSONArrayAdapter put(int index, int value)
+	public JSONArrayAdapter put(int index, Integer value)
 			throws JSONObjectAdapterException {
-		this.wrapped.set(index, new JSONNumber(value));
+		if (value == null) {
+			this.wrapped.set(index, JSONNull.getInstance());
+		} else {
+			this.wrapped.set(index, new JSONNumber(value));
+		}
 		return this;
 	}
 
