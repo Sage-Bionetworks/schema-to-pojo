@@ -417,18 +417,6 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
-	public void testRecursivlyCreateAllTypesMapString() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.STRING);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+String.class.getName()+">", type.fullName());
-	}
-	
-	@Test
 	public void testRecursivlyCreateAllTypesArrayStringSet() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
@@ -452,18 +440,6 @@ public class PojoGeneratorDriverTest {
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Long.class.getName()+">", type.fullName());
-	}
-	
-	@Test
-	public void testRecursivlyCreateAllTypesMapInteger() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.INTEGER);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+Long.class.getName()+">", type.fullName());
 	}
 	
 	@Test
@@ -493,18 +469,6 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
-	public void testRecursivlyCreateAllTypesMapBoolean() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.BOOLEAN);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+Boolean.class.getName()+">", type.fullName());
-	}
-	
-	@Test
 	public void testRecursivlyCreateAllTypesArrayBooleanSet() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
@@ -528,19 +492,6 @@ public class PojoGeneratorDriverTest {
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Double.class.getName()+">", type.fullName());
-	}
-	
-	@Test
-	public void testRecursivlyCreateAllTypesMapNumber() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.NUMBER);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		System.out.println(type.fullName());
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+Double.class.getName()+">", type.fullName());
 	}
 	
 	@Test
@@ -570,18 +521,6 @@ public class PojoGeneratorDriverTest {
 	}
 	
 	@Test
-	public void testRecursivlyCreateAllTypesMapAny() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.ANY);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+Object.class.getName()+">", type.fullName());
-	}
-	
-	@Test
 	public void testRecursivlyCreateAllTypesArrayAnySet() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
@@ -605,18 +544,6 @@ public class PojoGeneratorDriverTest {
 		JType type = driver.createOrGetType(codeModel, schema);
 		assertNotNull(type);
 		assertEquals(List.class.getName()+"<"+Object.class.getName()+">", type.fullName());
-	}
-	
-	@Test
-	public void testRecursivlyCreateAllTypesMapNull() throws ClassNotFoundException{
-		schema.setType(TYPE.MAP);
-		ObjectSchema arrayType = new ObjectSchema();
-		arrayType.setType(TYPE.NULL);
-		schema.setItems(arrayType);
-		JCodeModel codeModel = new JCodeModel();
-		JType type = driver.createOrGetType(codeModel, schema);
-		assertNotNull(type);
-		assertEquals(Map.class.getName()+"<"+String.class.getName()+","+Object.class.getName()+">", type.fullName());
 	}
 	
 	@Test

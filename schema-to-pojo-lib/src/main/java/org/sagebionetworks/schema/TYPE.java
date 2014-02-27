@@ -40,7 +40,7 @@ public enum TYPE {
 	/*
 	 * Value MUST be a map
 	 */
-	MAP("map", false, "[]", "getJSONObject"),
+	MAP("map", false, Map.class.getName(), "getJSONMap()"),
 	/*
 	 * Value MUST be null. Note this is mainly for purpose of being able use
 	 * union types to define nullability. If this type is not included in a

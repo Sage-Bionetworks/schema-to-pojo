@@ -2424,7 +2424,7 @@ public class ObjectSchema implements JSONEntity {
 		} else if (TYPE.BOOLEAN == type) {
 			Object defaultBoolean = adapter.getBoolean(JSON_DEFAULT);
 			schema.setDefault(defaultBoolean);
-		} else if (TYPE.OBJECT == type || TYPE.MAP == type) {
+		} else if (TYPE.OBJECT == type) {
 			Object defaultJSONObject = adapter.getJSONObject(JSON_DEFAULT);
 			schema.setDefault(defaultJSONObject);
 		} else if (TYPE.ARRAY == type) {

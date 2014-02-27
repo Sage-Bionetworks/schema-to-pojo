@@ -33,17 +33,6 @@
             "title":"Date List",
             
         },
-        "dateMap":{
-            "type":"map",
-            "items":{
-                "type":"string",
-                "format":"date-time",
-                
-            },
-            "description":"This is an example of a list of dates",
-            "title":"Date map",
-            
-        },
         
     }
 }

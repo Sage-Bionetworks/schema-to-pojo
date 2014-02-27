@@ -177,14 +177,6 @@ public class ObjectSchemaTest {
 		property.setAdditionalItems(arrayType);
 		example.putAdditionalProperty("array", property);
 		
-		// Add a map
-		property = new ObjectSchema();
-		property.setType(TYPE.MAP);
-		arrayType  = new ObjectSchema();
-		arrayType.setType(TYPE.STRING);
-		property.setAdditionalItems(arrayType);
-		example.putAdditionalProperty("map", property);
-		
 		// Encoding
 		example.setContentEncoding(ENCODING.BINARY);
 		
