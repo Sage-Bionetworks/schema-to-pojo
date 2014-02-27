@@ -71,7 +71,7 @@
 						</execution>
 					</executions>
 				</plugin>
-				<!-- Tell the eclipse m2e plugin to -->
+				<!-- Tell the eclipse m2e pluing to -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

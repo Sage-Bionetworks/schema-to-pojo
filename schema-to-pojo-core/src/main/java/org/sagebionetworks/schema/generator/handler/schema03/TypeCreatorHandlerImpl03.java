@@ -94,6 +94,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				// This is a list
 				return codeModel.ref(List.class).narrow(arrayType);
 			}
+		}else if(TYPE.MAP == schema.getType()){
+			// We must have Items
+			if(arrayType == null) throw new IllegalArgumentException("A schema with TYPE.ARRAY must have a items that defines the type of the array");
+			// Get the array type
+			return codeModel.ref(Map.class).narrow(String.class).narrow(arrayType);
 		}
 		if(TYPE.MAP == schema.getType()){
 			// We must have Items

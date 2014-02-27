@@ -112,7 +112,8 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.MAP == type || 
 					TYPE.OBJECT == type ||
 					TYPE.STRING == type ||
-					TYPE.INTERFACE == type){
+					TYPE.INTERFACE == type ||
+					TYPE.MAP == type){
 				//add an assignment statements to the body
 				body.add(result.invoke("append").arg(keyName + "="));
 				body.add(result.invoke("append").arg(field));

@@ -1,0 +1,50 @@
+{
+    "type":"object",
+    "properties":{
+        "dateMap":{
+            "type":"map",
+            "items":{
+                "type":"string",
+                "format":"date-time",
+                
+            },
+            "description":"This is an example of a list of dates",
+            "title":"Date Map",
+            
+        },
+        "dateMap2":{
+            "type":"map",
+            "items":{
+                "type":"integer",
+                "format":"utc-millisec",
+                
+            },
+            "description":"This is an example of a list of dates",
+            "title":"Date Map",
+            
+        },
+        "longMap":{
+            "type":"map",
+            "items":{
+                "type":"integer",
+                
+            },
+            
+        },
+        "doubleMap":{
+            "type":"map",
+            "items":{
+                "type":"number",
+                
+            },
+            
+        },
+        "stringMap":{
+            "type":"map",
+            "items":{
+                "type":"string",
+            },
+        },
+        
+    }
+}
