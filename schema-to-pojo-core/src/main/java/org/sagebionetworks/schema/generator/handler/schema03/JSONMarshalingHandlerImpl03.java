@@ -16,6 +16,7 @@ import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.*;
@@ -25,7 +26,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	private static final String VAR_PREFIX = "__";
 
 	@Override
-	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, JDefinedClass createRegister) {
+	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, InstanceFactoryGenerator interfaceFactoryGenerator) {
 		// There is nothing to do for interfaces.
 		if(TYPE.INTERFACE == classSchema.getType()){
 			throw new IllegalArgumentException("Cannot add marshaling to an interface");
@@ -35,7 +36,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		createGetJSONSchemaMethod(classSchema, classType);
 	
 		// Create the init method
-		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, createRegister);
+		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, interfaceFactoryGenerator);
 		// setup a constructor.
 		createConstructor(classSchema, classType, initMethod);
 		
@@ -108,7 +109,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @param createRegister 
 	 * @return
 	 */
-	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType, JDefinedClass createRegister) {
+	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType, InstanceFactoryGenerator interfaceFactoryGenerator) {
 		// Now the method that takes a JSONObjectAdapter.
 		JMethod method = createBaseMethod(classSchema, classType, "initializeFromJSONObject");
 		JVar param = method.params().get(0);
@@ -217,7 +218,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
 				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
-					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(arrayTypeClass);
 					JConditional ifNull = loopBody._if(jsonArray.invoke("isNull").arg(i));
 					// if null
 					JBlock ifNulThenBlock = ifNull._then();
@@ -274,8 +276,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Handle abstract classes and interfaces
 				JVar value;
 				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
-					if (createRegister == null)
-						throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					if (interfaceFactoryGenerator == null)
+						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
 					// first get the JSONObject for this array element
 					JVar valueAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter", jsonMap
 							.invoke("getJSONObject").arg(loop.var()));
@@ -301,7 +304,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// If we have a register then we need to use it
 				JClass typeClass = (JClass) field.type();
 				if(typeClass.isInterface() || typeClass.isAbstract()){
-					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize an interfaces or abstract classes.");
+					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(typeClass);
 					// Use the register to create the class
 					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
 							.invoke("getJSONObject").arg(propName));

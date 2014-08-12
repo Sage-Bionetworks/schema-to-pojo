@@ -285,7 +285,13 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema inter = new ObjectSchema();
 		inter.setName("SomeInterface");
 		inter.setType(TYPE.INTERFACE);
-		inter.setId("SomeInterface");
+		inter.setId("example.org.SomeInterface");
+		
+		ObjectSchema impl = new ObjectSchema();
+		impl.setName("SomeInterfaceImpl");
+		impl.setType(TYPE.OBJECT);
+		impl.setId("example.org.SomeInterfaceImpl");
+		impl.setImplements(new ObjectSchema[]{inter});
 		
 		ObjectSchema root = new ObjectSchema();
 		root.setName("Root");
@@ -303,12 +309,13 @@ public class PojoGeneratorDriverTest {
 
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		list.add(inter);
+		list.add(impl);
 		list.add(root);
 //		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 //		List<ObjectSchema> schemaList = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 		JCodeModel codeModel = new JCodeModel();
-		JDefinedClass register = RegisterGenerator.createClassFromFullName(codeModel, "org.example.Register");
-		driver.createAllClasses(codeModel, list, register);
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, list);
+		driver.createAllClasses(codeModel, list, ifg);
 	}
 	
 	@Test

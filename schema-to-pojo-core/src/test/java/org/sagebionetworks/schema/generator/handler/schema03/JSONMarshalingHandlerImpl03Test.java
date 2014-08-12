@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
+import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 import org.sagebionetworks.schema.generator.RegisterGenerator;
 
 import com.sun.codemodel.JBlock;
@@ -43,7 +45,6 @@ public class JSONMarshalingHandlerImpl03Test {
 	JPackage _package;
 	JDefinedClass sampleClass;
 	JDefinedClass sampleInterface;
-	JDefinedClass registerClass;
 	JType type;
 	ObjectSchema schema;
 	ObjectSchema schemaInterface;
@@ -62,7 +63,6 @@ public class JSONMarshalingHandlerImpl03Test {
 		schemaInterface = new ObjectSchema();
 		schemaInterface.setType(TYPE.INTERFACE);
 		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
-		registerClass = RegisterGenerator.createClassFromFullName(codeModel, "org.sample.Register");
 	}
 
 	@Test
@@ -473,7 +473,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, sampleInterface, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
-		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
@@ -495,7 +496,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
-		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
@@ -517,7 +519,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleInterface), propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
-		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, registerClass);
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);

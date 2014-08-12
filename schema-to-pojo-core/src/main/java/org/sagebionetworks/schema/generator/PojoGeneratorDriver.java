@@ -56,7 +56,7 @@ public class PojoGeneratorDriver {
 	 * @param registerClass
 	 * @throws ClassNotFoundException
 	 */
-	public void createAllClasses(JCodeModel codeModel,	List<ObjectSchema> list, JDefinedClass registerClass) throws ClassNotFoundException {
+	public void createAllClasses(JCodeModel codeModel,	List<ObjectSchema> list, InstanceFactoryGenerator ifg) throws ClassNotFoundException {
 		// The first step is to register all named types and replace all references with
 		// concrete schemas.
 		list = preprocessSchemas(list);
@@ -66,7 +66,7 @@ public class PojoGeneratorDriver {
 		// Now recursively process all of the schema objects
 		for(ObjectSchema schema: list){
 			// Create each POJO
-			createPOJO(codeModel, schema, registerClass);
+			createPOJO(codeModel, schema, ifg);
 		}
 	}
 	
@@ -78,7 +78,7 @@ public class PojoGeneratorDriver {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public JDefinedClass createPOJO(JCodeModel codeModel, ObjectSchema schema, JDefinedClass registerClass) throws ClassNotFoundException{
+	public JDefinedClass createPOJO(JCodeModel codeModel, ObjectSchema schema, InstanceFactoryGenerator ifg) throws ClassNotFoundException{
 		// First create the type for this schema
 		JType type = createOrGetType(codeModel, schema);
 		if(!(type instanceof JDefinedClass)) return null;
@@ -109,7 +109,7 @@ public class PojoGeneratorDriver {
 		}
 		if(TYPE.INTERFACE != schema.getType()){
 			// Add the JSON marshaling
-			factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType, registerClass);
+			factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType, ifg);
 			// Add hash and equals
 			factory.getHashAndEqualsHandler().addHashAndEquals(schema, classType);
 			//add the toString

@@ -95,9 +95,12 @@ public class SchemaToPojo {
 			registerClass = RegisterGenerator.createClassFromFullName(codeModel, createRegister);
 		}
 		
+		// Provides all of the interface factories.
+		InstanceFactoryGenerator interfaceFactoryGenerator = new InstanceFactoryGenerator(codeModel, schemaList);
+		
 		// The drive does the recursive work and drives the handlers
 		PojoGeneratorDriver driver = new PojoGeneratorDriver(factory);
-		driver.createAllClasses(codeModel, schemaList, registerClass);
+		driver.createAllClasses(codeModel, schemaList, interfaceFactoryGenerator);
 		
 	
 		// When provided, create a register for all of the classes in the list.
