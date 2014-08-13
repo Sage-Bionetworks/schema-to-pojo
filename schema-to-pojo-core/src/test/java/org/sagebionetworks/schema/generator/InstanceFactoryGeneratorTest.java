@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
-
+import static org.sagebionetworks.schema.generator.InstanceFactoryGenerator.INSTANCE_FACTORY_SUFFIX;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 
@@ -87,23 +87,23 @@ public class InstanceFactoryGeneratorTest {
 		// There should be a factory for both interfaces.
 		JDefinedClass factoryClass = ifg.getFactoryClass(interfaceOne.getId());
 		assertNotNull(factoryClass);
-		assertEquals("org.example.InterfaceOneInstatanceFactory", factoryClass.fullName());
+		assertEquals("org.example.InterfaceOne"+INSTANCE_FACTORY_SUFFIX, factoryClass.fullName());
 		// This factory should create one, both and three
 		Set<String> expected = new HashSet<String>(Arrays.asList(oneImpl.getId(), bothImpl.getId(), threeImpl.getId()));
-		assertEquals(expected, ifg.getImplementaionIdsForFactory(factoryClass));
+		assertEquals(expected, ifg.getImplementationIdsForFactory(factoryClass));
 		// two
 		factoryClass = ifg.getFactoryClass(interfaceTwo.getId());
 		assertNotNull(factoryClass);
-		assertEquals("org.example.InterfaceTwoInstatanceFactory", factoryClass.fullName());
+		assertEquals("org.example.InterfaceTwo"+INSTANCE_FACTORY_SUFFIX, factoryClass.fullName());
 		// This factory should create two, both and three
 		expected = new HashSet<String>(Arrays.asList(twoImpl.getId(), bothImpl.getId(), threeImpl.getId()));
-		assertEquals(expected, ifg.getImplementaionIdsForFactory(factoryClass));
+		assertEquals(expected, ifg.getImplementationIdsForFactory(factoryClass));
 		// three
 		factoryClass = ifg.getFactoryClass(interfaceThree.getId());
 		assertNotNull(factoryClass);
-		assertEquals("org.example.InterfaceThreeInstatanceFactory", factoryClass.fullName());
+		assertEquals("org.example.InterfaceThree"+INSTANCE_FACTORY_SUFFIX, factoryClass.fullName());
 		// This factory should create just three
 		expected = new HashSet<String>(Arrays.asList(threeImpl.getId()));
-		assertEquals(expected, ifg.getImplementaionIdsForFactory(factoryClass));
+		assertEquals(expected, ifg.getImplementationIdsForFactory(factoryClass));
 	}
 }

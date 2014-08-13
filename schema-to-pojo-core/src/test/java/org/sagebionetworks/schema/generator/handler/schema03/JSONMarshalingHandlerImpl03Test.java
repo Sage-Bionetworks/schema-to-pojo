@@ -492,7 +492,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(\"propName\");") > 0);
 		assertTrue(methodString
-				.indexOf("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstatanceFactory.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
+				.indexOf("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(__localAdapter);") > 0);
 	}
 	
@@ -538,7 +538,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);") > 0);
 		assertTrue(methodString
-				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstatanceFactory.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
+				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("__indexObject.initializeFromJSONObject(__indexAdapter);") > 0);
 		assertTrue(methodString.indexOf("arrayName.add(__indexObject);") > 0);
 	}

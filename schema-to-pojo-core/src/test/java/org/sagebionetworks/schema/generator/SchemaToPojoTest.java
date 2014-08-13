@@ -99,11 +99,11 @@ public class SchemaToPojoTest {
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		// Make sure the register class exists
-		result = new File(outputDir, "InterfaceAInstatanceFactory.java");
+		result = new File(outputDir, "InterfaceAInstanceFactory.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
-		result = new File(outputDir, "InterfaceBInstatanceFactory.java");
+		result = new File(outputDir, "InterfaceBInstanceFactory.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		

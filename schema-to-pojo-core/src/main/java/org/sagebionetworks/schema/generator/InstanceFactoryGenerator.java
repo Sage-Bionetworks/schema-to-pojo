@@ -23,7 +23,7 @@ import com.sun.codemodel.JDefinedClass;
  */
 public class InstanceFactoryGenerator {
 
-	private static final String INSTATANCE_FACTORY_SUFFIX = "InstatanceFactory";
+	public static final String INSTANCE_FACTORY_SUFFIX = "InstanceFactory";
 	JCodeModel codeModel;
 	List<ObjectSchema> allObjects;
 	Map<String, JDefinedClass> interfaceMap = new HashMap<String, JDefinedClass>();
@@ -71,7 +71,7 @@ public class InstanceFactoryGenerator {
 		// Now create a factory for each interface
 		for(String key: map.keySet()){
 			List<ObjectSchema> instanceLis =  map.get(key);
-			JDefinedClass factoryClass = RegisterGenerator.createClassFromFullName(codeModel, key+INSTATANCE_FACTORY_SUFFIX);
+			JDefinedClass factoryClass = RegisterGenerator.createClassFromFullName(codeModel, key+INSTANCE_FACTORY_SUFFIX);
 			implMap.put(factoryClass, instanceLis);
 			factoryForMap.put(factoryClass, key);
 			// Map the interface to the factory
@@ -160,7 +160,7 @@ public class InstanceFactoryGenerator {
 	 * @param factory
 	 * @return
 	 */
-	public Set<String> getImplementaionIdsForFactory(JDefinedClass factoryClass){
+	public Set<String> getImplementationIdsForFactory(JDefinedClass factoryClass){
 		Set<String> list = new HashSet<String>();
 		List<ObjectSchema> instanceList =  implMap.get(factoryClass);
 		if(instanceList != null){
