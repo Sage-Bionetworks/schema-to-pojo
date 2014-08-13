@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.JSONEntity;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCase;
@@ -23,7 +22,6 @@ import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JSwitch;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
@@ -45,7 +43,7 @@ public class RegisterGenerator {
 	 * @param registerClass
 	 * @throws JClassAlreadyExistsException 
 	 */
-	public static JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass) {
+	public static JDefinedClass createRegister(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, String interfaceFullName) {
 	
 		// Only concrete class are added
 		List<ObjectSchema> classList = new ArrayList<ObjectSchema>();
@@ -60,7 +58,7 @@ public class RegisterGenerator {
 		createConstructor(codeModel, classList, regClass, mapRef);
 		
 		// the new instance method
-		createNewInstanceMethod(codeModel, classList, regClass, mapRef);
+		createNewInstanceMethod(codeModel, classList, regClass, mapRef, interfaceFullName);
 
 		createKeySetIterator(codeModel, regClass, mapRef);
 		
@@ -85,13 +83,9 @@ public class RegisterGenerator {
 	 */
 	public static JDefinedClass createClassFromFullName(JCodeModel codeModel,
 			String registerClass) {
-		String packageName = getPackageName(registerClass);
-		String className = getClassName(registerClass);
-		JPackage _package = codeModel._package(packageName);
-		// Create the enum
 		JDefinedClass regClass = null;
 		try {
-			regClass = _package._class(className);
+			regClass = codeModel._class(registerClass);
 		} catch (JClassAlreadyExistsException e) {
 			regClass = e.getExistingClass();
 		}
@@ -123,9 +117,9 @@ public class RegisterGenerator {
 	 * @param list
 	 * @return
 	 */
-	protected static JMethod createNewInstanceMethod(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, JFieldRef mapRef){
+	protected static JMethod createNewInstanceMethod(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, JFieldRef mapRef, String interfaceFullName){
 		// Create the new instance method
-		JType returnType = codeModel.ref(JSONEntity.class);
+		JType returnType = getInterfaceClass(codeModel, interfaceFullName);
 		JMethod method = regClass.method(JMod.PUBLIC, returnType, "newInstance");
 		JVar parm = method.param(codeModel.ref(String.class), "className");
 		JBlock body = method.body();
@@ -160,6 +154,14 @@ public class RegisterGenerator {
 
 		
 		return method;
+	}
+	
+	private static JType getInterfaceClass(JCodeModel codeModel, String fullName){
+		try {
+			return codeModel._class(fullName);
+		} catch (JClassAlreadyExistsException e) {
+			return e.getExistingClass();
+		}
 	}
 
 	/**

@@ -48,6 +48,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	JType type;
 	ObjectSchema schema;
 	ObjectSchema schemaInterface;
+	ObjectSchema schemaInterfaceImpl;
 
 
 	@Before
@@ -59,10 +60,19 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleInterface = _package._interface("SampleInterface");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.OBJECT);
+		
 		// Create a schema interface
 		schemaInterface = new ObjectSchema();
 		schemaInterface.setType(TYPE.INTERFACE);
 		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
+		schemaInterface.setId(sampleInterface.fullName());
+
+		// impl
+		schemaInterfaceImpl = new ObjectSchema();
+		schemaInterfaceImpl.setType(TYPE.OBJECT);
+		schemaInterfaceImpl.setId("org.sample.SampleImpl");
+		schemaInterfaceImpl.setImplements(new ObjectSchema[]{schemaInterface});
+
 	}
 
 	@Test
@@ -473,7 +483,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, sampleInterface, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
-		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -482,7 +492,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(\"propName\");") > 0);
 		assertTrue(methodString
-				.indexOf("propName = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
+				.indexOf("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstatanceFactory.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(__localAdapter);") > 0);
 	}
 	
@@ -519,7 +529,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleInterface), propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
-		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -528,7 +538,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);") > 0);
 		assertTrue(methodString
-				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.Register.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
+				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstatanceFactory.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
 		assertTrue(methodString.indexOf("__indexObject.initializeFromJSONObject(__indexAdapter);") > 0);
 		assertTrue(methodString.indexOf("arrayName.add(__indexObject);") > 0);
 	}

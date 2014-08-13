@@ -36,18 +36,6 @@ public class PojoGeneratorDriver {
 		this.factory = factory;
 	}
 	
-
-	
-	/**
-	 * Create all POJOs from the list of root schemas.
-	 * @param codeModel
-	 * @param list
-	 * @param packageName
-	 * @throws ClassNotFoundException
-	 */
-	public void createAllClasses(JCodeModel codeModel, List<ObjectSchema> list) throws ClassNotFoundException{
-		createAllClasses(codeModel, list, null);
-	}
 	
 	/**
 	 * Create all POJOs from the list of root schemas
@@ -56,18 +44,22 @@ public class PojoGeneratorDriver {
 	 * @param registerClass
 	 * @throws ClassNotFoundException
 	 */
-	public void createAllClasses(JCodeModel codeModel,	List<ObjectSchema> list, InstanceFactoryGenerator ifg) throws ClassNotFoundException {
+	public void createAllClasses(JCodeModel codeModel,	List<ObjectSchema> list) throws ClassNotFoundException {
 		// The first step is to register all named types and replace all references with
 		// concrete schemas.
 		list = preprocessSchemas(list);
+		// Provides all of the interface factories.
+		InstanceFactoryGenerator interfaceFactoryGenerator = new InstanceFactoryGenerator(codeModel, list);
 		// We are now ready to start creating the classes
 		// First create the package
 		JPackage _package = codeModel._package("");
 		// Now recursively process all of the schema objects
 		for(ObjectSchema schema: list){
 			// Create each POJO
-			createPOJO(codeModel, schema, ifg);
+			createPOJO(codeModel, schema, interfaceFactoryGenerator);
 		}
+		// Last step is to build the factories.
+		interfaceFactoryGenerator.buildFactories();
 	}
 	
 	/**

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -125,7 +126,7 @@ public class RegisterGeneratorTest {
 		// Create the enum
 		JDefinedClass testClass = _package._class("Test");
 		JFieldRef mapRef = RegisterGenerator.createMapFieldRef(codeModel, testClass);
-		JMethod method = RegisterGenerator.createNewInstanceMethod(codeModel, list, testClass, mapRef);
+		JMethod method = RegisterGenerator.createNewInstanceMethod(codeModel, list, testClass, mapRef, JSONEntity.class.getName());
 		assertNotNull(method);
 		StringWriter writer = new StringWriter();
 		JFormatter formatter = new JFormatter(writer);
@@ -171,7 +172,7 @@ public class RegisterGeneratorTest {
 	@Test
 	public void testCreateMap() {
 		JCodeModel model = new JCodeModel();
-		JDefinedClass def = RegisterGenerator.createRegister(model, list,	RegisterGenerator.createClassFromFullName(model,"org.example.Register"));
+		JDefinedClass def = RegisterGenerator.createRegister(model, list, RegisterGenerator.createClassFromFullName(model,"org.example.Register"), JSONEntity.class.getName());
 		assertNotNull(def);
 
 		StringWriter writer = new StringWriter();
@@ -186,7 +187,7 @@ public class RegisterGeneratorTest {
 	@Test
 	public void testSingleton() {
 		JCodeModel model = new JCodeModel();
-		JDefinedClass def = RegisterGenerator.createRegister(model, list,	RegisterGenerator.createClassFromFullName(model,"org.example.Register"));
+		JDefinedClass def = RegisterGenerator.createRegister(model, list,	RegisterGenerator.createClassFromFullName(model,"org.example.Register"), JSONEntity.class.getName());
 		assertNotNull(def);
 
 		StringWriter writer = new StringWriter();
