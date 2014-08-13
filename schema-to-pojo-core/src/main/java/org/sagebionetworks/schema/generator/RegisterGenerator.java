@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCase;
@@ -119,7 +120,13 @@ public class RegisterGenerator {
 	 */
 	protected static JMethod createNewInstanceMethod(JCodeModel codeModel, List<ObjectSchema> list, JDefinedClass regClass, JFieldRef mapRef, String interfaceFullName){
 		// Create the new instance method
-		JType returnType = getInterfaceClass(codeModel, interfaceFullName);
+		JType returnType = null;
+		if(interfaceFullName != null){
+			returnType = getInterfaceClass(codeModel, interfaceFullName);
+		}else{
+			returnType = codeModel.ref(JSONEntity.class);
+		}
+	
 		JMethod method = regClass.method(JMod.PUBLIC, returnType, "newInstance");
 		JVar parm = method.param(codeModel.ref(String.class), "className");
 		JBlock body = method.body();

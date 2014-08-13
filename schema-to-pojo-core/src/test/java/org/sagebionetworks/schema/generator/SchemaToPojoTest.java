@@ -51,9 +51,14 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, factory, new StringBuilder());
+		SchemaToPojo.generatePojos(sampleFile, outputDir,"org.sample.Register", factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "Product.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		// Make sure the register class exists
+		result = new File(outputDir, "org/sample/Register.java");
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
@@ -72,7 +77,7 @@ public class SchemaToPojoTest {
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
-		SchemaToPojo.generatePojos(sampleFile, outputDir, factory, new StringBuilder());
+		SchemaToPojo.generatePojos(sampleFile, outputDir,"org.sample.Register", factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "org/sample/PackageSample.java");
 		System.out.println(result.getAbsolutePath());
@@ -90,6 +95,9 @@ public class SchemaToPojoTest {
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
+		result = new File(outputDir, "org/sample/Register.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
 		// Make sure the register class exists
 		result = new File(outputDir, "InterfaceAInstatanceFactory.java");
 		System.out.println(result.getAbsolutePath());
