@@ -91,20 +91,18 @@ public class SchemaToPojo {
 		
 		// Create the register class if it is provided
 		JDefinedClass registerClass = null;
-		if(createRegister != null){
+		if (createRegister != null) {
 			registerClass = RegisterGenerator.createClassFromFullName(codeModel, createRegister);
 		}
 		
 		// The drive does the recursive work and drives the handlers
 		PojoGeneratorDriver driver = new PojoGeneratorDriver(factory);
-		driver.createAllClasses(codeModel, schemaList, registerClass);
+		driver.createAllClasses(codeModel, schemaList);
 		
-	
 		// When provided, create a register for all of the classes in the list.
 		if(createRegister != null){
-			RegisterGenerator.createRegister(codeModel, schemaList, registerClass);
+			RegisterGenerator.createRegister(codeModel, schemaList, registerClass, null);
 		}
-		
 		
 		// The final step is to generate the classes
 		if(!outputDir.exists()){

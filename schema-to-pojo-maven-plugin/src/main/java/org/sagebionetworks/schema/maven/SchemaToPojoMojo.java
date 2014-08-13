@@ -41,13 +41,6 @@ public class SchemaToPojoMojo extends AbstractMojo {
      * @since 0.1.0
      */
     private File sourceDirectory;
-    
-    /** 
-     * This is a an optional parameter.  When set, a register class will be generated using the specific fully qualified class name.
-     * @parameter expression="${schema-to-pojo.createRegister}"
-     * @since 0.1.13
-     */
-    private String createRegister;
 
     /**
      * Package name used for generated Java classes (for types where a fully
@@ -58,6 +51,13 @@ public class SchemaToPojoMojo extends AbstractMojo {
      * @since 0.1.0
      */
     private String packageName = "";
+    
+     /**
+    * This is a an optional parameter. When set, a register class will be generated using the specific fully qualified class name.
+    * @parameter expression="${schema-to-pojo.createRegister}"
+    * @since 0.1.13
+    */
+    private String createRegister;
     
     
     /**
@@ -77,7 +77,7 @@ public class SchemaToPojoMojo extends AbstractMojo {
 			 HandlerFactoryImpl03 factory = new HandlerFactoryImpl03();
 			 // Generate the classes from their schemas.
 			StringBuilder tmplog = new StringBuilder();
-			SchemaToPojo.generatePojos(sourceDirectory, outputDirectory, createRegister, factory, tmplog);
+			SchemaToPojo.generatePojos(sourceDirectory, outputDirectory,createRegister, factory, tmplog);
 			if (tmplog.length() > 0) {
 				getLog().info(tmplog.toString());
 			}
