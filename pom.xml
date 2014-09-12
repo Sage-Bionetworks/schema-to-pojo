@@ -117,7 +117,7 @@
 						</archive>
 					</configuration>
 				</plugin>
-						<!-- Tell the eclipse m2e plugin to execute these lifecycle mappings 
+						<!-- Tell the eclipse m2e plugin to execute these lifecycle mappings
 					See: http://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
