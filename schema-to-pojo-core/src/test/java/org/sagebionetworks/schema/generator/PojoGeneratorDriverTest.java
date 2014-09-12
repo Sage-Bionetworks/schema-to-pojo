@@ -601,7 +601,7 @@ public class PojoGeneratorDriverTest {
 		JDefinedClass def = (JDefinedClass) type;
 		String classDeffString = declareToString(def);
 //		System.out.println(classDeffString);
-		assertTrue(classDeffString.indexOf("implements org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface") > 0);
+		assertTrue(classDeffString.indexOf("implements java.io.Serializable, org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface") > 0);
 	}
 	
 	@Test
