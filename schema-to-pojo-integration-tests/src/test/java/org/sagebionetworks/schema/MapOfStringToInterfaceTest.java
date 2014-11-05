@@ -49,4 +49,35 @@ public class MapOfStringToInterfaceTest {
 
 		assertEquals(map, clone);
 	}
+
+	@Test
+	public void testRoundTripWithNulls() throws Exception {
+		MapOfStringToInterface map = new MapOfStringToInterface();
+
+		map.setMap(new HashMap<String, InterfaceA>());
+		ABImpl value = new ABImpl();
+		value.setFromMe("aa");
+		map.getMap().put("a", value);
+		ABImpl2 value2 = new ABImpl2();
+		value2.setFromMe2("bb");
+		map.getMap().put("b", null);
+
+		map.setMapConcrete(new HashMap<String, ABImpl>());
+		ABImpl concreteValue = new ABImpl();
+		concreteValue.setFromMe("cc");
+		map.getMapConcrete().put("c", concreteValue);
+		map.getMapConcrete().put("d", null);
+
+		// Now make the round trip
+		String jsonString = EntityFactory.createJSONStringForEntity(map);
+		assertNotNull(jsonString);
+		System.out.println(jsonString);
+
+		// Clone it
+		MapOfStringToInterface clone = EntityFactory.createEntityFromJSONString(jsonString, MapOfStringToInterface.class);
+		assertNotNull(clone);
+		System.out.println(EntityFactory.createJSONStringForEntity(clone));
+
+		assertEquals(map, clone);
+	}
 }

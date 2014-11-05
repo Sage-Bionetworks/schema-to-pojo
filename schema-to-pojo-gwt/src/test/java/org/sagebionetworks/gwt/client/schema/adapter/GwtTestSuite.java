@@ -497,6 +497,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add("a");
 		one.add("b");
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, String.class);
@@ -513,6 +514,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Double(123));
 		one.add(new Double(345.5));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Double.class);
@@ -529,6 +531,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Long(123));
 		one.add(new Long(345));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Long.class);
@@ -545,6 +548,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Date(System.currentTimeMillis()));
 		one.add(new Date(345*1000));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Date.class);
@@ -561,13 +565,15 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add("First blob".getBytes("UTF-8"));
 		one.add("Second blob".getBytes("UTF-8"));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, byte[].class);
 		System.out.println(adapterObject.toJSONString());
 		// Now make sure we can come back
 		Map<String, List<byte[]>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, byte[].class);
-		assertEquals(1, clone.size());
+		assertEquals(2, clone.size());
+		assertNull(clone.get("twp"));
 		List<byte[]> list = clone.get("one");
 		assertNotNull(list);
 		assertEquals(2, list.size());

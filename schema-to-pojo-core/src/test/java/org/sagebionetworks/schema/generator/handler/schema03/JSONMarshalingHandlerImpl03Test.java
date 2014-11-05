@@ -1812,12 +1812,16 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
-		assertTrue(methodString.indexOf("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();") > 0);
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();"));
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(\"mapWhoseItemIsAnEnum\");") > 0);
-		assertTrue(methodString.indexOf("org.sample.Pets __value = org.sample.Pets.valueOf(__jsonMap.getString(__keyObject));") > 0);
-		assertTrue(methodString.indexOf("org.sample.Animals __key = org.sample.Animals.valueOf(((java.lang.String) __keyObject));") > 0);
-		assertTrue(methodString.indexOf("mapWhoseItemIsAnEnum.put(__key, __value);") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(\"mapWhoseItemIsAnEnum\");"));
+		assertTrue(methodString.contains("org.sample.Pets __value;"));
+		assertTrue(methodString.contains("if (__jsonMap.isNull(__keyObject)) {"));
+		assertTrue(methodString.contains("__value = null;"));
+		assertTrue(methodString.contains("} else {"));
+		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonMap.getString(__keyObject));"));
+		assertTrue(methodString.contains("org.sample.Animals __key = org.sample.Animals.valueOf(((java.lang.String) __keyObject));"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
 	}
 
 	/**
@@ -1870,7 +1874,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 
 		// make sure everything was created correctly
-		assertTrue(methodString.indexOf("__map.put(__entry.getKey(), __entry.getValue().name())") > 0);
+		assertTrue(methodString.contains("if (__entry.getValue() == null) {"));
+		assertTrue(methodString.contains("__map.putNull(__entry.getKey());"));
+		assertTrue(methodString.contains("} else {"));
+		assertTrue(methodString.contains("__map.put(__entry.getKey(), __entry.getValue().name())"));
 	}
 
 }

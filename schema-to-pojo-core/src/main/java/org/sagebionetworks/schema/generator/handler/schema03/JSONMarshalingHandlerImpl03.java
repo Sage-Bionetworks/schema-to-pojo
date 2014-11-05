@@ -274,27 +274,34 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JForEach loop = thenBlock.forEach(keyObject, VAR_PREFIX + "keyObject", jsonMap.invoke("keys"));
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
-				JVar value;
+				JVar value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value");
+				JConditional ifNull = loopBody._if(jsonMap.invoke("isNull").arg(loop.var()));
+				// if null
+				JBlock ifNulThenBlock = ifNull._then();
+				// then value = null
+				ifNulThenBlock.assign(value, JExpr._null());
+				// else
+				JBlock ifNullElseBlock = ifNull._else();
 				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
 					if (interfaceFactoryGenerator == null)
 						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
 					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
 					// first get the JSONObject for this array element
-					JVar valueAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter", jsonMap
+					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
+							jsonMap
 							.invoke("getJSONObject").arg(loop.var()));
+
 					// Create the object from the register
-					value = loopBody.decl(
-							valueTypeClass,
-							VAR_PREFIX + "value",
+					ifNullElseBlock.assign(
+							value,
 							JExpr.cast(
 									valueTypeClass,
 									createRegister.staticInvoke("singleton").invoke("newInstance")
 											.arg(valueAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					// Initialize the object from the adapter.
-					loopBody.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
 				} else {
-					value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value",
-							createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
+					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
 				}
 				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
 						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
@@ -712,8 +719,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
 				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();
-				loopBody.add(map.invoke("put").arg(loop.var().invoke("getKey"))
-						.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
+				JConditional ifNull = loopBody._if(loop.var().invoke("getValue").eq(JExpr._null()));
+				ifNull._then().add(map.invoke("putNull").arg(loop.var().invoke("getKey")));
+				ifNull._else().add(
+						map.invoke("put").arg(loop.var().invoke("getKey"))
+								.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
 			} else {
@@ -789,9 +799,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		} else if (TYPE.INTEGER == type) {
 			return assignPropertyToJSONLong(typeClass.owner(), typeSchema, value);
 		} else if (TYPE.ARRAY == type) {
-			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
 		} else if (TYPE.MAP == type) {
-			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+			throw new IllegalArgumentException("Maps of Maps are currently not supported");
 		} else {
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
