@@ -1,5 +1,6 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +135,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JDefinedClass newClass = null;
 			if(TYPE.OBJECT == schema.getType()){
 				newClass = _package._class(schema.getName());
+				newClass._implements(Serializable.class);
 			}else if(TYPE.INTERFACE == schema.getType()){
 				newClass = _package._interface(schema.getName());
 			}else{

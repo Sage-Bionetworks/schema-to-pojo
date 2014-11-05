@@ -113,7 +113,7 @@ public class TypeCreatorHandlerImpl03Test {
 	}
 	
 	@Test
-	public void testClassImplementsInterfances() throws ClassNotFoundException, JClassAlreadyExistsException{
+	public void testClassImplementsInterfaces() throws ClassNotFoundException, JClassAlreadyExistsException{
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		JDefinedClass parentInternace = _package._interface("ParentInterface");
 		JDefinedClass parentInternace2 = _package._interface("ParentInterface2");
@@ -124,7 +124,7 @@ public class TypeCreatorHandlerImpl03Test {
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
 //		System.out.println(classString);
-		assertTrue(classString.indexOf("implements org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
+		assertTrue(classString.indexOf("implements java.io.Serializable, org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface, org.sample.ParentInterface2") > 0);
 	}
 	
 	@Test
