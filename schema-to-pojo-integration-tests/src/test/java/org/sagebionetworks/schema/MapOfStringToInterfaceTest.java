@@ -66,6 +66,7 @@ public class MapOfStringToInterfaceTest {
 		ABImpl concreteValue = new ABImpl();
 		concreteValue.setFromMe("cc");
 		map.getMapConcrete().put("c", concreteValue);
+		map.getMapConcrete().put("d", null);
 
 		// Now make the round trip
 		String jsonString = EntityFactory.createJSONStringForEntity(map);
