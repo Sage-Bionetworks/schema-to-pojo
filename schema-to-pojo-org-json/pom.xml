@@ -4,12 +4,12 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.3.8</version>
+		<version>0.3.9</version>
 	</parent>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-org-json</artifactId>
 	<name>schema-to-pojo-org-json</name>
-	<packaging>jar</packaging>
+	<packaging>maven-plugin</packaging>
 	<description>The org.json implementation of the JSONObjectAdapter</description>
 	<dependencies>
 		<dependency>
