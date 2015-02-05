@@ -93,7 +93,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = 34.3;
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
-		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapter.get(index));
 	}
@@ -105,7 +105,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = Double.NaN;
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
-		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapter.get(index));
 	}
@@ -117,7 +117,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = Double.POSITIVE_INFINITY;
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
-		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapter.get(index));
 	}
@@ -326,7 +326,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = Double.NaN;
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
-		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapterObject.get(propertyKey));
 	}
@@ -336,7 +336,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = Double.POSITIVE_INFINITY;
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
-		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapterObject.get(propertyKey));
 	}
@@ -346,7 +346,7 @@ public class GwtTestSuite extends GWTTestCase {
 		double value = Double.NEGATIVE_INFINITY;
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
-		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
 		// Make sure we can also get it as an object
 		assertEquals(value, adapterObject.get(propertyKey));
 	}
