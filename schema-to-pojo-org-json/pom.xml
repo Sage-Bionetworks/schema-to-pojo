@@ -9,7 +9,7 @@
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-org-json</artifactId>
 	<name>schema-to-pojo-org-json</name>
-	<packaging>maven-plugin</packaging>
+	<packaging>jar</packaging>
 	<description>The org.json implementation of the JSONObjectAdapter</description>
 	<dependencies>
 		<dependency>
