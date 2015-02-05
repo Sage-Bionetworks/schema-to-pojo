@@ -107,7 +107,7 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, Double.parseDouble((String)adapter.get(index)));
 	}
 	
 	@Test
@@ -119,7 +119,7 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, Double.parseDouble((String)adapter.get(index)));
 	}
 	
 	@Test
@@ -131,7 +131,7 @@ public class GwtTestSuite extends GWTTestCase {
 		assertEquals(1, adapter.length());
 		assertEquals(value, adapter.getDouble(index));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, Double.parseDouble((String)adapter.get(index)));
 	}
 	
 	private boolean doubleCompare(double a, double b){
