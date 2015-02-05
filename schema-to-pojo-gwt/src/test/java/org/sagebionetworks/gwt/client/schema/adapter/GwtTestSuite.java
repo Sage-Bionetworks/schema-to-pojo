@@ -99,6 +99,18 @@ public class GwtTestSuite extends GWTTestCase {
 	}
 	
 	@Test
+	public void testDoubleNaNRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.NaN;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
 	public void testDoubleInfinityRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
 		assertEquals(0, adapter.length());
