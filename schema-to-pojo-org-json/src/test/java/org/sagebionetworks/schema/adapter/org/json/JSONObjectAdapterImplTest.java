@@ -131,6 +131,38 @@ public class JSONObjectAdapterImplTest {
 	}
 	
 	@Test
+	public void testDoubleNaNRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NaN;
+		adapter.put(propertyKey, value);
+		assertTrue(adapter.has(propertyKey));
+		assertTrue(Double.isNaN(adapter.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertTrue(Double.isNaN(Double.parseDouble((String)adapter.get(propertyKey))));
+	}
+	
+	@Test
+	public void testDoubleInfinityRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.POSITIVE_INFINITY;
+		adapter.put(propertyKey, value);
+		assertTrue(adapter.has(propertyKey));
+		assertTrue(Double.isInfinite(adapter.getDouble(propertyKey)));
+		assertEquals(Double.POSITIVE_INFINITY, adapter.getDouble(propertyKey), 0d);
+		// Make sure we can also get it as an object
+		assertTrue(Double.isInfinite(Double.parseDouble((String)adapter.get(propertyKey))));
+	}
+	
+	@Test
+	public void testDoubleNegativeInfinityRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NEGATIVE_INFINITY;
+		adapter.put(propertyKey, value);
+		assertTrue(adapter.has(propertyKey));
+		assertTrue(Double.isInfinite(adapter.getDouble(propertyKey)));
+		assertEquals(Double.NEGATIVE_INFINITY, adapter.getDouble(propertyKey), 0d);
+		// Make sure we can also get it as an object
+		assertTrue(Double.isInfinite(Double.parseDouble((String)adapter.get(propertyKey))));
+	}
+	
+	@Test
 	public void testBooleanRoundTrip() throws JSONObjectAdapterException{
 		boolean value = true;
 		adapter.put(propertyKey, value);
