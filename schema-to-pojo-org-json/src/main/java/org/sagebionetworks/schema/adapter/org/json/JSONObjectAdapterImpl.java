@@ -211,7 +211,11 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 	public JSONObjectAdapter put(String key, double value)
 			throws JSONObjectAdapterException {
 		try {
-			wrapped.put(key, value);
+			if (Double.isNaN(value) || Double.isInfinite(value)) {
+				wrapped.put(key, Double.toString(value));
+			} else {
+				wrapped.put(key, value);
+			}
 			return this;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);

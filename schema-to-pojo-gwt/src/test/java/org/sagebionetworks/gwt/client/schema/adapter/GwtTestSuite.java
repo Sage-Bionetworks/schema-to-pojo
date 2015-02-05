@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -92,6 +91,42 @@ public class GwtTestSuite extends GWTTestCase {
 		// Start off at zero
 		assertEquals(0, adapter.length());
 		double value = 34.3;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
+	public void testDoubleNaNRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.NaN;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
+	public void testDoubleInfinityRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.POSITIVE_INFINITY;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapter.get(index));
+	}
+	
+	@Test
+	public void testDoubleNegativeInfRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.NEGATIVE_INFINITY;
 		adapter.put(index, value);
 		assertEquals(1, adapter.length());
 		assertTrue(doubleCompare(value, adapter.getDouble(index)));
@@ -279,6 +314,36 @@ public class GwtTestSuite extends GWTTestCase {
 	@Test
 	public void testObjectDoubleRoundTrip() throws JSONObjectAdapterException{
 		double value = 12.5565;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectDoubleNaNRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NaN;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectDoubleInfinityRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.POSITIVE_INFINITY;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectDoubleNegativeInfRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NEGATIVE_INFINITY;
 		adapterObject.put(propertyKey, value);
 		assertTrue(adapterObject.has(propertyKey));
 		assertTrue(CompareUtils.doubleEquals(value, adapterObject.getDouble(propertyKey)));

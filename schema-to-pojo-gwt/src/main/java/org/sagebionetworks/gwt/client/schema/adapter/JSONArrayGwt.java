@@ -158,6 +158,8 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 			throws JSONObjectAdapterException {
 		if (value == null) {
 			this.wrapped.set(index, JSONNull.getInstance());
+		} else if (Double.isNaN(value) || Double.isInfinite(value)) {
+			this.wrapped.set(index, new JSONString(Double.toString(value)));
 		} else {
 			this.wrapped.set(index, new JSONNumber(value));
 		}
