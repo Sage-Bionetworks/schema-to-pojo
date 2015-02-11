@@ -72,6 +72,42 @@ public class JSONArrayAdapterImplTest {
 	}
 
 	@Test
+	public void testDoubleNaNRoundTrip() throws JSONObjectAdapterException{
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.NaN;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(Double.isNaN(adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertTrue(Double.isNaN(Double.parseDouble((String)adapter.get(index))));
+	}
+
+	@Test
+	public void testDoubleInfinityRoundTrip() throws JSONObjectAdapterException{
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.POSITIVE_INFINITY;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(Double.isInfinite(adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertTrue(Double.isInfinite(Double.parseDouble((String)adapter.get(index))));
+	}
+
+	@Test
+	public void testDoubleNegativeInfinityRoundTrip() throws JSONObjectAdapterException{
+		// Start off at zero
+		assertEquals(0, adapter.length());
+		double value = Double.NEGATIVE_INFINITY;
+		adapter.put(index, value);
+		assertEquals(1, adapter.length());
+		assertTrue(Double.isInfinite(adapter.getDouble(index)));
+		// Make sure we can also get it as an object
+		assertTrue(Double.isInfinite(Double.parseDouble((String)adapter.get(index))));
+	}
+
+	@Test
 	public void testBooleanRoundTrip() throws JSONObjectAdapterException{
 		// Start off at zero
 		assertEquals(0, adapter.length());
