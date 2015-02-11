@@ -178,7 +178,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 	public JSONArrayAdapter put(int index, Double value)
 			throws JSONObjectAdapterException {
 		try {
-			if (Double.isNaN(value) || Double.isInfinite(value)) {
+			if (value!=null && (Double.isNaN(value) || Double.isInfinite(value))) {
 				wrapped.put(index, Double.toString(value));
 			} else {
 				wrapped.put(index, value);
