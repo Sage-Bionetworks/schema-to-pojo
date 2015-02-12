@@ -15,7 +15,7 @@ import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
  * @author John
  *
  */
-public class IntefaceTest {
+public class InterfaceTest {
 	
 	
 	@Test
