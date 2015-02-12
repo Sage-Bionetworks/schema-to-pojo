@@ -105,6 +105,66 @@ public class AllTypesTest {
 	}
 
 	@Test
+	public void testAllTypesRoundTripWithDoubleNaN() throws JSONObjectAdapterException{
+		AllTypes allTypes = new AllTypes();
+		allTypes.setDoubleProp(Double.NaN);
+	
+		// Now create a clone by going to JSON
+		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
+		allTypes.writeToJSONObject(adapter);
+		String json = adapter.toJSONString();
+		System.out.println(json);
+		// Now make the round trip
+		adapter = new JSONObjectAdapterImpl(json);
+		AllTypes clone = new AllTypes(adapter);
+		assertEquals(allTypes, clone);
+		// Try equals both ways
+		assertTrue(clone.equals(allTypes));
+		assertTrue(allTypes.equals(clone));
+		
+	}
+
+	@Test
+	public void testAllTypesRoundTripWithDoubleInfinity() throws JSONObjectAdapterException{
+		AllTypes allTypes = new AllTypes();
+		allTypes.setDoubleProp(Double.POSITIVE_INFINITY);
+	
+		// Now create a clone by going to JSON
+		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
+		allTypes.writeToJSONObject(adapter);
+		String json = adapter.toJSONString();
+		System.out.println(json);
+		// Now make the round trip
+		adapter = new JSONObjectAdapterImpl(json);
+		AllTypes clone = new AllTypes(adapter);
+		assertEquals(allTypes, clone);
+		// Try equals both ways
+		assertTrue(clone.equals(allTypes));
+		assertTrue(allTypes.equals(clone));
+		
+	}
+
+	@Test
+	public void testAllTypesRoundTripWithDoubleNegativeInfinity() throws JSONObjectAdapterException{
+		AllTypes allTypes = new AllTypes();
+		allTypes.setDoubleProp(Double.NEGATIVE_INFINITY);
+	
+		// Now create a clone by going to JSON
+		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
+		allTypes.writeToJSONObject(adapter);
+		String json = adapter.toJSONString();
+		System.out.println(json);
+		// Now make the round trip
+		adapter = new JSONObjectAdapterImpl(json);
+		AllTypes clone = new AllTypes(adapter);
+		assertEquals(allTypes, clone);
+		// Try equals both ways
+		assertTrue(clone.equals(allTypes));
+		assertTrue(allTypes.equals(clone));
+		
+	}
+
+	@Test
 	public void testAllTypesRoundTripWithAllNulls() throws JSONObjectAdapterException {
 		AllTypes allTypes = new AllTypes();
 		// Now create a clone by going to JSON
@@ -137,6 +197,9 @@ public class AllTypesTest {
 		// Double List
 		allTypes.setDoubleList(new ArrayList<Double>());
 		allTypes.getDoubleList().add(new Double(99.77));
+		allTypes.getDoubleList().add(new Double(Double.NaN));
+		allTypes.getDoubleList().add(new Double(Double.POSITIVE_INFINITY));
+		allTypes.getDoubleList().add(new Double(Double.NEGATIVE_INFINITY));
 		allTypes.getDoubleList().add(null);
 		ABImpl impl1 = new ABImpl();
 		impl1.setFromMe("mine1");
