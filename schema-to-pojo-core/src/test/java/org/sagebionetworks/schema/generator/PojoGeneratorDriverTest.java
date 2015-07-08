@@ -651,10 +651,11 @@ public class PojoGeneratorDriverTest {
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(6, fields.size());
+		assertEquals(6 + 1, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
+		assertNotNull(fields.get(ObjectSchema.EXTRA_FIELDS));
 	}
 	
 	@Test

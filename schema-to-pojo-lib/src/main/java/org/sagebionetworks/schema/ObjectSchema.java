@@ -71,6 +71,12 @@ public class ObjectSchema implements JSONEntity {
 	 */
 	public static final String CONCRETE_TYPE = "concreteType";
 
+	/**
+	 * For the case where a POJO is created from a new version with additional fields, we want to preserve those
+	 * additional fields and re-emit them if necessary. For that we keep an optional list of JSONObjects
+	 */
+	public static final String EXTRA_FIELDS = "extraFieldsFromNewerVersion";
+
 	/*
 	 * The name of this object.
 	 */

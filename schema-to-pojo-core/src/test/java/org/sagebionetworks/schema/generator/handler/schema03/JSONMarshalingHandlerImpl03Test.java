@@ -4,9 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +21,10 @@ import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
-import org.sagebionetworks.schema.generator.RegisterGenerator;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -127,16 +129,25 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testCreateMissingFieldsField() {
+		// Now handle the
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JFieldVar extraFields = handler.createMissingFieldField(sampleClass);
+
+		hasFragments(extraFields,
+				"private java.util.Map<java.lang.String, java.lang.Object> extraFieldsFromNewerVersion = null;");
+	}
+
+	@Test
 	public void testCreateGetJSONSchemaMethod(){
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		sampleClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, sampleClass.owner()._ref(String.class), JSONEntity.EFFECTIVE_SCHEMA);
-		JMethod getMethod = handler.createGetJSONSchemaMethod(schema, sampleClass);
+		JMethod getMethod = handler.createGetJSONSchemaMethod(sampleClass);
 		assertNotNull(getMethod);
 		assertEquals(JMod.PUBLIC, getMethod.mods().getValue());
 		assertNotNull(getMethod.params());
 		assertEquals(0, getMethod.params().size());
 		String methodString = declareToString(getMethod);
-//		System.out.println(methodString);
 		assertTrue(methodString.indexOf("return EFFECTIVE_SCHEMA;") > 0);
 	}
 	
@@ -194,6 +205,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -220,6 +232,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -332,6 +345,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -359,6 +373,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -388,7 +403,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
@@ -408,7 +425,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Long.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(method);;
@@ -427,7 +446,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Double.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -446,7 +467,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Boolean.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -464,7 +487,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -481,7 +506,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleInterface, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		// this time we provide a register.
 		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
@@ -504,6 +531,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
 		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
@@ -527,6 +555,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleInterface), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
 		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
@@ -551,7 +580,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
@@ -572,7 +603,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
 //		printClassToConsole(sampleClass);
@@ -598,7 +631,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
 //		printClassToConsole(sampleClass);
@@ -621,7 +656,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleClass), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
 //		printClassToConsole(sampleClass);
@@ -648,6 +685,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		enumCalss.enumConstant("A");
 		enumCalss.enumConstant("B");
 		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -749,7 +787,25 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(methodString);
 		assertEquals("uriName", methodString);
 	}
-	
+
+
+	@Test
+	public void testWriteToJSONObjectExtraFields() throws JClassAlreadyExistsException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = schema;
+		String propName = "propName";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		// Now get the string and check it.
+		hasFragments(constructor,
+				"if (extraFieldsFromNewerVersion!= null) {",
+				"AdapterCollectionUtils.writeToObject(adapter, extraFieldsFromNewerVersion);");
+	}
+
 	@Test
 	public void testWriteToJSONObjectDateProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
@@ -761,6 +817,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -785,6 +842,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -804,6 +862,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -824,6 +883,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -843,6 +903,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("double"), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -862,6 +923,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("boolean"), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -880,6 +942,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -902,6 +965,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -932,6 +996,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -965,6 +1030,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -996,6 +1062,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1027,6 +1094,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1059,6 +1127,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(HashSet.class).narrow(String.class), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1084,6 +1153,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleClass), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1109,6 +1179,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		enumCalss.enumConstant("A");
 		enumCalss.enumConstant("B");
 		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -1135,6 +1206,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
 		childClasss.field(JMod.PRIVATE, codeModel.ref(Boolean.class), "fromInterface");
+		childClasss.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		// Now handle the
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(childSchema, childClasss);
@@ -1156,6 +1228,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
 		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
+		childClasss.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		// Now handle the
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(childSchema, childClasss);
@@ -1178,7 +1251,29 @@ public class JSONMarshalingHandlerImpl03Test {
 	}
 	
 	/**
+	 * Helper to check for sequential fragments
+	 * 
+	 * @param toDeclare
+	 * @return
+	 */
+	public void hasFragments(JDeclaration toDeclare, String... fragments) {
+		String result = declareToString(toDeclare);
+		int nextIndex = -1;
+		for (String fragment : fragments) {
+			int found = result.indexOf(fragment);
+			if (found < 0) {
+				fail("'" + fragment + "' not found in " + result);
+			}
+			if (found < nextIndex) {
+				fail("'" + fragment + "' found out of order in " + result);
+			}
+			nextIndex = found;
+		}
+	}
+
+	/**
 	 * Helper to declare a model object to string.
+	 * 
 	 * @param toDeclare
 	 * @return
 	 */
@@ -1220,7 +1315,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1254,7 +1350,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1291,7 +1388,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1327,7 +1425,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1363,7 +1462,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1402,7 +1502,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1440,7 +1541,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1477,7 +1579,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1516,7 +1619,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1563,7 +1667,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		testClass.enumConstant("mouse");
 		testClass.enumConstant("elephant");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
@@ -1627,6 +1732,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//add field to sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1683,6 +1789,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		testClass.enumConstant("mouse");
 		testClass.enumConstant("elephant");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
@@ -1740,7 +1847,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//add field to sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
-		
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1803,6 +1911,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		testValueClass.enumConstant("dog");
 		testValueClass.enumConstant("cat");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -1866,6 +1975,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		testValueClass.enumConstant("dog");
 		testValueClass.enumConstant("cat");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
