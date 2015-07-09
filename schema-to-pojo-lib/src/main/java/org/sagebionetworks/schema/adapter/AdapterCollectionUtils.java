@@ -58,6 +58,12 @@ public class AdapterCollectionUtils {
 				JSONArrayAdapter newArray = adapter.createNewArray();
 				adapter.put(key, newArray);
 				writeToArray(newArray, itable);
+			} else if (value instanceof JSONObjectAdapter) {
+				adapter.put(key, (JSONObjectAdapter) value);
+			} else if (value instanceof JSONArrayAdapter) {
+				adapter.put(key, (JSONArrayAdapter) value);
+			} else if (value instanceof JSONMapAdapter) {
+				adapter.put(key, (JSONMapAdapter) value);
 			}else{
 				throw new IllegalArgumentException("Unknown type: "+value.getClass().getName());
 			}

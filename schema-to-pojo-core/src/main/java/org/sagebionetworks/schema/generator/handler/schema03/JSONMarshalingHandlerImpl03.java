@@ -1,16 +1,20 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectValidator;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
@@ -33,8 +37,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
-		createGetJSONSchemaMethod(classSchema, classType);
-	
+		createGetJSONSchemaMethod(classType);
+
+		// Create a field to handle overflow from newer type definitions
+		JFieldVar extraFields = createMissingFieldField(classType);
+
 		// Create the init method
 		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, interfaceFactoryGenerator);
 		// setup a constructor.
@@ -42,15 +49,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 		// Add the second method.
 		createWriteToJSONObject(classSchema, classType);
-		
+	}
+
+	JFieldVar createMissingFieldField(JDefinedClass classType) {
+		JFieldVar extraFields = classType.field(JMod.PRIVATE, classType.owner().ref(Map.class).narrow(String.class).narrow(Object.class),
+				ObjectSchema.EXTRA_FIELDS, JExpr._null());
+		return extraFields;
 	}
 	
 	/**
 	 * Create the getJSONSchema method.
+	 * 
 	 * @param classSchema
 	 * @param classType
 	 */
-	public JMethod createGetJSONSchemaMethod(ObjectSchema classSchema,JDefinedClass classType){
+	public JMethod createGetJSONSchemaMethod(JDefinedClass classType) {
 		// Look up the field for this property
 		JFieldVar field = classType.fields().get(JSONEntity.EFFECTIVE_SCHEMA);
 		if (field == null)
@@ -116,7 +129,14 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
 		
 		// First validate against the schema
-		body.staticInvoke(classType.owner().ref(ObjectValidator.class), "validateEntity").arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
+		JInvocation invocation = classType.owner().ref(ObjectValidator.class).staticInvoke("validateEntity")
+				.arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
+		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
+		if (extraFields == null) {
+			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '" + ObjectSchema.EXTRA_FIELDS + "' on class: "
+					+ classType.name());
+		}
+		body.assign(extraFields, invocation);
         
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
@@ -742,12 +762,19 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 										+ "' is required and cannot be null"));
 			}
 		}
+		createWriteExtraFields(classType, body, param);
         // Always return the param
         body._return(param);
         return method;
 		
 	}
 	
+	void createWriteExtraFields(JDefinedClass classType, JBlock body, JVar jsonObject) {
+		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
+		JBlock thenBlock = body._if(extraFields.ne(JExpr._null()))._then();
+		thenBlock.staticInvoke(classType.owner().ref(AdapterCollectionUtils.class), "writeToObject").arg(jsonObject).arg(extraFields);
+	}
+
 	private JExpression createEqNullCheck(JVar value, JExpression createExpresssionToSetFromArray) {
 		return JOp.cond(value.eq(JExpr._null()), JExpr._null(), createExpresssionToSetFromArray);
 	}

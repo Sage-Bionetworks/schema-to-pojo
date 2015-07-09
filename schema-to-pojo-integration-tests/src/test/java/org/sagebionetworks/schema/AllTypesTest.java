@@ -165,6 +165,25 @@ public class AllTypesTest {
 	}
 
 	@Test
+	public void testAllTypesRoundTripWithExtraFields() throws JSONObjectAdapterException {
+		AllTypes allTypes = new AllTypes();
+		allTypes.setStringProp("somevalue");
+
+		// Now create a clone by going to JSON
+		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
+		allTypes.writeToJSONObject(adapter);
+		adapter.put("extra_field", "value");
+		String json = adapter.toJSONString();
+		// Now make the round trip
+		adapter = new JSONObjectAdapterImpl(json);
+		AllTypes clone = new AllTypes(adapter);
+		JSONObjectAdapter cloneAdapter = new JSONObjectAdapterImpl();
+		clone.writeToJSONObject(cloneAdapter);
+		String cloneJson = cloneAdapter.toJSONString();
+		assertEquals(json, cloneJson);
+	}
+
+	@Test
 	public void testAllTypesRoundTripWithAllNulls() throws JSONObjectAdapterException {
 		AllTypes allTypes = new AllTypes();
 		// Now create a clone by going to JSON

@@ -2,12 +2,17 @@ package org.sagebionetworks.schema;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.cglib.core.ReflectUtils;
 import org.sagebionetworks.AllTypes;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -73,7 +78,8 @@ public class ObjectValidatorTest {
 		adapter.put("theSecondProperty", 7);
 		adapter.put("theThirdProperty", "hello");
 		
-		ObjectValidator.validateEntity(testSchema, adapter);
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(testSchema, adapter);
+		assertNull(undefinedEntries);
 	}
 	
 	/**
@@ -110,7 +116,8 @@ public class ObjectValidatorTest {
 		adapter.put("theFristProperty", 123.456);
 		adapter.put("theSecondProperty", 7);		
 		
-		ObjectValidator.validateEntity(testSchema, adapter);
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(testSchema, adapter);
+		assertEquals(0, undefinedEntries.size());
 	}
 	
 	/**
@@ -142,7 +149,8 @@ public class ObjectValidatorTest {
 		adapter.put("theFirstProperty", 123.456);
 		
 		//now validate
-		ObjectValidator.validateEntity(testSchema, adapter);
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(testSchema, adapter);
+		assertNull(undefinedEntries);
 	}
 	
 	/**
@@ -155,7 +163,8 @@ public class ObjectValidatorTest {
 		testSchema.setDescription("this is description for test schema");
 		
 		//now validate
-		ObjectValidator.validateEntity(testSchema, adapter);
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(testSchema, adapter);
+		assertNull(undefinedEntries);
 	}
 	
 	/**
@@ -185,11 +194,12 @@ public class ObjectValidatorTest {
 		adapter.put("theFirstProperty", 123.456);
 		adapter.put("theSecondProperty", 7);
 		
-		ObjectValidator.validateEntity(testSchema, adapter);
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(testSchema, adapter);
+		assertNull(undefinedEntries);
 	}
 	
 	
-	@Test (expected=JSONObjectAdapterException.class)
+	@Test
 	public void testNonDeclaredValue() throws JSONObjectAdapterException{
 		AllTypes at = new AllTypes();
 		at.setBooleanProp(true);
@@ -198,12 +208,13 @@ public class ObjectValidatorTest {
 		at.writeToJSONObject(adapter);
 		// Now add an undeclared property to the object
 		adapter.put("NOT DECLARED", "I should not be here");
-		// This should fail validation
-		ObjectValidator.validateEntity(at.getJSONSchema(), adapter, AllTypes.class);
+		// This should return the undeclared fiels
+		Map<String, Object> undefinedEntries = ObjectValidator.validateEntity(at.getJSONSchema(), adapter, AllTypes.class);
+		assertEquals(Collections.singletonMap("NOT DECLARED", "I should not be here"), undefinedEntries);
 	}
 	
-	@Test (expected=JSONObjectAdapterException.class)
-	public void testNonDeclaredValueOnInit() throws JSONObjectAdapterException{
+	@Test
+	public void testNonDeclaredValueOnInit() throws Exception {
 		AllTypes at = new AllTypes();
 		at.setBooleanProp(true);
 		at.setLongProp(123L);
@@ -213,8 +224,11 @@ public class ObjectValidatorTest {
 		adapter.put("NOT DECLARED", "I should not be here");
 		// This should fail validation
 		AllTypes clone = new AllTypes();
-		// The init should fail.
+		// The init should succeed and the extra param should be kept in the extra field map
 		clone.initializeFromJSONObject(adapter);
+		Field field = clone.getClass().getDeclaredField(ObjectSchema.EXTRA_FIELDS);
+		field.setAccessible(true);
+		assertEquals(Collections.singletonMap("NOT DECLARED", "I should not be here"), field.get(clone));
 	}
 	
 	/**

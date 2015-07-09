@@ -3,6 +3,7 @@ package org.sagebionetworks.schema;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -45,58 +46,73 @@ public class ObjectValidator {
 	
 	/**
 	 * Validate.
+	 * 
 	 * @param schemaJSON
 	 * @param adapter
 	 * @param clazz
+	 * @return the keys from the adapter that are not definded in the schema
 	 */
-	public static void validateEntity(String schemaJSON, JSONObjectAdapter adapter, Class<? extends JSONEntity> clazz) throws JSONObjectAdapterException{
+	public static Map<String, Object> validateEntity(String schemaJSON, JSONObjectAdapter adapter, Class<? extends JSONEntity> clazz)
+			throws JSONObjectAdapterException {
 		if(schemaJSON == null) throw new IllegalArgumentException("Schema string cannot be null");
 		if(adapter == null) throw new IllegalArgumentException("Adapter cannot be null");
 		if(clazz == null) throw new IllegalArgumentException("Adapter cannot be null");
 		// First fetch the schema.
 		ObjectSchema schema = getSchema(schemaJSON, adapter, clazz);
 		// Validate it against the schema
-		validateEntity(schema, adapter);
+		return validateEntity(schema, adapter);
 	}
 	
 	/**
-	* Validate the passed adapter against the given schema.
-	* @param schema
-	* @param adapter
-	* @throws JSONObjectAdapterException
-	*/
-	public static void validateEntity(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+	 * Validate the passed adapter against the given schema.
+	 * 
+	 * @param schema
+	 * @param adapter
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static Map<String, Object> validateEntity(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException {
 		if(schema == null) throw new IllegalArgumentException("Schema cannot be null");
 		if(adapter == null) throw new IllegalArgumentException("Adapter cannot be null");
 		// First fetch the schema.
-		validateAllKeysAreDefined(schema, adapter);
+		Map<String, Object> undefinedKeys = validateAllKeysAreDefined(schema, adapter);
 		//make sure all required properties are represented in adapter
 		validateRequiredProperties(schema, adapter);
 		//check for schema properties that have a pattern defined
 		validatePatternProperties(schema, adapter);
 		// Validate URI properties
 		validateURIProperties(schema, adapter);
+		return undefinedKeys;
 	}
 	
 	/**
 	 * Validate that all of the keys are defined.
+	 * 
 	 * @param schema
 	 * @param adapter
-	 * @throws JSONObjectAdapterException 
+	 * @return the keys in the adapter but not the schema
+	 * @throws JSONObjectAdapterException
 	 */
-	private static void validateAllKeysAreDefined(ObjectSchema schema, JSONObjectAdapter adapter) throws JSONObjectAdapterException{
+	private static Map<String, Object> validateAllKeysAreDefined(ObjectSchema schema, JSONObjectAdapter adapter)
+			throws JSONObjectAdapterException {
+		Map<String, Object> undefinedKeys = null;
 		Iterator<String> it = adapter.keys();
 		Map<String, ObjectSchema> props = schema.getProperties();
 		if(props == null){
-			if(it.hasNext()) throw new JSONObjectAdapterException("The schema has not properties so the adapter cannot have any data");
-			return;
+			if (it.hasNext()) {
+				throw new JSONObjectAdapterException("The schema has not properties so the adapter cannot have any data");
+			}
 		}
 		while(it.hasNext()){
 			String key = it.next();
 			if(!props.containsKey(key)){
-				throw new JSONObjectAdapterException("Found property: "+key+", but this property is not defined in the schema: "+schema.getId());
+				if (undefinedKeys == null) {
+					undefinedKeys = new HashMap<String, Object>();
+				}
+				undefinedKeys.put(key, adapter.get(key));
 			}
 		}
+		return undefinedKeys;
 	}
 	
 	/**
