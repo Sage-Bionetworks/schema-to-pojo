@@ -2,12 +2,14 @@ package org.sagebionetworks.schema;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.Test;
 import org.sagebionetworks.ABImpl;
 import org.sagebionetworks.ABImpl2;
 import org.sagebionetworks.ABImpl2newversion;
+import org.sagebionetworks.InterfaceA;
 import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
@@ -53,6 +55,10 @@ public class ExtraFieldsTest {
 		impl.setFromInterfaceB("from B value");
 		impl.setNewField("new value");
 		impl.setExtraFieldFromInterfaceB("extra");
+		impl.setNewInterfaceList(Collections.<InterfaceA> singletonList(new ABImpl()));
+		impl.setNewRef(new ABImpl());
+		impl.setNewList(Collections.singletonList("one"));
+		impl.setNewMap(Collections.singletonMap("key", 10L));
 
 		// Now make the round trip
 		String jsonString = EntityFactory.createJSONStringForEntity(impl);

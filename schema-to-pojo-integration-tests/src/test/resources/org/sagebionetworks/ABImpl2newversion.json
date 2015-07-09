@@ -6,6 +6,30 @@
         },
         "newField":{
             "type":"string"
+        },
+        "newList":{
+            "type":"array",
+            "items":{
+                "type":"string",
+            }
+        },
+        "newInterfaceList":{
+            "type":"array",
+            "items":{
+        		"$ref":"org.sagebionetworks.InterfaceA"
+        	}
+        },
+        "newMap":{
+            "type":"map",
+	        "key":{
+	            "type":"string"
+	        },
+	        "value":{
+	            "type":"integer"
+	        },
+        },
+        "newRef":{
+    		"$ref":"org.sagebionetworks.InterfaceA"
         }
     },
     "implements":[

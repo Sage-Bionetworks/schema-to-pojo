@@ -129,7 +129,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
 		
 		// First validate against the schema
-		JInvocation invocation = body.staticInvoke(classType.owner().ref(ObjectValidator.class), "validateEntity")
+		JInvocation invocation = classType.owner().ref(ObjectValidator.class).staticInvoke("validateEntity")
 				.arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
 		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
 		if (extraFields == null) {
