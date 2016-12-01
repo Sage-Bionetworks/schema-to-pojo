@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -40,7 +39,7 @@ public class GwtTestSuite extends GWTTestCase {
 		return Constants.MODULE_NAME;
 	}
 	
-	JSONArrayAdapter adapter = null;
+	JSONArrayAdapter adapterArray = null;
 	JSONObjectAdapter adapterObject = null;
 	int index = 0;
 	String propertyKey; 
@@ -48,7 +47,7 @@ public class GwtTestSuite extends GWTTestCase {
 	@Override
 	public void gwtSetUp() {
 		// This is a test for the JSONObjectAdapterImpl
-		adapter = new JSONArrayGwt();
+		adapterArray = new JSONArrayGwt();
 		adapterObject = new JSONObjectGwt();
 		index = 0;
 		propertyKey = "propKey";
@@ -57,46 +56,82 @@ public class GwtTestSuite extends GWTTestCase {
 	@Test
 	public void testLongRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		long value = 123;
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertEquals(value, adapter.getLong(index));
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getLong(index));
 	}
 
 	@Test
 	public void testStringRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		String value = "I am a tea pot";
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertEquals(value, adapter.getString(index));
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getString(index));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, adapterArray.get(index));
 	}
 	
 	@Test
 	public void testNullRoundTrip() throws JSONObjectAdapterException{
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		long value = 123;
-		adapter.putNull(index);
-		assertEquals(1, adapter.length());
-		assertTrue(adapter.isNull(index));
-		assertEquals(null, adapter.get(index));
+		adapterArray.putNull(index);
+		assertEquals(1, adapterArray.length());
+		assertTrue(adapterArray.isNull(index));
+		assertEquals(null, adapterArray.get(index));
 	}
 
 	@Test
 	public void testDoubleRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		double value = 34.3;
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertTrue(doubleCompare(value, adapter.getDouble(index)));
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertTrue(doubleCompare(value, adapterArray.getDouble(index)));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, adapterArray.get(index));
+	}
+	
+	@Test
+	public void testDoubleNaNRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapterArray.length());
+		double value = Double.NaN;
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getDouble(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, Double.parseDouble((String)adapterArray.get(index)));
+	}
+	
+	@Test
+	public void testDoubleInfinityRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapterArray.length());
+		double value = Double.POSITIVE_INFINITY;
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getDouble(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, Double.parseDouble((String)adapterArray.get(index)));
+	}
+	
+	@Test
+	public void testDoubleNegativeInfRoundTrip() throws JSONObjectAdapterException {
+		// Start off at zero
+		assertEquals(0, adapterArray.length());
+		double value = Double.NEGATIVE_INFINITY;
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getDouble(index));
+		// Make sure we can also get it as an object
+		assertEquals(value, Double.parseDouble((String)adapterArray.get(index)));
 	}
 	
 	private boolean doubleCompare(double a, double b){
@@ -106,95 +141,95 @@ public class GwtTestSuite extends GWTTestCase {
 	@Test
 	public void testBooleanRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		boolean value = true;
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertEquals(value, adapter.getBoolean(index));
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getBoolean(index));
 		// Make sure we can also get it as an object
-		assertEquals(value, adapter.get(index));
+		assertEquals(value, adapterArray.get(index));
 	}
 
 	@Test
 	public void testIntRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
+		assertEquals(0, adapterArray.length());
 		int value = 34;
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertEquals(value, adapter.getInt(index));
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertEquals(value, adapterArray.getInt(index));
 		// Make sure we can also get it as an object
-		assertNotNull(adapter.get(index));
+		assertNotNull(adapterArray.get(index));
 	}
 
 	@Test
 	public void testJSONObjectRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
-		JSONObjectAdapter value = adapter.createNew();
+		assertEquals(0, adapterArray.length());
+		JSONObjectAdapter value = adapterArray.createNew();
 		value.put("keyone", 123);
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertNotNull(adapter.getJSONObject(index));
-		System.out.print(adapter.toJSONString());
-		assertEquals(value.toJSONString(), adapter.getJSONObject(index)
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertNotNull(adapterArray.getJSONObject(index));
+		System.out.print(adapterArray.toJSONString());
+		assertEquals(value.toJSONString(), adapterArray.getJSONObject(index)
 				.toJSONString());
 	}
 
 	@Test
 	public void testJSONArrayRoundTrip() throws JSONObjectAdapterException {
 		// Start off at zero
-		assertEquals(0, adapter.length());
-		JSONArrayAdapter value = adapter.createNewArray();
+		assertEquals(0, adapterArray.length());
+		JSONArrayAdapter value = adapterArray.createNewArray();
 		value.put(0, 123);
-		adapter.put(index, value);
-		assertEquals(1, adapter.length());
-		assertNotNull(adapter.getJSONArray(index));
-		System.out.print(adapter.toJSONString());
-		assertEquals(value.toJSONString(), adapter.getJSONArray(index)
+		adapterArray.put(index, value);
+		assertEquals(1, adapterArray.length());
+		assertNotNull(adapterArray.getJSONArray(index));
+		System.out.print(adapterArray.toJSONString());
+		assertEquals(value.toJSONString(), adapterArray.getJSONArray(index)
 				.toJSONString());
 	}
 	
 	@Test
 	public void testIsNullString() throws JSONObjectAdapterException{
 		// add the array to the value
-		assertTrue(adapter.isNull(index));
-		adapter.put(index, "someValue");
-		assertFalse(adapter.isNull(index));
-		adapter.put(index, (String)null);
-		assertTrue(adapter.isNull(index));
+		assertTrue(adapterArray.isNull(index));
+		adapterArray.put(index, "someValue");
+		assertFalse(adapterArray.isNull(index));
+		adapterArray.put(index, (String)null);
+		assertTrue(adapterArray.isNull(index));
 	}
 	
 	@Test
 	public void testIsNullObject() throws JSONObjectAdapterException{
 		// add the array to the value
-		assertTrue(adapter.isNull(index));
-		adapter.put(index, adapter.createNew());
-		assertFalse(adapter.isNull(index));
-		adapter.put(index, (JSONObjectAdapter)null);
-		assertTrue(adapter.isNull(index));
+		assertTrue(adapterArray.isNull(index));
+		adapterArray.put(index, adapterArray.createNew());
+		assertFalse(adapterArray.isNull(index));
+		adapterArray.put(index, (JSONObjectAdapter)null);
+		assertTrue(adapterArray.isNull(index));
 	}
 	
 	@Test
 	public void testIsNullArray() throws JSONObjectAdapterException{
 		// add the array to the value
-		assertTrue(adapter.isNull(index));
-		adapter.put(index, adapter.createNewArray());
-		assertFalse(adapter.isNull(index));
-		adapter.put(index, (JSONArrayAdapter)null);
-		assertTrue(adapter.isNull(index));
+		assertTrue(adapterArray.isNull(index));
+		adapterArray.put(index, adapterArray.createNewArray());
+		assertFalse(adapterArray.isNull(index));
+		adapterArray.put(index, (JSONArrayAdapter)null);
+		assertTrue(adapterArray.isNull(index));
 	}
 
 	@Test
 	public void testToString() throws JSONObjectAdapterException {
-		adapter.put(0, 123);
-		adapter.put(1, 34.5);
-		adapter.put(2, "I am a great string!");
-		JSONObjectAdapter object = adapter.createNew();
+		adapterArray.put(0, 123);
+		adapterArray.put(1, 34.5);
+		adapterArray.put(2, "I am a great string!");
+		JSONObjectAdapter object = adapterArray.createNew();
 		object.put("childKeyOne", true);
-		adapter.put(3, object);
-		System.out.println(adapter.toJSONString());
-		assertEquals(adapter.toJSONString(), adapter.toString());
+		adapterArray.put(3, object);
+		System.out.println(adapterArray.toJSONString());
+		assertEquals(adapterArray.toJSONString(), adapterArray.toString());
 	}
 	
 	// Make sure we can support all of the expected types
@@ -287,6 +322,36 @@ public class GwtTestSuite extends GWTTestCase {
 	}
 	
 	@Test
+	public void testObjectDoubleNaNRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NaN;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectDoubleInfinityRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.POSITIVE_INFINITY;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
+	public void testObjectDoubleNegativeInfRoundTrip() throws JSONObjectAdapterException{
+		double value = Double.NEGATIVE_INFINITY;
+		adapterObject.put(propertyKey, value);
+		assertTrue(adapterObject.has(propertyKey));
+		assertEquals(value, adapterObject.getDouble(propertyKey));
+		// Make sure we can also get it as an object
+		assertEquals(value, adapterObject.get(propertyKey));
+	}
+	
+	@Test
 	public void testObjectBooleanRoundTrip() throws JSONObjectAdapterException{
 		boolean value = true;
 		adapterObject.put(propertyKey, value);
@@ -308,7 +373,7 @@ public class GwtTestSuite extends GWTTestCase {
 	
 	@Test
 	public void testObjectJSONObjectAdapterRoundTrip() throws JSONObjectAdapterException{
-		JSONObjectAdapter value = adapter.createNew();
+		JSONObjectAdapter value = adapterArray.createNew();
 		assertNotNull(value);
 		value.put("someValue", 123);
 		assertNotNull(value);
@@ -320,7 +385,7 @@ public class GwtTestSuite extends GWTTestCase {
 	
 	@Test
 	public void testObjectJSONArrayAdapterRoundTrip() throws JSONObjectAdapterException{
-		JSONArrayAdapter array = adapter.createNewArray();
+		JSONArrayAdapter array = adapterArray.createNewArray();
 		// Add one object to the array
 		array.put(0, 123);
 		array.put(1, 345);
@@ -366,7 +431,7 @@ public class GwtTestSuite extends GWTTestCase {
 		// add the array to the value
 		assertTrue(adapterObject.isNull(propertyKey));
 		
-		adapterObject.put(propertyKey, adapter.createNew());
+		adapterObject.put(propertyKey, adapterArray.createNew());
 		assertFalse(adapterObject.isNull(propertyKey));
 		adapterObject.put(propertyKey, (JSONObjectAdapter)null);
 		assertTrue(adapterObject.isNull(propertyKey));
@@ -376,7 +441,7 @@ public class GwtTestSuite extends GWTTestCase {
 	public void testObjectIsNullArray() throws JSONObjectAdapterException{
 		// add the array to the value
 		assertTrue(adapterObject.isNull(propertyKey));
-		adapterObject.put(propertyKey, adapter.createNewArray());
+		adapterObject.put(propertyKey, adapterArray.createNewArray());
 		assertFalse(adapterObject.isNull(propertyKey));
 		adapterObject.put(propertyKey, (JSONArrayAdapter)null);
 		assertTrue(adapterObject.isNull(propertyKey));
@@ -387,11 +452,11 @@ public class GwtTestSuite extends GWTTestCase {
 		adapterObject.put("longKey", 123);
 		adapterObject.put("doubleKey", 34.5);
 		adapterObject.put("stringKey", "I am a great string!");
-		JSONObjectAdapter object = adapter.createNew();
+		JSONObjectAdapter object = adapterArray.createNew();
 		object.put("childKeyOne", true);
 		adapterObject.put("objecKey", object);
-		System.out.println(adapter.toJSONString());
-		assertEquals(adapter.toJSONString(), adapter.toString());
+		System.out.println(adapterArray.toJSONString());
+		assertEquals(adapterArray.toJSONString(), adapterArray.toString());
 	}
 	
 	@Test
@@ -497,6 +562,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add("a");
 		one.add("b");
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, String.class);
@@ -513,6 +579,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Double(123));
 		one.add(new Double(345.5));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Double.class);
@@ -529,6 +596,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Long(123));
 		one.add(new Long(345));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Long.class);
@@ -545,6 +613,7 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add(new Date(System.currentTimeMillis()));
 		one.add(new Date(345*1000));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, Date.class);
@@ -561,13 +630,15 @@ public class GwtTestSuite extends GWTTestCase {
 		one.add("First blob".getBytes("UTF-8"));
 		one.add("Second blob".getBytes("UTF-8"));
 		map.put("one", one);
+		map.put("two", null);
 		// Writ this to an adapter
 		adapterObject = new JSONObjectGwt();
 		AdapterCollectionUtils.writeToAdapter(adapterObject, map, byte[].class);
 		System.out.println(adapterObject.toJSONString());
 		// Now make sure we can come back
 		Map<String, List<byte[]>> clone = AdapterCollectionUtils.createMapOfCollection(adapterObject, byte[].class);
-		assertEquals(1, clone.size());
+		assertEquals(2, clone.size());
+		assertNull(clone.get("twp"));
 		List<byte[]> list = clone.get("one");
 		assertNotNull(list);
 		assertEquals(2, list.size());
@@ -579,7 +650,7 @@ public class GwtTestSuite extends GWTTestCase {
 	public void testDateRoundTrip() throws JSONObjectAdapterException{
 		Date dateValue = new Date(System.currentTimeMillis());
 		adapterObject.put("key", dateValue);
-		System.out.println(adapter.toJSONString());
+		System.out.println(adapterArray.toJSONString());
 		Date clone = adapterObject.getDate("key");
 		assertEquals(dateValue, clone);
 	}
@@ -611,16 +682,16 @@ public class GwtTestSuite extends GWTTestCase {
 	@Test
 	public void testDateRoundTripArray() throws JSONObjectAdapterException{
 		Date dateValue = new Date(System.currentTimeMillis());
-		adapter.put(0, dateValue);
-		System.out.println(adapter.toJSONString());
-		Date clone = adapter.getDate(0);
+		adapterArray.put(0, dateValue);
+		System.out.println(adapterArray.toJSONString());
+		Date clone = adapterArray.getDate(0);
 		assertEquals(dateValue, clone);
 	}
 	
 	@Test
 	public void testDateNullArray() throws JSONObjectAdapterException{
 		try{
-			adapter.put(0, (Date)null);
+			adapterArray.put(0, (Date)null);
 			fail("Should have thrown an exception");
 		}catch(IllegalArgumentException e){
 			// expected
@@ -631,7 +702,7 @@ public class GwtTestSuite extends GWTTestCase {
 	@Test
 	public void testDateNullValueArray() throws JSONObjectAdapterException{
 		try{
-			Date value = adapter.getDate(0);
+			Date value = adapterArray.getDate(0);
 			fail("Should have thrown an exception");
 		}catch(JSONObjectAdapterException e){
 			// expected
@@ -655,9 +726,9 @@ public class GwtTestSuite extends GWTTestCase {
 		// Make sure we can use base 64
 		String startString = "This string will be encoded";
 		byte[] value = startString.getBytes("UTF-8");
-		adapter.put(0, value);
+		adapterArray.put(0, value);
 		// Get the value out
-		byte[] cloneArray = adapter.getBinary(0);
+		byte[] cloneArray = adapterArray.getBinary(0);
 		String clone = new String(cloneArray, "UTF-8");
 		assertEquals(startString, clone);
 	}

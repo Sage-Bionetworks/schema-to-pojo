@@ -122,7 +122,17 @@ public class JSONValueUtil {
 	public static double getDoubleValue(JSONValue value, Object key) throws JSONObjectAdapterException{
 		if(value == null) throw new JSONObjectAdapterException("No value found for key: "+key);
 		JSONNumber valueType = value.isNumber();
-		if(valueType == null) throw new JSONObjectAdapterException("Key: "+key+" exists but is not a number. Value class: "+value.getClass().getName());
+		if(valueType == null) {
+			JSONString stringValueType = value.isString();
+			if (stringValueType!=null) {
+				try {
+					return Double.parseDouble(stringValueType.stringValue());
+				} catch (NumberFormatException e) {
+					// throw exception below
+				}
+			}
+			throw new JSONObjectAdapterException("Key: "+key+" exists but is not a number. Value class: "+value.getClass().getName());
+		}
 		return valueType.doubleValue();
 	}
 	

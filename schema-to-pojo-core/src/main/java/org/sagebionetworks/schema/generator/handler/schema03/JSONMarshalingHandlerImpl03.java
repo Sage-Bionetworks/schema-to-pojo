@@ -1,21 +1,26 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectValidator;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.*;
@@ -25,31 +30,40 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	private static final String VAR_PREFIX = "__";
 
 	@Override
-	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, JDefinedClass createRegister) {
+	public void addJSONMarshaling(ObjectSchema classSchema,	JDefinedClass classType, InstanceFactoryGenerator interfaceFactoryGenerator) {
 		// There is nothing to do for interfaces.
 		if(TYPE.INTERFACE == classSchema.getType()){
 			throw new IllegalArgumentException("Cannot add marshaling to an interface");
 		}
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
-		createGetJSONSchemaMethod(classSchema, classType);
-	
+		createGetJSONSchemaMethod(classType);
+
+		// Create a field to handle overflow from newer type definitions
+		JFieldVar extraFields = createMissingFieldField(classType);
+
 		// Create the init method
-		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, createRegister);
+		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, interfaceFactoryGenerator);
 		// setup a constructor.
 		createConstructor(classSchema, classType, initMethod);
 		
 		// Add the second method.
 		createWriteToJSONObject(classSchema, classType);
-		
+	}
+
+	JFieldVar createMissingFieldField(JDefinedClass classType) {
+		JFieldVar extraFields = classType.field(JMod.PRIVATE, classType.owner().ref(Map.class).narrow(String.class).narrow(Object.class),
+				ObjectSchema.EXTRA_FIELDS, JExpr._null());
+		return extraFields;
 	}
 	
 	/**
 	 * Create the getJSONSchema method.
+	 * 
 	 * @param classSchema
 	 * @param classType
 	 */
-	public JMethod createGetJSONSchemaMethod(ObjectSchema classSchema,JDefinedClass classType){
+	public JMethod createGetJSONSchemaMethod(JDefinedClass classType) {
 		// Look up the field for this property
 		JFieldVar field = classType.fields().get(JSONEntity.EFFECTIVE_SCHEMA);
 		if (field == null)
@@ -108,14 +122,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @param createRegister 
 	 * @return
 	 */
-	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType, JDefinedClass createRegister) {
+	protected JMethod createMethodInitializeFromJSONObject(ObjectSchema classSchema, JDefinedClass classType, InstanceFactoryGenerator interfaceFactoryGenerator) {
 		// Now the method that takes a JSONObjectAdapter.
 		JMethod method = createBaseMethod(classSchema, classType, "initializeFromJSONObject");
 		JVar param = method.params().get(0);
 		JBlock body = method.body();
 		
 		// First validate against the schema
-		body.staticInvoke(classType.owner().ref(ObjectValidator.class), "validateEntity").arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
+		JInvocation invocation = classType.owner().ref(ObjectValidator.class).staticInvoke("validateEntity")
+				.arg(classType.staticRef(JSONEntity.EFFECTIVE_SCHEMA)).arg(param).arg(classType.staticRef("class"));
+		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
+		if (extraFields == null) {
+			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '" + ObjectSchema.EXTRA_FIELDS + "' on class: "
+					+ classType.name());
+		}
+		body.assign(extraFields, invocation);
         
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
@@ -217,7 +238,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
 				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
-					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(arrayTypeClass);
 					JConditional ifNull = loopBody._if(jsonArray.invoke("isNull").arg(i));
 					// if null
 					JBlock ifNulThenBlock = ifNull._then();
@@ -272,26 +294,34 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JForEach loop = thenBlock.forEach(keyObject, VAR_PREFIX + "keyObject", jsonMap.invoke("keys"));
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
-				JVar value;
+				JVar value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value");
+				JConditional ifNull = loopBody._if(jsonMap.invoke("isNull").arg(loop.var()));
+				// if null
+				JBlock ifNulThenBlock = ifNull._then();
+				// then value = null
+				ifNulThenBlock.assign(value, JExpr._null());
+				// else
+				JBlock ifNullElseBlock = ifNull._else();
 				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
-					if (createRegister == null)
-						throw new IllegalArgumentException("A register is need to inizilaize interfaces or abstract classes.");
+					if (interfaceFactoryGenerator == null)
+						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
 					// first get the JSONObject for this array element
-					JVar valueAdapter = loopBody.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter", jsonMap
+					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
+							jsonMap
 							.invoke("getJSONObject").arg(loop.var()));
+
 					// Create the object from the register
-					value = loopBody.decl(
-							valueTypeClass,
-							VAR_PREFIX + "value",
+					ifNullElseBlock.assign(
+							value,
 							JExpr.cast(
 									valueTypeClass,
 									createRegister.staticInvoke("singleton").invoke("newInstance")
 											.arg(valueAdapter.invoke("getString").arg(ObjectSchema.CONCRETE_TYPE))));
 					// Initialize the object from the adapter.
-					loopBody.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
 				} else {
-					value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value",
-							createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
+					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
 				}
 				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
 						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
@@ -301,7 +331,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// If we have a register then we need to use it
 				JClass typeClass = (JClass) field.type();
 				if(typeClass.isInterface() || typeClass.isAbstract()){
-					if(createRegister == null) throw new IllegalArgumentException("A register is need to inizilaize an interfaces or abstract classes.");
+					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(typeClass);
 					// Use the register to create the class
 					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
 							.invoke("getJSONObject").arg(propName));
@@ -708,8 +739,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
 				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();
-				loopBody.add(map.invoke("put").arg(loop.var().invoke("getKey"))
-						.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
+				JConditional ifNull = loopBody._if(loop.var().invoke("getValue").eq(JExpr._null()));
+				ifNull._then().add(map.invoke("putNull").arg(loop.var().invoke("getKey")));
+				ifNull._else().add(
+						map.invoke("put").arg(loop.var().invoke("getKey"))
+								.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
 			} else {
@@ -728,12 +762,19 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 										+ "' is required and cannot be null"));
 			}
 		}
+		createWriteExtraFields(classType, body, param);
         // Always return the param
         body._return(param);
         return method;
 		
 	}
 	
+	void createWriteExtraFields(JDefinedClass classType, JBlock body, JVar jsonObject) {
+		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
+		JBlock thenBlock = body._if(extraFields.ne(JExpr._null()))._then();
+		thenBlock.staticInvoke(classType.owner().ref(AdapterCollectionUtils.class), "writeToObject").arg(jsonObject).arg(extraFields);
+	}
+
 	private JExpression createEqNullCheck(JVar value, JExpression createExpresssionToSetFromArray) {
 		return JOp.cond(value.eq(JExpr._null()), JExpr._null(), createExpresssionToSetFromArray);
 	}
@@ -785,9 +826,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		} else if (TYPE.INTEGER == type) {
 			return assignPropertyToJSONLong(typeClass.owner(), typeSchema, value);
 		} else if (TYPE.ARRAY == type) {
-			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
 		} else if (TYPE.MAP == type) {
-			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+			throw new IllegalArgumentException("Maps of Maps are currently not supported");
 		} else {
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));

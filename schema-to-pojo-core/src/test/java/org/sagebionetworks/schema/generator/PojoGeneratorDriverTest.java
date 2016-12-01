@@ -285,7 +285,16 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema inter = new ObjectSchema();
 		inter.setName("SomeInterface");
 		inter.setType(TYPE.INTERFACE);
-		inter.setId("SomeInterface");
+		inter.setId("example.org.SomeInterface");
+		
+		ObjectSchema interRef = new ObjectSchema();
+		interRef.setRef(inter.getId());
+		
+		ObjectSchema impl = new ObjectSchema();
+		impl.setName("SomeInterfaceImpl");
+		impl.setType(TYPE.OBJECT);
+		impl.setId("example.org.SomeInterfaceImpl");
+		impl.setImplements(new ObjectSchema[]{interRef});
 		
 		ObjectSchema root = new ObjectSchema();
 		root.setName("Root");
@@ -303,12 +312,12 @@ public class PojoGeneratorDriverTest {
 
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		list.add(inter);
+		list.add(impl);
 		list.add(root);
 //		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 //		List<ObjectSchema> schemaList = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
 		JCodeModel codeModel = new JCodeModel();
-		JDefinedClass register = RegisterGenerator.createClassFromFullName(codeModel, "org.example.Register");
-		driver.createAllClasses(codeModel, list, register);
+		driver.createAllClasses(codeModel, list);
 	}
 	
 	@Test
@@ -592,7 +601,7 @@ public class PojoGeneratorDriverTest {
 		JDefinedClass def = (JDefinedClass) type;
 		String classDeffString = declareToString(def);
 //		System.out.println(classDeffString);
-		assertTrue(classDeffString.indexOf("implements org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface") > 0);
+		assertTrue(classDeffString.indexOf("implements java.io.Serializable, org.sagebionetworks.schema.adapter.JSONEntity, org.sample.ParentInterface") > 0);
 	}
 	
 	@Test
@@ -642,10 +651,11 @@ public class PojoGeneratorDriverTest {
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(6, fields.size());
+		assertEquals(6 + 1, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
+		assertNotNull(fields.get(ObjectSchema.EXTRA_FIELDS));
 	}
 	
 	@Test
