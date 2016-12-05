@@ -14,28 +14,28 @@
  * limitations under the License.
  */ 
 
-package org.apache.commons.codec;
+package org.sagebionetworks.schema.binary;
 
 /**
- * Defines common encoding methods for byte array encoders.
- * 
+ * Defines common decoding methods for byte array decoders.
+ *
  * @author Apache Software Foundation
- * @version $Id: BinaryEncoder.java,v 1.10 2004/02/29 04:08:31 tobrien Exp $
+ * @version $Id: BinaryDecoder.java,v 1.10 2004/06/15 18:14:15 ggregory Exp $
  */
-public interface BinaryEncoder extends Encoder {
-    
+public interface BinaryDecoder extends Decoder {
+
     /**
-     * Encodes a byte array and return the encoded data
-     * as a byte array.
-     * 
-     * @param pArray Data to be encoded
+     * Decodes a byte array and returns the results as a byte array. 
      *
-     * @return A byte array containing the encoded data
+     * @param pArray A byte array which has been encoded with the
+     *      appropriate encoder
      * 
-     * @throws EncoderException thrown if the Encoder
-     *      encounters a failure condition during the
-     *      encoding process.
+     * @return a byte array that contains decoded content
+     * 
+     * @throws DecoderException A decoder exception is thrown
+     *          if a Decoder encounters a failure condition during
+     *          the decode process.
      */
-    byte[] encode(byte[] pArray) throws EncoderException;
+    byte[] decode(byte[] pArray) throws DecoderException;
 }  
 

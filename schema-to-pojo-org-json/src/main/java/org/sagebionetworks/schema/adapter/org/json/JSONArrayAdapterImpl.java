@@ -3,7 +3,6 @@ package org.sagebionetworks.schema.adapter.org.json;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +10,7 @@ import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.binary.Base64;
 
 /**
  * An org.json.JSONObject Implementation of JSONObjectAdapter.

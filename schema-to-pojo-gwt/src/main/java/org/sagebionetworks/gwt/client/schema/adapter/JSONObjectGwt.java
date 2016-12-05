@@ -4,12 +4,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.apache.commons.codec.binary.Base64;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.binary.Base64;
 
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
