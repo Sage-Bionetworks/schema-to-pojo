@@ -14,12 +14,8 @@
  * limitations under the License.
  */ 
 
-package org.apache.commons.codec.binary;
+package org.sagebionetworks.schema.binary;
 
-import org.apache.commons.codec.BinaryDecoder;
-import org.apache.commons.codec.BinaryEncoder;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.EncoderException;
 
 /**
  * Provides Base64 encoding and decoding as defined by RFC 2045.

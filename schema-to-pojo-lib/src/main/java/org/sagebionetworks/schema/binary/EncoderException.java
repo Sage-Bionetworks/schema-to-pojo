@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.apache.commons.codec;
+package org.sagebionetworks.schema.binary;
 
 /**
  * Thrown when there is a failure condition during the encoding process.  This

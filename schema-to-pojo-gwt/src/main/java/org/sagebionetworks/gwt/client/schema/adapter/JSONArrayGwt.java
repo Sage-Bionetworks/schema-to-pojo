@@ -3,11 +3,11 @@ package org.sagebionetworks.gwt.client.schema.adapter;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
-import org.apache.commons.codec.binary.Base64;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.binary.Base64;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;

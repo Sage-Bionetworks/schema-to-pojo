@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.apache.commons.codec;
+package org.sagebionetworks.schema.binary;
 
 /**
  * <p>Provides the highest level of abstraction for Decoders.
