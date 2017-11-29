@@ -16,7 +16,7 @@ import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
  */
 public class OrderedTest {
 	
-	@Ignore // This test fails since moving to Java 8 because of the changes to HashSet
+//	@Ignore // This test fails since moving to Java 8 because of the changes to HashSet
 	@Test
 	public void testOrder() throws JSONObjectAdapterException{
 		// Get the schema

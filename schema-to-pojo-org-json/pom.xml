@@ -21,8 +21,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20090211</version>
+			<artifactId>JSON-Java</artifactId>
+			<version>1.0</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
