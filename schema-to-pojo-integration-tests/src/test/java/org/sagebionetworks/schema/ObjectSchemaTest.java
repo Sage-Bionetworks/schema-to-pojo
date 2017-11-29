@@ -110,6 +110,11 @@ public class ObjectSchemaTest {
 			field.set(toTest, new LinkDescription[] { 
 					new LinkDescription(LinkRel.DESCRIBED_BY, "http://google.com/"),
 					new LinkDescription(LinkRel.ROOT, "http://localhost:8080/")});
+		}else if(field.getType() == EnumValue[].class){
+			field.set(toTest, new EnumValue[]{
+					new EnumValue("a", "a description"),
+					new EnumValue("b", "b description")
+			});
 		}else{
 			throw new IllegalArgumentException("Unknown Type:"+field.getType());
 		}
@@ -184,7 +189,10 @@ public class ObjectSchemaTest {
 		example.setTransient(true);
 		
 		// An enum
-		example.setEnum(new String[]{"a","b","c"});
+		example.setEnum(new EnumValue[]{
+				new EnumValue("a", "a description"),
+				new EnumValue("b", "b description")
+		});
 		
 		validateSchemaRoundTrip(example);
 	}

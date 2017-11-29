@@ -2,8 +2,17 @@
     "type":"string",
     "name":"PetEnum",
     "enum":[
-        "CAT",
-        "DOG",
-        "FISH",
+    	{
+    		"name":"CAT",
+    		"description":"Cats are better than dogs"
+    	},
+    	{
+    		"name":"DOG",
+    		"description":"nothing to say"
+    	},
+    	{
+    		"name":"FISH",
+    		"description":"Cats eat fish"
+    	}
     ],
 }

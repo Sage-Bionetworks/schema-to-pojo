@@ -3,9 +3,17 @@
     "name": "DiseaseNames",
     "type":"string",
     "enum":[
-        "Alzheimers",
-        "Asthma",
-        "Autism",
-        "Cancer"
+    	{
+    		"name":"Alzheimers"
+    	},
+    	{
+    		"name":"Asthma"
+    	},
+    	{
+    		"name":"Autism"
+    	},
+    	{
+    		"name":"Cancer",
+    	}
     ]
 }

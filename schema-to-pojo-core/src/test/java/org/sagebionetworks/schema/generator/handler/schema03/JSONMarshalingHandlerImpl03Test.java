@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
@@ -676,7 +677,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Add add a string property
 		ObjectSchema propertySchema = new ObjectSchema();
 		propertySchema.setType(TYPE.STRING);
-		propertySchema.setEnum(new String[]{"A","B",});
+		propertySchema.setEnum(new EnumValue[]{
+				new EnumValue("A"),
+				new EnumValue("B")
+		});
 		propertySchema.setName("SomeEnum");
 		String propName = "enumName";
 		schema.putProperty(propName, propertySchema);
@@ -690,7 +694,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
 		assertTrue(methodString.indexOf("catch (java.lang.IllegalArgumentException _x)") > 0);
@@ -1170,7 +1174,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Add add a string property
 		ObjectSchema propertySchema = new ObjectSchema();
 		propertySchema.setType(TYPE.STRING);
-		propertySchema.setEnum(new String[]{"A","B",});
+		propertySchema.setEnum(new EnumValue[]{
+				new EnumValue("A"),
+				new EnumValue("B")
+		});
 		propertySchema.setName("SomeEnum");
 		String propName = "enumName";
 		schema.putProperty(propName, propertySchema);
@@ -1651,7 +1658,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
-		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		EnumValue[] forTheEnum = {
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant"),
+		};
 		typesEnum.setEnum(forTheEnum);
 		
 		//add enum to property's items
@@ -1704,7 +1715,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
-		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		EnumValue[] forTheEnum = {
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant"),
+		};
 		typesEnum.setEnum(forTheEnum);
 		
 		//add enum to property's items
@@ -1773,7 +1788,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		itemWithEnum.setType(TYPE.STRING);
 		itemWithEnum.setName("Animals");
 		itemWithEnum.setId("Animals");
-		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		EnumValue[] forTheEnum = {
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant"),
+		};
 		itemWithEnum.setEnum(forTheEnum);
 		
 		//add item to property
@@ -1819,7 +1838,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
-		String[] forTheEnum = {"puppy", "mouse", "elephant"};
+		EnumValue[] forTheEnum = {
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant"),
+		};
 		typesEnum.setEnum(forTheEnum);
 		
 		//add enum to property's items
@@ -1886,13 +1909,20 @@ public class JSONMarshalingHandlerImpl03Test {
 		keyEnum.setType(TYPE.STRING);
 		keyEnum.setName("Animals");
 		keyEnum.setId("Animals");
-		keyEnum.setEnum(new String[] { "puppy", "mouse", "elephant" });
+		keyEnum.setEnum(new EnumValue[] { 
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant")
+		});
 
 		ObjectSchema valueEnum = new ObjectSchema();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
-		valueEnum.setEnum(new String[] { "dog", "cat" });
+		valueEnum.setEnum(new EnumValue[] {
+				new EnumValue("dog"),
+				new EnumValue("cat")
+		});
 
 		// add enum to property's key and value
 		propertySchema.setKey(keyEnum);
@@ -1950,13 +1980,20 @@ public class JSONMarshalingHandlerImpl03Test {
 		keyEnum.setType(TYPE.STRING);
 		keyEnum.setName("Animals");
 		keyEnum.setId("Animals");
-		keyEnum.setEnum(new String[] { "puppy", "mouse", "elephant" });
+		keyEnum.setEnum(new EnumValue[] { 
+				new EnumValue("puppy"),
+				new EnumValue("mouse"),
+				new EnumValue("elephant")
+		});
 
 		ObjectSchema valueEnum = new ObjectSchema();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
-		valueEnum.setEnum(new String[] { "dog", "cat" });
+		valueEnum.setEnum(new EnumValue[] { 
+				new EnumValue("dog"),
+				new EnumValue("cat")
+		});
 
 		// add enum to property's key and value
 		propertySchema.setKey(keyEnum);

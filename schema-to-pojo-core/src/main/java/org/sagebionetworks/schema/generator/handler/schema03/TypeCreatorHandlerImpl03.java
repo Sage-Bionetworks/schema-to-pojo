@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
@@ -194,8 +195,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JPackage _package = codeModel._package(schema.getPackageName());
 			JDefinedClass enumClass = _package._enum(schema.getName());
 			// Generate the enum constants
-			for(String enumName: schema.getEnum()){
-				enumClass.enumConstant(enumName);
+			for(EnumValue enumName: schema.getEnum()){
+				enumClass.enumConstant(enumName.getName());
 			}
 			// Add all of the comments
 			addCommentsAndEffectiveSchema(schema, enumClass);
