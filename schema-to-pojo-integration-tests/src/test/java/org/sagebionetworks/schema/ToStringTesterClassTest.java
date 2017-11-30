@@ -49,6 +49,6 @@ public class ToStringTesterClassTest {
 		System.out.println(theClass);
 		
 		//verify that the string looks as expected
-		assertTrue(theClass.indexOf("tags=[funTag, happyTag, sadTag] id=7 price=77.77 randomProp=null name=imTheName ") > 0);
+		assertTrue(theClass.indexOf("id=7 name=imTheName price=77.77 tags=[funTag, happyTag, sadTag] randomProp=null") > 0);
 	}
 }

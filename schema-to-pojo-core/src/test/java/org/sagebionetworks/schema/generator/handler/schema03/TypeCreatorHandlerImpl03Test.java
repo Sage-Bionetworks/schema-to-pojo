@@ -10,6 +10,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
@@ -251,7 +252,11 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test (expected=IllegalArgumentException.class)
 	public void testCreateEnumerationNotString() throws ClassNotFoundException{
 		schema.setType(TYPE.BOOLEAN);
-		schema.setEnum(new String[]{"one","two","three"});
+		schema.setEnum(new EnumValue[]{
+				new EnumValue("one"),
+				new EnumValue("two"),
+				new EnumValue("three")
+		});
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
 		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
@@ -260,7 +265,11 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test (expected=IllegalArgumentException.class)
 	public void testCreateEnumerationNullName() throws ClassNotFoundException{
 		schema.setType(TYPE.STRING);
-		schema.setEnum(new String[]{"one","two","three"});
+		schema.setEnum(new EnumValue[]{
+				new EnumValue("one"),
+				new EnumValue("two"),
+				new EnumValue("three")
+		});
 		schema.setName(null);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
@@ -274,7 +283,11 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setTitle(title);
 		schema.setDescription(description);
 		schema.setType(TYPE.STRING);
-		schema.setEnum(new String[]{"one","two","three"});
+		schema.setEnum(new EnumValue[]{
+				new EnumValue("one"),
+				new EnumValue("two", "two's description"),
+				new EnumValue("three")
+		});
 		schema.setName("SampleEnum");
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// Create the class
@@ -283,13 +296,14 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
-//		System.out.println(classString);
+		System.out.println(classString);
 		assertTrue(classString.indexOf("one,") > 0);
 		assertTrue(classString.indexOf("two,") > 0);
 		assertTrue(classString.indexOf("three;") > 0);
 		assertTrue(classString.indexOf(title) > 0);
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
+		assertTrue(classString.contains("two's description"));
 	}
 
 	@Test

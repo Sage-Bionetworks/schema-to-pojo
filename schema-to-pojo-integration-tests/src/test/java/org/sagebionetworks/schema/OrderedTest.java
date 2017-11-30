@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Iterator;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;

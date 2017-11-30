@@ -4,9 +4,18 @@
             "type":"string",
             "name":"ValidPets",
             "enum":[
-                "CAT",
-                "DOG",
-                "FISH"
+                {	
+                	"name":"CAT",
+                	"description":"Cats are better than dogs"
+                },
+                {
+                	"name":"DOG",
+                	"description":"nothing to say"
+                },
+                {
+                	"name":"FISH",
+                	"description":"Cats eat fish"
+                }
             ],
             "description":"The property is constrained by an enumeration",
             "required":true

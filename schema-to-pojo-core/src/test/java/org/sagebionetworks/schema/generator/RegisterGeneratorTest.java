@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
@@ -65,7 +66,9 @@ public class RegisterGeneratorTest {
 		RegisterGenerator regGen = new RegisterGenerator();
 		// Enums are not concrete classes
 		ObjectSchema enumClass = new ObjectSchema(TYPE.OBJECT);
-		enumClass.setEnum(new String[] {"one"});
+		enumClass.setEnum(new EnumValue[] {
+				new EnumValue("one")
+		});
 		assertFalse(regGen.isConcreteClass(enumClass));
 		// Interface is not a concrete class.
 		ObjectSchema interfaceClass = new ObjectSchema(TYPE.INTERFACE);

@@ -15,10 +15,18 @@
     			"type":"string",
     			"id":"DiseaseNames2",
     			"enum":[
-        			"Alzheimers",
-        			"Asthma",
-        			"Autism",
-        			"Cancer"
+    				{
+    					"name":"Alzheimers"
+    				},
+    				{
+    					"name":"Asthma"
+    				},
+    				{
+    					"name":"Autism"
+    				},
+    				{
+    					"name":"Cancer",
+    				}
     			]
             }
         }

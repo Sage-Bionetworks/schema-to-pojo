@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
@@ -18,6 +19,7 @@ import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
@@ -194,8 +196,13 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JPackage _package = codeModel._package(schema.getPackageName());
 			JDefinedClass enumClass = _package._enum(schema.getName());
 			// Generate the enum constants
-			for(String enumName: schema.getEnum()){
-				enumClass.enumConstant(enumName);
+			for(EnumValue enumName: schema.getEnum()){
+				JEnumConstant enumConst = enumClass.enumConstant(enumName.getName());
+				if(enumName.getDescription() != null) {
+					JDocComment doc = enumConst.javadoc();
+					doc.add(enumName.getDescription());
+				}
+				
 			}
 			// Add all of the comments
 			addCommentsAndEffectiveSchema(schema, enumClass);

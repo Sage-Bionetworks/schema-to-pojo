@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
@@ -303,7 +304,7 @@ public class ObjectSchema implements JSONEntity {
 	 * order for the schema to be valid. Comparison of enum values uses the same
 	 * algorithm as defined in "uniqueItems" (Section 5.15).
 	 */
-	private String[] _enum;
+	private EnumValue[] _enum;
 	/*
 	 * 5.20. default
 	 * 
@@ -1180,7 +1181,7 @@ public class ObjectSchema implements JSONEntity {
 	 * 
 	 * @return
 	 */
-	public String[] getEnum() {
+	public EnumValue[] getEnum() {
 		return _enum;
 	}
 
@@ -1197,7 +1198,7 @@ public class ObjectSchema implements JSONEntity {
 	 * 
 	 * @param _enum
 	 */
-	public void setEnum(String[] _enum) {
+	public void setEnum(EnumValue[] _enum) {
 		this._enum = _enum;
 	}
 
@@ -1924,7 +1925,9 @@ public class ObjectSchema implements JSONEntity {
 			JSONArrayAdapter array = copy.createNewArray();
 			copy.put(JSON_ENUM, array);
 			for (int i = 0; i < _enum.length; i++) {
-				array.put(i, _enum[i]);
+				JSONObjectAdapter valueAdapter = array.createNew();
+				_enum[i].writeToJSONObject(valueAdapter);
+				array.put(i, valueAdapter);
 			}
 		}
 		if (this.dependencies != null) {
@@ -2227,9 +2230,12 @@ public class ObjectSchema implements JSONEntity {
 		}
 		if (adapter.has(JSON_ENUM)) {
 			JSONArrayAdapter array = adapter.getJSONArray(JSON_ENUM);
-			this._enum = new String[array.length()];
+			this._enum = new EnumValue[array.length()];
 			for (int i = 0; i < array.length(); i++) {
-				this._enum[i] = array.getString(i);
+				JSONObjectAdapter valueAdapter = array.getJSONObject(i);
+				EnumValue enumValue = new EnumValue();
+				enumValue.initializeFromJSONObject(valueAdapter);
+				this._enum[i] = enumValue;
 			}
 		}
 		if (adapter.has(JSON_DEPENDENCIES)) {

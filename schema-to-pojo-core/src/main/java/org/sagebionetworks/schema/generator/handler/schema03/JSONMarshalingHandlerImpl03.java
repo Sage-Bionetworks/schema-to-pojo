@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectValidator;
@@ -183,7 +184,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 						if(i!=0){
 							builder.append(", ");
 						}
-						builder.append("'").append(propSchema.getEnum()[i]).append("'");
+						EnumValue enumValue = propSchema.getEnum()[i];
+						builder.append("'").append(enumValue.getName()).append("'");
 					}
 					builder.append(".");
 					catchBlock.body()._throw(JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(builder.toString()));
