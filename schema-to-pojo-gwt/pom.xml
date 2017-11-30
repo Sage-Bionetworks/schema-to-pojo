@@ -4,9 +4,8 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.3.13</version>
+		<version>0.3.14</version>
 	</parent>
-	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo-gwt</artifactId>
 	<packaging>jar</packaging>
 	<name>schema-to-pojo-gwt</name>
