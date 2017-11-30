@@ -92,7 +92,7 @@ public class EnumValue implements JSONEntity {
 		if(description != null) {
 			writeTo.put(JSON_DESCRIPTION, this.description);
 		}
-		return null;
+		return writeTo;
 	}
 
 	@Override
