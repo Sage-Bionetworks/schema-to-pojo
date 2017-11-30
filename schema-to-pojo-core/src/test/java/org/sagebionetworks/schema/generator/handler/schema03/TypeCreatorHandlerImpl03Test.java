@@ -285,7 +285,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setType(TYPE.STRING);
 		schema.setEnum(new EnumValue[]{
 				new EnumValue("one"),
-				new EnumValue("two"),
+				new EnumValue("two", "two's description"),
 				new EnumValue("three")
 		});
 		schema.setName("SampleEnum");
@@ -296,13 +296,14 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(clazz instanceof JDefinedClass);
 		JDefinedClass sampleClass = (JDefinedClass)clazz;
 		String classString = declareToString(sampleClass);
-//		System.out.println(classString);
+		System.out.println(classString);
 		assertTrue(classString.indexOf("one,") > 0);
 		assertTrue(classString.indexOf("two,") > 0);
 		assertTrue(classString.indexOf("three;") > 0);
 		assertTrue(classString.indexOf(title) > 0);
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
+		assertTrue(classString.contains("two's description"));
 	}
 
 	@Test

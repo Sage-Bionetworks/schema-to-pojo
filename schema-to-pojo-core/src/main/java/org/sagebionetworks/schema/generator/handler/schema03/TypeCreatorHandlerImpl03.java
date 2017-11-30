@@ -19,6 +19,7 @@ import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
@@ -196,7 +197,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JDefinedClass enumClass = _package._enum(schema.getName());
 			// Generate the enum constants
 			for(EnumValue enumName: schema.getEnum()){
-				enumClass.enumConstant(enumName.getName());
+				JEnumConstant enumConst = enumClass.enumConstant(enumName.getName());
+				if(enumName.getDescription() != null) {
+					JDocComment doc = enumConst.javadoc();
+					doc.add(enumName.getDescription());
+				}
+				
 			}
 			// Add all of the comments
 			addCommentsAndEffectiveSchema(schema, enumClass);
