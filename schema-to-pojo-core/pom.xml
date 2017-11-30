@@ -3,9 +3,8 @@
   <parent>
     <artifactId>schema-to-pojo</artifactId>
     <groupId>org.sagebionetworks</groupId>
-    <version>0.3.13</version>
+    <version>0.3.14</version>
   </parent>
-  <groupId>org.sagebionetworks</groupId>
   <artifactId>schema-to-pojo-core</artifactId>
   <name>schema-to-pojo-core</name>
   <packaging>jar</packaging>
