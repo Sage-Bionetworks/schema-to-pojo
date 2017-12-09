@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.3.14</version>
+		<version>0.3.15</version>
 	</parent>
 	<artifactId>schema-to-pojo-org-json</artifactId>
 	<name>schema-to-pojo-org-json</name>
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>JSON-Java</artifactId>
-			<version>1.1</version>
+			<version>1.2</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
