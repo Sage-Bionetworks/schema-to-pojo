@@ -154,7 +154,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				}
 			}
 			// Add all of the comments
-			addCommentsAndEffectiveSchema(schema, newClass);
+			addComments(schema, newClass);
 			return newClass;
 		} catch (JClassAlreadyExistsException e) {
 			return e.getExistingClass();
@@ -162,12 +162,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 	}
 
 
-	public void addCommentsAndEffectiveSchema(ObjectSchema schema, JDefinedClass newClass) {
-		try {
-			newClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, newClass.owner()._ref(String.class), JSONEntity.EFFECTIVE_SCHEMA, JExpr.lit(EffectiveSchemaUtil.generateJSONofEffectiveSchema(schema)));
-		} catch (JSONObjectAdapterException e) {
-			throw new RuntimeException(e);
-		}
+	public void addComments(ObjectSchema schema, JDefinedClass newClass) {
 		// Add the comments to the class
 		JDocComment docs = newClass.javadoc();
 		if(schema.getTitle() != null){
@@ -205,7 +200,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				
 			}
 			// Add all of the comments
-			addCommentsAndEffectiveSchema(schema, enumClass);
+			addComments(schema, enumClass);
 			return enumClass;
 		} catch (JClassAlreadyExistsException e) {
 			return e.getExistingClass();

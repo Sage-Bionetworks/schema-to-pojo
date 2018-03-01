@@ -305,26 +305,6 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 		assertTrue(classString.contains("two's description"));
 	}
-
-	@Test
-	public void testEffectiveSchema() throws ClassNotFoundException{
-		String title = "This is the title";
-		String description = "Add a description";
-		schema.setTitle(title);
-		schema.setDescription(description);
-		schema.setType(TYPE.OBJECT);
-		schema.setName("Sample");
-		schema.putProperty("someProperty", new  ObjectSchema(TYPE.STRING));
-		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
-		// Create the class
-		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
-		assertNotNull(clazz);
-		assertTrue(clazz instanceof JDefinedClass);
-		JDefinedClass sampleClass = (JDefinedClass)clazz;
-		String classString = declareToString(sampleClass);
-		assertTrue(classString.indexOf("public final static java.lang.String EFFECTIVE_SCHEMA") > 0);
-	}
-	
 	
 	/**
 	 * Helper to declare a model object to string.

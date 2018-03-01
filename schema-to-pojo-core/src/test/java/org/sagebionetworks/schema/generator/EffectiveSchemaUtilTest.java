@@ -125,7 +125,7 @@ public class EffectiveSchemaUtilTest {
 	public void testGenerateJSONofEffectiveSchemaWithEnum() throws JSONObjectAdapterException {
 		String json = EffectiveSchemaUtil.generateJSONofEffectiveSchema(enumSchema);
 		assertNotNull(json);
-//		System.out.println(json);
+		System.out.println(json);
 		
 		// Create a clone from the json
 		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(json));

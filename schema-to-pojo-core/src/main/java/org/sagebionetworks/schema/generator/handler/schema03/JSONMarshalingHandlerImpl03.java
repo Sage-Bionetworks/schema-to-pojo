@@ -1,13 +1,10 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.sagebionetworks.schema.EnumValue;
@@ -24,7 +21,28 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
-import com.sun.codemodel.*;
+import com.sun.codemodel.ClassType;
+import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JCatchBlock;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JCommentPart;
+import com.sun.codemodel.JConditional;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JForEach;
+import com.sun.codemodel.JForLoop;
+import com.sun.codemodel.JInvocation;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
+import com.sun.codemodel.JOp;
+import com.sun.codemodel.JTryBlock;
+import com.sun.codemodel.JType;
+import com.sun.codemodel.JVar;
+import com.sun.codemodel.JWhileLoop;
 
 public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
@@ -38,7 +56,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
-		createGetJSONSchemaMethod(classType);
 
 		// Create a field to handle overflow from newer type definitions
 		JFieldVar extraFields = createMissingFieldField(classType);
@@ -58,25 +75,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		return extraFields;
 	}
 	
-	/**
-	 * Create the getJSONSchema method.
-	 * 
-	 * @param classSchema
-	 * @param classType
-	 */
-	public JMethod createGetJSONSchemaMethod(JDefinedClass classType) {
-		// Look up the field for this property
-		JFieldVar field = classType.fields().get(JSONEntity.EFFECTIVE_SCHEMA);
-		if (field == null)
-			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '"+ JSONEntity.EFFECTIVE_SCHEMA + "' on class: " + classType.name());
-		// Create the get method
-		JMethod method = classType.method(JMod.PUBLIC, classType.owner()._ref(String.class), "getJSONSchema");
-		method.body()._return(field);
-		return method;
-	}
-
-
-
 	/**
 	 * 
 	 * @param classSchema
