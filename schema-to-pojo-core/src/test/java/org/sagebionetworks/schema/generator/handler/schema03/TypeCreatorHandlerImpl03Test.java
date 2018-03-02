@@ -1,14 +1,15 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
@@ -28,6 +29,7 @@ public class TypeCreatorHandlerImpl03Test {
 	
 	JCodeModel codeModel;
 	JPackage _package;
+	JDefinedClass sampleClass;
 	JType type;
 	ObjectSchema schema;
 
@@ -36,7 +38,7 @@ public class TypeCreatorHandlerImpl03Test {
 			ClassNotFoundException {
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
-//		sampleClass = codeModel._class("Sample");
+		sampleClass = codeModel._class("Sample");
 		schema = new ObjectSchema();
 		schema.setType(TYPE.OBJECT);
 		// give it a name
@@ -304,6 +306,75 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 		assertTrue(classString.contains("two's description"));
+	}
+	
+	@Test
+	public void testAddKeyConstantsConcreteClass() throws JClassAlreadyExistsException {
+		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
+		props.put("foo", new ObjectSchema(TYPE.STRING));
+		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		schema.setProperties(props);
+
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// call under test
+		handler.addKeyConstants(schema, sampleClass);
+		String classString = declareToString(sampleClass);
+		System.out.println(classString);
+		assertTrue(classString.contains("String _KEY_FOO = \"foo\";"));
+		assertTrue(classString.contains("String _KEY_BAR = \"bar\";"));
+		assertTrue(classString.contains("String[] _ALL_KEYS = new java.lang.String[] {_KEY_FOO, _KEY_BAR };"));
+	}
+	
+	@Test
+	public void testAddKeyConstantsInterfaceImplementor() throws JClassAlreadyExistsException {
+		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
+		props.put("foo", new ObjectSchema(TYPE.STRING));
+		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		schema.setProperties(props);
+		schema.setImplements(new ObjectSchema[] {new ObjectSchema(TYPE.INTERFACE)});
+
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// call under test
+		handler.addKeyConstants(schema, sampleClass);
+		String classString = declareToString(sampleClass);
+		System.out.println(classString);
+		assertTrue(classString.contains("String _KEY_FOO = \"foo\";"));
+		assertTrue(classString.contains("String _KEY_BAR = \"bar\";"));
+		assertTrue(classString.contains("String[] _ALL_KEYS = new java.lang.String[] {_KEY_FOO, _KEY_BAR, org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE };"));
+	}
+	
+	
+	@Test
+	public void testAddKeyConstantsInterface() throws JClassAlreadyExistsException {
+		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
+		props.put("foo", new ObjectSchema(TYPE.STRING));
+		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		schema.setProperties(props);
+		
+		JDefinedClass someInterface = _package._interface("SomeInterface");
+
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// call under test
+		handler.addKeyConstants(schema, someInterface);
+		String classString = declareToString(someInterface);
+		System.out.println(classString);
+		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("foo")));
+		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("bar")));
+		assertFalse(classString.contains(ObjectSchema.ALL_KEYS_NAME));
+	}
+	
+	@Test
+	public void testAddKeyConstantsEnum() throws JClassAlreadyExistsException {
+		schema.setEnum(new EnumValue[] {new EnumValue("foo")});
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		
+		JDefinedClass someEnum = _package._enum("SomeEnum");
+		// call under test
+		handler.addKeyConstants(schema, someEnum);
+		String classString = declareToString(someEnum);
+		System.out.println(classString);
+		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("foo")));
+		assertFalse(classString.contains(ObjectSchema.ALL_KEYS_NAME));
 	}
 	
 	/**

@@ -2,6 +2,8 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,10 +12,9 @@ import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-import org.sagebionetworks.schema.generator.EffectiveSchemaUtil;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
+import com.sun.codemodel.JArray;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -21,6 +22,8 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JEnumConstant;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
+import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
@@ -143,7 +146,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			}else{
 				throw new IllegalArgumentException("Unknown type: "+schema.getType()); 
 			}
-			// Both classes and interfaces should implment JSONEntity:
+			// Both classes and interfaces should implement JSONEntity:
 			newClass._implements(JSONEntity.class);
 			if(superType != null && TYPE.OBJECT == schema.getType()){
 				newClass._extends((JClass) superType);
@@ -153,6 +156,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 					newClass._implements((JClass)interfacesType);
 				}
 			}
+			// add all of the key constants
+			addKeyConstants(schema, newClass);
 			// Add all of the comments
 			addComments(schema, newClass);
 			return newClass;
@@ -161,6 +166,44 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		}
 	}
 
+	/**
+	 * Create a key constant for each property of the schema.
+	 * @param schema
+	 * @param newClass
+	 */
+	public static void addKeyConstants(ObjectSchema schema, JDefinedClass newClass) {
+		if(!newClass.isInterface()) {
+			JType stringType = newClass.owner()._ref(String.class);
+			JType stringArrayType = newClass.owner()._ref(String[].class);
+			Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
+			Iterator<String> keyIt = fieldMap.keySet().iterator();
+			List<JExpression> keyConstants = new LinkedList<JExpression>();
+			while (keyIt.hasNext()) {
+				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
+				String key = keyIt.next();
+				String name = ObjectSchema.getKeyConstantName(key);
+				JExpression value = JExpr.lit(key);
+				JFieldVar keyConst= newClass.field(mods, stringType , name, value);
+				keyConstants.add(keyConst);
+			}
+			// any class that implements an interface will have concreteType.
+			if(schema.getImplements() != null) {
+				JExpression keyConst= newClass.owner().ref(ObjectSchema.class).staticRef("CONCRETE_TYPE");
+				keyConstants.add(keyConst);
+			}
+			if(!keyConstants.isEmpty()) {
+				// create an array for all all values
+				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
+				JType type = newClass.owner()._ref(String.class);
+				JArray value = JExpr.newArray(type);
+				for(JExpression constants: keyConstants) {
+					value.add(constants);
+				}
+				// the array of all names.
+				newClass.field(mods, stringArrayType , ObjectSchema.ALL_KEYS_NAME, value);
+			}
+		}
+	}
 
 	public void addComments(ObjectSchema schema, JDefinedClass newClass) {
 		// Add the comments to the class

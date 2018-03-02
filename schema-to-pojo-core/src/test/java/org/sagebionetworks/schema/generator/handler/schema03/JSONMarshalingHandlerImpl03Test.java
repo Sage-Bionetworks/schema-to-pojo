@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +21,6 @@ import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
-import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 
@@ -194,17 +191,17 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(constructorString);
+		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"stringName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_STRINGNAME)) {") > 0);
 		// It should directly set the value
-		assertTrue(methodString.indexOf("stringName = adapter.getString(\"stringName\");") > 0);
+		assertTrue(methodString.indexOf("stringName = adapter.getString(_KEY_STRINGNAME);") > 0);
 		// It should also have an else that sets it to null
 		assertTrue(methodString.indexOf("} else {") > 0);
 		assertTrue(methodString.indexOf("stringName = null;") > 0);
@@ -221,17 +218,17 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"uriName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_URINAME)) {") > 0);
 		// It should directly set the value
-		assertTrue(methodString.indexOf("uriName = adapter.getString(\"uriName\");") > 0);
+		assertTrue(methodString.indexOf("uriName = adapter.getString(_KEY_URINAME);") > 0);
 		// It should also have an else that sets it to null
 		assertTrue(methodString.indexOf("} else {") > 0);
 		assertTrue(methodString.indexOf("uriName = null;") > 0);
@@ -247,13 +244,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "stringName";
 		// Create an adapter
 		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		JVar[] propertyKeyConstants = addKeyConstant(sampleClass, propName);
 		// add the parameter
 		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propertyKeyConstants[0], propertySchema);
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
-		assertEquals("adapter.getString(\"stringName\")", methodString);
+		assertEquals("adapter.getString(_KEY_STRINGNAME)", methodString);
 	}
 	
 	@Test
@@ -264,13 +262,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "dateName";
 		// Create an adapter
 		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		JVar[] propertyKeyConstants = addKeyConstant(sampleClass, propName);
 		// add the parameter
 		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propertyKeyConstants[0], propertySchema);
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
-		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), adapter.getString(\"dateName\"))", methodString);
+		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), adapter.getString(_KEY_DATENAME))", methodString);
 	}
 	
 	@Test
@@ -281,13 +280,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "dateName";
 		// Create an adapter
 		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		JVar[] propertyKeyConstants = addKeyConstant(sampleClass, propName);
 		// add the parameter
 		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propertyKeyConstants[0], propertySchema);
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
-		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE\"), adapter.getString(\"dateName\"))", methodString);
+		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE\"), adapter.getString(_KEY_DATENAME))", methodString);
 	}
 	
 	@Test
@@ -298,13 +298,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "someURI";
 		// Create an adapter
 		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		JVar[] propertyKeyConstants = addKeyConstant(sampleClass, propName);
 		// add the parameter
 		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propertyKeyConstants[0], propertySchema);
 		String methodString = generateToString(rhs);
 		System.out.println(methodString);
-		assertEquals("adapter.getString(\"someURI\")", methodString);
+		assertEquals("adapter.getString(_KEY_SOMEURI)", methodString);
 	}
 	
 	@Test
@@ -315,13 +316,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		String propName = "dateName";
 		// Create an adapter
 		JMethod method  = sampleClass.method(JMod.PUBLIC, JSONObjectAdapter.class, "initializeFromJSONObject");
+		JVar[] propertyKeyConstants = addKeyConstant(sampleClass, propName);
 		// add the parameter
 		JVar adapter = method.param(codeModel._ref(JSONObjectAdapter.class), "adapter");
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propName, propertySchema);
+		JExpression rhs = handler.assignJSONStringToProperty(codeModel, adapter, propertyKeyConstants[0], propertySchema);
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
-		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"TIME\"), adapter.getString(\"dateName\"))", methodString);
+		assertEquals("adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"TIME\"), adapter.getString(_KEY_DATENAME))", methodString);
 	}
 	
 	@Test
@@ -334,18 +336,18 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
 //		System.out.println(declareToString(sampleClass));
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DATENAME)) {") > 0);
 		// This should convert from a string to a date.
-		assertTrue(methodString.indexOf("dateName = adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), adapter.getString(\"dateName\"));") > 0);
+		assertTrue(methodString.indexOf("dateName = adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), adapter.getString(_KEY_DATENAME));") > 0);
 		// It should also have an else that sets it to null
 		assertTrue(methodString.indexOf("} else {") > 0);
 		assertTrue(methodString.indexOf("dateName = null;") > 0);
@@ -362,7 +364,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		assertNotNull(method);
@@ -371,9 +373,9 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(declareToString(sampleClass));
 		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DATENAME)) {") > 0);
 		// This should convert from a string to a date.
-		assertTrue(methodString.indexOf("dateName = new java.util.Date(adapter.getLong(\"dateName\"));") > 0);
+		assertTrue(methodString.indexOf("dateName = new java.util.Date(adapter.getLong(_KEY_DATENAME));") > 0);
 		// It should also have an else that sets it to null
 		assertTrue(methodString.indexOf("} else {") > 0);
 		assertTrue(methodString.indexOf("dateName = null;") > 0);
@@ -392,15 +394,16 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		// There should be an else block
 		assertTrue(methodString.indexOf("} else {") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"Property: 'stringName' is required and cannot be null\");") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchema.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
 		// This case should not have a set to null
 		assertFalse(methodString.indexOf("stringName = null;") > 0);
 	}
@@ -414,7 +417,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Long.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -422,7 +425,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(method);;
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("longName = new java.lang.Long(adapter.getLong(\"longName\"));") > 0);
+		assertTrue(methodString.indexOf("longName = new java.lang.Long(adapter.getLong(_KEY_LONGNAME));") > 0);
 		assertTrue(methodString.indexOf("longName = null;") > 0);
 	}
 	
@@ -435,7 +438,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Double.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -443,8 +446,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("oubleName = new java.lang.Double(adapter.getDouble(\"doubleName\"));") > 0);
-		assertTrue(methodString.indexOf("doubleName = null;") > 0);
+		assertTrue(methodString.contains("oubleName = new java.lang.Double(adapter.getDouble(_KEY_DOUBLENAME));"));
+		assertTrue(methodString.contains("doubleName = null;"));
 	}
 	
 	@Test
@@ -456,7 +459,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Boolean.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -464,7 +467,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = new java.lang.Boolean(adapter.getBoolean(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("propName = new java.lang.Boolean(adapter.getBoolean(_KEY_PROPNAME));") > 0);
 		assertTrue(methodString.indexOf("propName = null;") > 0);
 	}
 	
@@ -476,7 +479,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -484,7 +487,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(_KEY_PROPNAME));") > 0);
 	}
 	
 	@Test
@@ -495,7 +498,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleInterface, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		// this time we provide a register.
@@ -506,10 +509,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(\"propName\");") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(_KEY_PROPNAME);"));
 		assertTrue(methodString
-				.indexOf("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__localAdapter.getString(\"concreteType\")));") > 0);
-		assertTrue(methodString.indexOf("propName.initializeFromJSONObject(__localAdapter);") > 0);
+				.contains("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__localAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+		assertTrue(methodString.contains("propName.initializeFromJSONObject(__localAdapter);"));
 	}
 	
 	@Test
@@ -520,7 +523,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
 		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
@@ -529,7 +532,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(\"propName\"));") > 0);
+		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(_KEY_PROPNAME));") > 0);
 	}
 	
 	@Test
@@ -544,7 +547,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleInterface), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		// this time we provide a register.
 		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
@@ -554,11 +557,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);"));
 		assertTrue(methodString
-				.indexOf("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__indexAdapter.getString(\"concreteType\")));") > 0);
-		assertTrue(methodString.indexOf("__indexObject.initializeFromJSONObject(__indexAdapter);") > 0);
-		assertTrue(methodString.indexOf("arrayName.add(__indexObject);") > 0);
+				.contains("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__indexAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+		assertTrue(methodString.contains("__indexObject.initializeFromJSONObject(__indexAdapter);"));
+		assertTrue(methodString.contains("arrayName.add(__indexObject);"));
 	}
 	
 	@Test
@@ -569,7 +572,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -577,7 +580,29 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("org.sagebionetworks.schema.ObjectValidator.validateEntity(Sample.EFFECTIVE_SCHEMA, adapter, Sample.class);") > 0);
+		assertTrue(methodString.contains("extraFieldsFromNewerVersion = org.sagebionetworks.schema.ExtraFields.createExtraFieldsMap(adapter, _ALL_KEYS);"));
+	}
+	
+	/**
+	 * Helper to add Constant key with the given name to the given class.
+	 * @param toAddTo
+	 * @param propertyName
+	 * @return
+	 */
+	public static JFieldVar[] addKeyConstant(JDefinedClass toAddTo, String...propertyNames) {
+		JFieldVar[] vars = null;
+		if(propertyNames != null) {
+			vars = new JFieldVar[propertyNames.length];
+			int index = 0;
+			for(String propertyName: propertyNames) {
+				JFieldVar var = toAddTo.field(JMod.PRIVATE | JMod.FINAL | JMod.STATIC, String[].class, ObjectSchema.getKeyConstantName(propertyName));
+				vars[index] = var;
+				index++;
+			}
+		}
+		toAddTo.field(JMod.PRIVATE | JMod.FINAL | JMod.STATIC, String[].class, ObjectSchema.ALL_KEYS_NAME);
+		toAddTo.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		return vars;
 	}
 	
 	@Test
@@ -592,18 +617,18 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
-//		printClassToConsole(sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<java.lang.String>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYNAME);") > 0);
 		assertTrue(methodString.indexOf("arrayName.add((__jsonArray.isNull(__i)?null:__jsonArray.getString(__i)));") > 0);
 	}
 	
@@ -620,12 +645,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
-//		printClassToConsole(sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 //		System.out.println(declareToString(constructor));
@@ -645,7 +669,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
@@ -653,11 +677,12 @@ public class JSONMarshalingHandlerImpl03Test {
 //		printClassToConsole(sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("arrayName = new java.util.ArrayList<Sample>();") > 0);
+		assertTrue(methodString.contains("arrayName = new java.util.ArrayList<Sample>();"));
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayName\");") > 0);
-		assertTrue(methodString.indexOf("arrayName.add((__jsonArray.isNull(__i)?null:new Sample(__jsonArray.getJSONObject(__i))));") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYNAME);"));
+		assertTrue(methodString.contains("arrayName.add((__jsonArray.isNull(__i)?null:new Sample(__jsonArray.getJSONObject(__i))));"));
 	}
 	
 	@Test
@@ -677,16 +702,16 @@ public class JSONMarshalingHandlerImpl03Test {
 		enumCalss.enumConstant("A");
 		enumCalss.enumConstant("B");
 		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("enumName = org.sample.SomeEnum.valueOf(adapter.getString(\"enumName\"));") > 0);
-		assertTrue(methodString.indexOf("catch (java.lang.IllegalArgumentException _x)") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"'enumName' must be one of the following: 'A', 'B'.\")") > 0);
+		assertTrue(methodString.contains("enumName = org.sample.SomeEnum.valueOf(adapter.getString(_KEY_ENUMNAME));"));
+		assertTrue(methodString.contains("catch (java.lang.IllegalArgumentException _x)"));
+		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(\"'enumName' must be one of the following: 'A', 'B'.\")"));
 	}
 	
 	@Test
@@ -789,7 +814,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -809,17 +834,17 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		assertNotNull(method);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// It should check to see if the property exits in the adapter
 		assertTrue(methodString.indexOf("if (dateName!= null) {") > 0);
 		// It should directly set the value
-		assertTrue(methodString.indexOf("adapter.put(\"dateName\", adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), dateName));") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_DATENAME, adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), dateName));") > 0);
 		assertTrue(methodString.indexOf("return adapter;") > 0);
 	}
 	
@@ -834,15 +859,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// There should be an else block
 		assertTrue(methodString.indexOf("} else {") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(\"Property: 'stringName' is required and cannot be null\");") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchema.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
 	}
 	
 	@Test
@@ -854,7 +879,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -862,7 +887,7 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertFalse(methodString.indexOf("if (longName!= null) {") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"longName\", longName);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_LONGNAME, longName);") > 0);
 	}
 	
 	@Test
@@ -875,7 +900,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("long"), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -883,7 +908,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertFalse(methodString.indexOf("if (longName!= null) {") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"dateName\", dateName.getTime());") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_DATENAME, dateName.getTime());") > 0);
 	}
 	
 	@Test
@@ -895,15 +920,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("double"), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertFalse(methodString.indexOf("if (doubleName!= null) {") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"doubleName\", doubleName);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_DOUBLENAME, doubleName);") > 0);
 	}
 	
 	@Test
@@ -915,7 +940,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.parseType("boolean"), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
@@ -923,7 +948,7 @@ public class JSONMarshalingHandlerImpl03Test {
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertFalse(methodString.indexOf("if (propName!= null) {") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"propName\", propName);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_PROPNAME, propName);") > 0);
 	}
 	
 	@Test
@@ -934,14 +959,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("adapter.put(\"propName\", propName.writeToJSONObject(adapter.createNew()));") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_PROPNAME, propName.writeToJSONObject(adapter.createNew()));") > 0);
 //		printClassToConsole(sampleClass);
 	}
 	
@@ -957,7 +982,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -972,7 +997,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("String __value = __it.next();") > 0);
 		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayName\", __array);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_ARRAYNAME, __array);") > 0);
 	}
 	
 	@Test
@@ -988,14 +1013,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
 //		printClassToConsole(sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("if (arrayDates!= null) {") > 0);
 		assertTrue(methodString.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __array = adapter.createNewArray();") > 0);
@@ -1006,7 +1031,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.indexOf("__array.put(__index, ((__value == null)?null:adapter.convertDateToString(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __value)));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_ARRAYDATES, __array);") > 0);
 	}
 	
 	@Test
@@ -1022,7 +1047,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1039,7 +1064,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.util.Date __value = __it.next();") > 0);
 		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value.getTime()));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"arrayDates\", __array);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_ARRAYDATES, __array);") > 0);
 	}
 	
 	@Test
@@ -1054,7 +1079,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1071,7 +1096,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.lang.Long __value = __it.next();") > 0);
 		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"longList\", __array);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_LONGLIST, __array);") > 0);
 	}
 	
 	@Test
@@ -1086,7 +1111,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1103,7 +1128,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("java.lang.Double __value = __it.next();") > 0);
 		assertTrue(methodString.indexOf("array.put(__index, ((__value == null)?null:__value));") > 0);
 		assertTrue(methodString.indexOf("__index++;") > 0);
-		assertTrue(methodString.indexOf("adapter.put(\"doubleList\", __array);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_DOUBLELIST, __array);") > 0);
 	}
 	
 	@Test
@@ -1119,7 +1144,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(HashSet.class).narrow(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1145,7 +1170,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		schema.putProperty(propName, propertySchema);
 		// Make sure this field exits
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(sampleClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		
@@ -1174,14 +1199,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		enumCalss.enumConstant("A");
 		enumCalss.enumConstant("B");
 		sampleClass.field(JMod.PRIVATE, enumCalss, propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("adapter.put(\"enumName\", enumName.name());") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_ENUMNAME, enumName.name());") > 0);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -1200,8 +1225,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
-		childClasss.field(JMod.PRIVATE, codeModel.ref(Boolean.class), "fromInterface");
-		childClasss.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		String propName = "fromInterface";
+		childClasss.field(JMod.PRIVATE, codeModel.ref(Boolean.class), propName);
+		addKeyConstant(childClasss, propName);
 		// Now handle the
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(childSchema, childClasss);
@@ -1212,7 +1238,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(method);
 		System.out.println(methodString);
 		// Make sure there is a call to super.
-		assertTrue(methodString.indexOf("fromInterface = new java.lang.Boolean(adapter.getBoolean(\"fromInterface\"));") > 0);
+		assertTrue(methodString.indexOf("fromInterface = new java.lang.Boolean(adapter.getBoolean(_KEY_FROMINTERFACE));") > 0);
 	}
 	
 	@Test
@@ -1222,8 +1248,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
-		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, "fromInterface");
-		childClasss.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		String propName = "fromInterface";
+		childClasss.field(JMod.PRIVATE, codeModel.BOOLEAN, propName);
+		addKeyConstant(childClasss, propName);
 		// Now handle the
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(childSchema, childClasss);
@@ -1234,7 +1261,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(method);
 		System.out.println(methodString);
 		// Make sure there is a call to super.
-		assertTrue(methodString.indexOf("adapter.put(\"fromInterface\", fromInterface);") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_FROMINTERFACE, fromInterface);") > 0);
 	}
 	
 
@@ -1310,7 +1337,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1320,11 +1347,12 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"stringName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_STRINGNAME)) {") > 0);
 		//check that assignment statement got generated
-		assertTrue(methodString.indexOf("stringName = adapter.getString(\"stringName\");") > 0);
+		assertTrue(methodString.indexOf("stringName = adapter.getString(_KEY_STRINGNAME);") > 0);
 		//check that else statement was generated
 		assertTrue(methodString.indexOf("stringName = \"defaultString\";") > 0);
 	}
@@ -1345,7 +1373,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1355,14 +1383,14 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
-//		System.out.println(methodString);
+		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DATELIST)) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("dateList = new java.util.ArrayList<java.util.Date>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_DATELIST);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString
 				.indexOf("dateList.add((__jsonArray.isNull(__i)?null:adapter.convertStringToDate(org.sagebionetworks.schema.FORMAT.valueOf(\"DATE_TIME\"), __jsonArray.getString(__i))));") > 0);
@@ -1383,7 +1411,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Long.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1396,11 +1424,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"longList\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_LONGLIST)) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("longList = new java.util.ArrayList<java.lang.Long>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"longList\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_LONGLIST);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString.indexOf("longList.add((__jsonArray.isNull(__i)?null:__jsonArray.getLong(__i)));") > 0);
 	}
@@ -1420,7 +1448,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Double.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1433,11 +1461,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"doubleList\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DOUBLELIST)) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("doubleList = new java.util.ArrayList<java.lang.Double>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"doubleList\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_DOUBLELIST);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString.indexOf("doubleList.add((__jsonArray.isNull(__i)?null:__jsonArray.getDouble(__i)));") > 0);
 	}
@@ -1457,7 +1485,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Date.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1470,11 +1498,11 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		
 		// It check to see if the "if statement got generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"dateList\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DATELIST)) {") > 0);
 		//check that assignment statement got generated
 		assertTrue(methodString.indexOf("dateList = new java.util.ArrayList<java.util.Date>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"dateList\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_DATELIST);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString.indexOf("dateList.add((__jsonArray.isNull(__i)?null:new java.util.Date(__jsonArray.getLong(__i))));") > 0);
 	}
@@ -1497,7 +1525,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1507,12 +1535,13 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		
 		//check that if statement was generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultDoubleName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DEFAULTDOUBLENAME)) {") > 0);
 		//check that body of if statement was generated
 		assertTrue(methodString.indexOf("defaultDoubleName = " +
-				"new java.lang.String(adapter.getDouble(\"defaultDoubleName\"));") > 0);
+				"new java.lang.String(adapter.getDouble(_KEY_DEFAULTDOUBLENAME));") > 0);
 		//check that body of else statement was generated
 		assertTrue(methodString.indexOf("defaultDoubleName = 7.12D;") > 0);
 	}
@@ -1536,7 +1565,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1546,11 +1575,12 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		//check that if statement was generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultIntegerName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DEFAULTINTEGERNAME)) {") > 0);
 		//check that body of if statement was generated
 		assertTrue(methodString.indexOf("defaultIntegerName = " +
-				"new java.lang.String(adapter.getLong(\"defaultIntegerName\"));") > 0);
+				"new java.lang.String(adapter.getLong(_KEY_DEFAULTINTEGERNAME));") > 0);
 		//check that body of else statment was generated
 		assertTrue(methodString.indexOf("defaultIntegerName = 77L;") > 0);
 	}
@@ -1574,7 +1604,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1584,11 +1614,12 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		//check that if statement was generated
-		assertTrue(methodString.indexOf("if (!adapter.isNull(\"defaultBooleanName\")) {") > 0);
+		assertTrue(methodString.indexOf("if (!adapter.isNull(_KEY_DEFAULTBOOLEANNAME)) {") > 0);
 		//check that body of if statement was generated
 		assertTrue(methodString.indexOf("defaultBooleanName = " +
-				"new java.lang.String(adapter.getBoolean(\"defaultBooleanName\"));") > 0);
+				"new java.lang.String(adapter.getBoolean(_KEY_DEFAULTBOOLEANNAME));") > 0);
 		//check that body of else statment was generated
 		assertTrue(methodString.indexOf("defaultBooleanName = false;") > 0);
 	}
@@ -1614,7 +1645,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		// put field in sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel._ref(String.class), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		//create the method
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
@@ -1666,19 +1697,20 @@ public class JSONMarshalingHandlerImpl03Test {
 		testClass.enumConstant("mouse");
 		testClass.enumConstant("elephant");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 		
 		//check that array of enumeration got created successfully, and 
 		//assignments are correct
 		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
+				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYWHOSEITEMISANENUM);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString
 				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));") > 0);
@@ -1735,28 +1767,29 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//add field to sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName, propTwoName);
 		
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 		
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+//		System.out.println(methodString);
 		
 		//check that everything was created correctly for the array with an enum
-		assertTrue(methodString.indexOf("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();") > 0);
+		assertTrue(methodString.contains("arrayWhoseItemIsAnEnum = new java.util.ArrayList<org.sample.Animals>();"));
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsAnEnum\");") > 0);
-		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYWHOSEITEMISANENUM);"));
+		assertTrue(methodString.contains("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {"));
 		assertTrue(methodString
-				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));") > 0);
+				.contains("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));"));
 		
 		//check that everything was created correctly for the array without an enum
-		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();") > 0);
+		assertTrue(methodString.contains("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();"));
 		assertTrue(methodString
-				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(\"arrayWhoseItemIsNotEnum\");") > 0);
-		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
-		assertTrue(methodString.indexOf("arrayWhoseItemIsNotEnum.add((__jsonArray.isNull(__i)?null:__jsonArray.getString(__i)));") > 0);
+				.contains("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYWHOSEITEMISNOTENUM);"));
+		assertTrue(methodString.contains("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {"));
+		assertTrue(methodString.contains("arrayWhoseItemIsNotEnum.add((__jsonArray.isNull(__i)?null:__jsonArray.getString(__i)));"));
 	}
 	
 	/**
@@ -1796,7 +1829,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		testClass.enumConstant("mouse");
 		testClass.enumConstant("elephant");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 		
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
@@ -1858,7 +1891,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//add field to sampleClass
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(String.class), propTwoName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName,propTwoName);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createWriteToJSONObject(schema, sampleClass);
@@ -1929,19 +1962,20 @@ public class JSONMarshalingHandlerImpl03Test {
 		testValueClass.enumConstant("dog");
 		testValueClass.enumConstant("cat");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
 
 		// Now get the string and check it.
 		String methodString = declareToString(method);
+		System.out.println(methodString);
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
 		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();"));
 		assertTrue(methodString
-				.contains("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(\"mapWhoseItemIsAnEnum\");"));
+				.contains("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(_KEY_MAPWHOSEITEMISANENUM);"));
 		assertTrue(methodString.contains("org.sample.Pets __value;"));
 		assertTrue(methodString.contains("if (__jsonMap.isNull(__keyObject)) {"));
 		assertTrue(methodString.contains("__value = null;"));
@@ -2000,7 +2034,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		testValueClass.enumConstant("dog");
 		testValueClass.enumConstant("cat");
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
-		sampleClass.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
+		addKeyConstant(sampleClass, propName);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);

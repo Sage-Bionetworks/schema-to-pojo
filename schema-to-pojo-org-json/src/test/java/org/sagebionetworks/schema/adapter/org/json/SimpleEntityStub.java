@@ -41,12 +41,6 @@ public class SimpleEntityStub implements SimpleInterface{
 	public void setValue(String value) {
 		this.value = value;
 	}
-
-	@Override
-	public String getJSONSchema() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	public String getConcreteType(){
 		return this.concreteType;

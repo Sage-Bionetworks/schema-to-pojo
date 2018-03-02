@@ -142,11 +142,6 @@ public class LinkDescription implements JSONEntity {
 	}
 
 	@Override
-	public String getJSONSchema() {
-		return null;
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

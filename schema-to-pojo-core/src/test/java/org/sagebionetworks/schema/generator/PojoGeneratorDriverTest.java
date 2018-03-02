@@ -630,7 +630,7 @@ public class PojoGeneratorDriverTest {
 			impl = e.getExistingClass();
 		} 
 		String classString = declareToString(impl);
-//		System.out.println(classString);
+		System.out.println(classString);
 		Iterator<JClass> it = impl._implements();
 		assertNotNull(it);
 		String intA = "InterfaceA";
@@ -651,7 +651,7 @@ public class PojoGeneratorDriverTest {
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(6, fields.size());
+		assertEquals(6*2, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
