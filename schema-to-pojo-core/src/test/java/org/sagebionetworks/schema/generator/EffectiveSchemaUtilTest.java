@@ -1,10 +1,16 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
@@ -22,8 +28,10 @@ public class EffectiveSchemaUtilTest {
 	ObjectSchema compositeSchema;
 	ObjectSchema enumSchema;
 	
+	File tempFolder;
+	
 	@Before
-	public void before(){
+	public void before() throws IOException{
 		// A base class.
 		baseClassSchema = new ObjectSchema();
 		baseClassSchema.setType(TYPE.OBJECT);
@@ -71,6 +79,15 @@ public class EffectiveSchemaUtilTest {
 		});
 		enumSchema.setProperties(new LinkedHashMap<String, ObjectSchema>());
 		
+		tempFolder = FileUtils.createTempDirectory("testfolder");	
+		tempFolder.deleteOnExit();
+	}
+	
+	@After
+	public void after() {
+		if(tempFolder != null) {
+			FileUtils.recursivelyDeleteDirectory(tempFolder);
+		}
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -131,5 +148,51 @@ public class EffectiveSchemaUtilTest {
 		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(json));
 		assertNotNull(clone);
 		assertEquals(enumSchema, clone);
+	}
+	
+	@Test
+	public void testCreateFileNameForSchema() throws IOException {
+		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		schema.setId("org.sample.FooBar");
+		// call under test
+		File result = EffectiveSchemaUtil.createFileForSchema(tempFolder, schema);
+		assertEquals("FooBar-effective.json", result.getName());
+		assertFalse(result.exists());
+		// the full path must exist
+		File orgFolder = new File(tempFolder, "org");
+		assertTrue(orgFolder.exists());
+		assertTrue(orgFolder.exists());
+		File sampelFolder = new File(orgFolder, "sample");
+		assertTrue(sampelFolder.exists());
+		assertTrue(sampelFolder.exists());
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateFileNameForSchemaNullSchema() throws IOException {
+		ObjectSchema schema = null;
+		// call under test
+		EffectiveSchemaUtil.createFileForSchema(tempFolder, schema);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testCreateFileNameForSchemaNullId() throws IOException {
+		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		schema.setId(null);
+		// call under test
+		EffectiveSchemaUtil.createFileForSchema(tempFolder, schema);
+	}
+	
+	@Test
+	public void testGenerateEffectiveSchemaFile() throws Exception {
+		// call under test
+		File result = EffectiveSchemaUtil.generateEffectiveSchemaFile(tempFolder, compositeSchema);
+		assertNotNull(result);
+		assertTrue(result.exists());
+		assertTrue(result.isFile());
+		String jsonString = FileUtils.readToString(result);
+		assertNotNull(jsonString);
+		ObjectSchema expected = new ObjectSchema(new JSONObjectAdapterImpl(EffectiveSchemaUtil.generateJSONofEffectiveSchema(compositeSchema)));
+		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(jsonString));
+		assertEquals(expected, clone);
 	}
 }

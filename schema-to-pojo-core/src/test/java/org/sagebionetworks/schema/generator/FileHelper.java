@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-public class FileUtils {
+public class FileHelper {
 
 	/**
 	 * Load static content from a file on the classpath

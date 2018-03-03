@@ -31,13 +31,13 @@ public class SchemaWEnumToPojoTest {
 	@Before
 	public void setUp() throws Exception {
 		// Create a temp directory for output
-		outputDir = FileUtil.createTempDirectory("output");
+		outputDir = FileUtils.createTempDirectory("output");
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		// Delete the output directory
-		FileUtil.recursivelyDeleteDirectory(outputDir);
+		FileUtils.recursivelyDeleteDirectory(outputDir);
 		assertFalse(outputDir.exists());
 	}
 
@@ -64,7 +64,7 @@ public class SchemaWEnumToPojoTest {
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		// Load the file string
-		String resultString = FileUtil.readToString(result);
+		String resultString = FileUtils.readToString(result);
 		System.out.println(resultString);
 	}
 }

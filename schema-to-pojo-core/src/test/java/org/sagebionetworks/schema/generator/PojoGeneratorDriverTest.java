@@ -613,7 +613,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 //			schema.setName(name);
 			schema.setId(schema.getName());
@@ -666,7 +666,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);
@@ -696,7 +696,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);

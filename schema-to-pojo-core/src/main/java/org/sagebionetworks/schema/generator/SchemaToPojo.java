@@ -48,7 +48,7 @@ public class SchemaToPojo {
 		if(outputDir == null) throw new IllegalArgumentException("outputDir cannot be null");
 		if(factory == null) throw new IllegalArgumentException("The HandlerFactory cannot be null");
 		// process each file
-		Iterator<File> iterator = FileUtil.getRecursiveIterator(schemaSource, new FileFilter() {
+		Iterator<File> iterator = FileUtils.getRecursiveIterator(schemaSource, new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
 				// Only include .json files
@@ -60,7 +60,7 @@ public class SchemaToPojo {
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		while(iterator.hasNext()){
 			File file = iterator.next();
-			String string = FileUtil.readToString(file);
+			String string = FileUtils.readToString(file);
 			// Create a new schema
 			ObjectSchema schema;
 			try {
@@ -107,6 +107,11 @@ public class SchemaToPojo {
 		// The final step is to generate the classes
 		if(!outputDir.exists()){
 			outputDir.mkdirs();
+		}
+		
+		if(createRegister != null) {
+			// create an effective schema file for each schema.
+			EffectiveSchemaUtil.generateEffectiveSchemaFiles(outputDir, schemaList);
 		}
 
 		CodeWriter sources = new ChangeFileCodeWriter(outputDir, log);
