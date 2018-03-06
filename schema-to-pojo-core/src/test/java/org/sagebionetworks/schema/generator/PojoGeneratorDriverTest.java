@@ -613,7 +613,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 //			schema.setName(name);
 			schema.setId(schema.getName());
@@ -630,7 +630,7 @@ public class PojoGeneratorDriverTest {
 			impl = e.getExistingClass();
 		} 
 		String classString = declareToString(impl);
-//		System.out.println(classString);
+		System.out.println(classString);
 		Iterator<JClass> it = impl._implements();
 		assertNotNull(it);
 		String intA = "InterfaceA";
@@ -651,7 +651,7 @@ public class PojoGeneratorDriverTest {
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(6 + 1, fields.size());
+		assertEquals(6*2, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
@@ -666,7 +666,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);
@@ -696,7 +696,7 @@ public class PojoGeneratorDriverTest {
 		};
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
-			String fileString = FileUtils.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
+			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);
@@ -717,7 +717,7 @@ public class PojoGeneratorDriverTest {
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
 		// Enums should have no fields
-		assertEquals(1, fields.size());
+		assertEquals(0, fields.size());
 		Collection<JMethod> methods = impl.methods();
 		assertNotNull(methods);
 		// enums should have no methods

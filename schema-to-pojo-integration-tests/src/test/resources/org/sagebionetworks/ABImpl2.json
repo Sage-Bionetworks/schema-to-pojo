@@ -7,7 +7,7 @@
     },
     "implements":[
         {
-            "$ref":"org.sagebionetworks.InterfaceB",
-        },
+            "$ref":"org.sagebionetworks.InterfaceB"
+        }
     ]
 }

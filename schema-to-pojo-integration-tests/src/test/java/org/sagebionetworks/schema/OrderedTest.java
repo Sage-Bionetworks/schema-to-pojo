@@ -1,13 +1,12 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Iterator;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
+import org.sagebionetworks.schema.generator.EffectiveSchemaUtil;
 
 /**
  * Test that checks that the order of the properties in the JSON schema are preserved.
@@ -17,9 +16,10 @@ import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 public class OrderedTest {
 	
 	@Test
-	public void testOrder() throws JSONObjectAdapterException{
+	public void testOrder() throws Exception {
 		// Get the schema
-		ObjectSchema schema = EntityFactory.createEntityFromJSONString(new Ordered().getJSONSchema(), ObjectSchema.class);
+		String schemaJson = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(new Ordered());
+		ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(schemaJson));
 		Iterator<String> it = schema.getProperties().keySet().iterator();
 		int index = 0;
 		while(it.hasNext()){

@@ -4,12 +4,21 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.3.15</version>
+		<version>0.3.16</version>
 	</parent>
 	<artifactId>schema-to-pojo-integration-tests</artifactId>
 	<name>schema-to-pojo-integration-tests</name>
 	<packaging>jar</packaging>
 	<build>
+		<resources>
+			<resource>
+				<!-- We also want the resources directory added -->
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>target/auto-generated-pojos</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.sagebionetworks</groupId>
@@ -23,6 +32,7 @@
 						<configuration>
 							<sourceDirectory>src/test/resources</sourceDirectory>
 							<packageName>org.sagebionetworks</packageName>
+							<outputDirectory>target/auto-generated-pojos</outputDirectory>
 							<createRegister>org.sagebionetworks.Register</createRegister>
 						</configuration>
 					</execution>
@@ -31,7 +41,8 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -76,6 +87,13 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.0-rc1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.sagebionetworks</groupId>
+			<artifactId>schema-to-pojo-core</artifactId>
+			<version>${project.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

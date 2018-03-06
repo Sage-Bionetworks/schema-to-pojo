@@ -31,13 +31,13 @@ public class SchemaToPojoTest {
 	@Before
 	public void before() throws IOException {
 		// Create a temp directory for output
-		outputDir = FileUtil.createTempDirectory("output");
+		outputDir = FileUtils.createTempDirectory("output");
 	}
 
 	@After
 	public void after() {
 		// Delete the output directory
-		FileUtil.recursivelyDeleteDirectory(outputDir);
+		FileUtils.recursivelyDeleteDirectory(outputDir);
 		assertFalse(outputDir.exists());
 	}
 
@@ -63,7 +63,7 @@ public class SchemaToPojoTest {
 		assertTrue(result.exists());
 		
 		// Load the file string
-		String resultString = FileUtil.readToString(result);
+		String resultString = FileUtils.readToString(result);
 		System.out.println(resultString);
 	}
 
@@ -108,7 +108,7 @@ public class SchemaToPojoTest {
 		assertTrue(result.exists());
 		
 		// Load the file string
-		String resultString = FileUtil.readToString(result);
+		String resultString = FileUtils.readToString(result);
 		System.out.println(resultString);
 	}
 

@@ -16,7 +16,7 @@ import java.util.List;
  * @author John
  * 
  */
-public class FileUtil {
+public class FileUtils {
 
 	/**
 	 * The recursive iterator can be used to walk all files in a directory tree.

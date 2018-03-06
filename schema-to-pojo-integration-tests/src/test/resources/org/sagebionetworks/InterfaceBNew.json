@@ -9,12 +9,12 @@
             "format":"date-time"
         },
         "extraFieldFromInterfaceB":{
-            "type":"string",
+            "type":"string"
         }
     },
     "implements":[
         {
-            "$ref":"org.sagebionetworks.InterfaceA",
+            "$ref":"org.sagebionetworks.InterfaceA"
         }
     ]
 }

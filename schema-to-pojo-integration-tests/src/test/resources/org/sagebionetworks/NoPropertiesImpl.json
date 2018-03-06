@@ -1,0 +1,8 @@
+{
+    "type":"object",
+    "implements":[
+        {
+            "$ref":"org.sagebionetworks.InterfaceNoProperties"
+        }
+    ]
+}

@@ -6,7 +6,7 @@
         },
         "fromInterfaceA":{
             "type":"string",
-            "title":"From Interface A",
+            "title":"From Interface A"
         },
         "alsoFromInterfaceA":{
             "type":"number"

@@ -180,7 +180,7 @@ public class AllTypesTest {
 		JSONObjectAdapter cloneAdapter = new JSONObjectAdapterImpl();
 		clone.writeToJSONObject(cloneAdapter);
 		String cloneJson = cloneAdapter.toJSONString();
-		assertEquals(json, cloneJson);
+		assertEquals("{\"extra_field\":\"value\",\"stringProp\":\"somevalue\"}", cloneJson);
 	}
 
 	@Test

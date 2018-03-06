@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.ObjectValidator;
-import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -524,35 +522,17 @@ public class GwtTestSuite extends GWTTestCase {
 		assertFalse(adapterObject.validatePatternProperty(pattern, totallyBadProperty));
 	}
 	
-	/**
-	 * Tests that ObjectValidator works for GWT.
-	 */
 	@Test
-	public void testObjectValidatorForGWT() throws Exception {
-		ObjectSchema testSchema = new ObjectSchema();
-		//set up schema
-		testSchema.setName("imATestSchemaName");
-		testSchema.setDescription("I'm the description for the test schema");
+	public void testExtraFieldsForGWT() throws JSONObjectAdapterException {
 		
-		//make the key/name for the property
-		String propKeyName = "imAKeyForAPropertyWithAPattern";
-		
-		//make the pattern and the matcher that will work for that pattern
-		String regexPattern = "a*b";
-		String instanceOfRegexPattern = "aaaaab";
-		
-		//make an objectSchema that is the property that contains the pattern
-		ObjectSchema patternProperty = new ObjectSchema();
-		patternProperty.setPattern(regexPattern);
-		patternProperty.setDescription("this property is to test pattern functionality");
-		patternProperty.setType(TYPE.STRING);
-		testSchema.putProperty(propKeyName, patternProperty);
-		
-		//make an adapter that has a string that will work schema's pattern
-		adapterObject.put(propKeyName, instanceOfRegexPattern);
-		
-		//validate
-		ObjectValidator.validatePatternProperties(testSchema, adapterObject);
+		adapterObject.put("keyOne", "valueOne");
+		adapterObject.put("keyTwo", "valueTwo");
+		adapterObject.put("extraKey", "extraValue");
+	
+		Map<String,Object> extraFields = ExtraFields.createExtraFieldsMap(adapterObject, "keyOne", "keyTwo");
+		assertNotNull(extraFields);
+		assertEquals(1, extraFields.size());
+		assertEquals("extraValue", extraFields.get("extraKey"));
 	}
 	
 	@Test

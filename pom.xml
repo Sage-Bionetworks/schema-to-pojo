@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
-	<version>0.3.15</version>
+	<version>0.3.16</version>
 	<packaging>pom</packaging>
 	<name>schema-to-pojo</name>
 	<description>Container for the rest of the sub-projects</description>
@@ -47,8 +47,8 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>2.3.2</version>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+						<source>1.8</source>
+						<target>1.8</target>
 					</configuration>
 				</plugin>
 

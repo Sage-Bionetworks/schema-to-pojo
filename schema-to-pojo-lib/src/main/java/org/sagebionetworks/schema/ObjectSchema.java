@@ -77,6 +77,42 @@ public class ObjectSchema implements JSONEntity {
 	 * additional fields and re-emit them if necessary. For that we keep an optional list of JSONObjects
 	 */
 	public static final String EXTRA_FIELDS = "extraFieldsFromNewerVersion";
+	
+	/**
+	 * Error message for null adapter.
+	 */
+	public static final String OBJECT_ADAPTER_CANNOT_BE_NULL = "org.sagebionetworks.schema.adapter.JSONObjectAdapter cannot be null";
+	
+	/**
+	 * Name of the String[] containing all keys used by a class.
+	 */
+	public static final String ALL_KEYS_NAME = "_ALL_KEYS";
+	/**
+	 * Template used to create key constants for property names.
+	 */
+	public static final String TEMPLATE_KEY_CONSTANT = "_KEY_%1$S";
+	
+	/**
+	 * Get the name of the key constant for the given property name.
+	 * 
+	 * @param propertyName
+	 * @return
+	 */
+	public static String getKeyConstantName(String propertyName) {
+		return String.format(TEMPLATE_KEY_CONSTANT, propertyName);
+	}
+	
+	private static final String TEMPLATE_PROP_CANNOT_BE_NULL = "Property: '%1$s' is required and cannot be null";
+	
+	/**
+	 * Create an error message: 'Property: 'name' is required and cannot be null'
+	 * 
+	 * @param propertyName
+	 * @return
+	 */
+	public static String createPropertyCannotBeNullMessage(String propertyName) {
+		return String.format(TEMPLATE_PROP_CANNOT_BE_NULL, propertyName);
+	}
 
 	/*
 	 * The name of this object.
@@ -2316,11 +2352,6 @@ public class ObjectSchema implements JSONEntity {
 		}
 	}
 
-	@Override
-	public String getJSONSchema() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	/**
 	 * Set's a adapter's default
