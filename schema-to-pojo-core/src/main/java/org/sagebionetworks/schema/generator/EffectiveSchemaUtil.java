@@ -141,11 +141,10 @@ public class EffectiveSchemaUtil {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static String loadEffectiveSchemaFromClasspath(JSONEntity entity) throws IOException {
-		if(entity == null) {
+	public static String loadEffectiveSchemaFromClasspath(Class<? extends JSONEntity> clazz) throws IOException {
+		if(clazz == null) {
 			throw new IllegalArgumentException("JSONEntity cannot be null");
 		}
-		Class<? extends JSONEntity> clazz = entity.getClass();
 		String fileName = clazz.getName().replaceAll(ESCAPED_DOT, FORWARD_SLASH)+DOT_JSON;
 		try(InputStream stream = clazz.getClassLoader().getResourceAsStream(fileName)){
 			if(stream == null) {
