@@ -133,7 +133,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JFieldVar allKeyNames = classType.fields().get(ObjectSchema.ALL_KEYS_NAME);
 		
 		JInvocation invocation = classType.owner().ref(ExtraFields.class).staticInvoke("createExtraFieldsMap")
-				.arg(param).arg(allKeyNames);
+				.arg(param);
+		if(allKeyNames != null) {
+			invocation.arg(allKeyNames);
+		}
 		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
 		if (extraFields == null) {
 			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '" + ObjectSchema.EXTRA_FIELDS + "' on class: "

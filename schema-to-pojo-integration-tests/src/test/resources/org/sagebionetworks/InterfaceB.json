@@ -11,7 +11,7 @@
     },
     "implements":[
         {
-            "$ref":"org.sagebionetworks.InterfaceA",
+            "$ref":"org.sagebionetworks.InterfaceA"
         }
     ]
 }

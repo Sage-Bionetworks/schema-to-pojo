@@ -161,10 +161,10 @@ public class EffectiveSchemaUtilTest {
 		// the full path must exist
 		File orgFolder = new File(tempFolder, "org");
 		assertTrue(orgFolder.exists());
-		assertTrue(orgFolder.exists());
-		File sampelFolder = new File(orgFolder, "sample");
-		assertTrue(sampelFolder.exists());
-		assertTrue(sampelFolder.exists());
+		assertTrue(orgFolder.isDirectory());
+		File sample = new File(orgFolder, "sample");
+		assertTrue(sample.exists());
+		assertTrue(sample.isDirectory());
 	}
 	
 	@Test (expected=IllegalArgumentException.class)

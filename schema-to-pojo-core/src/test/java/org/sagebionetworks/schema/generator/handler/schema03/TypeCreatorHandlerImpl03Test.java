@@ -330,6 +330,7 @@ public class TypeCreatorHandlerImpl03Test {
 		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
 		props.put("foo", new ObjectSchema(TYPE.STRING));
 		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		props.put(ObjectSchema.CONCRETE_TYPE, new ObjectSchema(TYPE.STRING));
 		schema.setProperties(props);
 		schema.setImplements(new ObjectSchema[] {new ObjectSchema(TYPE.INTERFACE)});
 
@@ -340,7 +341,8 @@ public class TypeCreatorHandlerImpl03Test {
 		System.out.println(classString);
 		assertTrue(classString.contains("String _KEY_FOO = \"foo\";"));
 		assertTrue(classString.contains("String _KEY_BAR = \"bar\";"));
-		assertTrue(classString.contains("String[] _ALL_KEYS = new java.lang.String[] {_KEY_FOO, _KEY_BAR, org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE };"));
+		assertTrue(classString.contains("_KEY_CONCRETETYPE = \"concreteType\";"));
+		assertTrue(classString.contains("String[] _ALL_KEYS = new java.lang.String[] {_KEY_FOO, _KEY_BAR, _KEY_CONCRETETYPE };"));
 	}
 	
 	

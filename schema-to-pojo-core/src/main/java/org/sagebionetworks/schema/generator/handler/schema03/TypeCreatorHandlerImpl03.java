@@ -186,11 +186,6 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				JFieldVar keyConst= newClass.field(mods, stringType , name, value);
 				keyConstants.add(keyConst);
 			}
-			// any class that implements an interface will have concreteType.
-			if(schema.getImplements() != null) {
-				JExpression keyConst= newClass.owner().ref(ObjectSchema.class).staticRef("CONCRETE_TYPE");
-				keyConstants.add(keyConst);
-			}
 			if(!keyConstants.isEmpty()) {
 				// create an array for all all values
 				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
