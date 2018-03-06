@@ -29,7 +29,7 @@ public class RegisterTest {
 			assertNotNull(newInstance);
 			assertEquals(newInstance.getClass().getName(), fullClassName);
 			// Should be able to load the schema for each registered file
-			String json = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(newInstance);
+			String json = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(newInstance.getClass());
 			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(json));
 			assertEquals(newInstance.getClass().getName(), schema.getId());
 		}

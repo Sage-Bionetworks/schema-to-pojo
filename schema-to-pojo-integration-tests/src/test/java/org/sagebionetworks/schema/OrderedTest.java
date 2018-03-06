@@ -18,7 +18,7 @@ public class OrderedTest {
 	@Test
 	public void testOrder() throws Exception {
 		// Get the schema
-		String schemaJson = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(new Ordered());
+		String schemaJson = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(Ordered.class);
 		ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(schemaJson));
 		Iterator<String> it = schema.getProperties().keySet().iterator();
 		int index = 0;
