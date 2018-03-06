@@ -195,4 +195,5 @@ public class EffectiveSchemaUtilTest {
 		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(jsonString));
 		assertEquals(expected, clone);
 	}
+	
 }
