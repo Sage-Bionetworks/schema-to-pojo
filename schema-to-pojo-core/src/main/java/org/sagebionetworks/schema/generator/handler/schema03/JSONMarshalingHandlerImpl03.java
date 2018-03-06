@@ -178,22 +178,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JExpression rhs = null;
 				if(propSchema.getEnum() != null){
 					// Assign an enum
-					JTryBlock tryBlock = thenBlock._try();
 					rhs = assignJSONStringToEnumProperty(param, propNameConstant, field);
-					tryBlock.body().assign(field, rhs);
-					JCatchBlock catchBlock = tryBlock._catch(classType.owner().ref(IllegalArgumentException.class));
-					// Create the throw string
-					StringBuilder builder = new StringBuilder();
-					builder.append("'").append(propName).append("' must be one of the following: ");
-					for(int i=0; i<propSchema.getEnum().length; i++){
-						if(i!=0){
-							builder.append(", ");
-						}
-						EnumValue enumValue = propSchema.getEnum()[i];
-						builder.append("'").append(enumValue.getName()).append("'");
-					}
-					builder.append(".");
-					catchBlock.body()._throw(JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(builder.toString()));
+					thenBlock.assign(field, rhs);
 				}else{
 					// This is just a string.
 					rhs = assignJSONStringToProperty(classType.owner(),

@@ -13,6 +13,7 @@ import org.sagebionetworks.InterfaceA;
 import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
+import org.sagebionetworks.schema.adapter.org.json.JSONArrayAdapterImpl;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 public class ExtraFieldsTest {
@@ -77,5 +78,22 @@ public class ExtraFieldsTest {
 		assertNotNull(impl.getNewField());
 		assertNotNull(impl.getExtraFieldFromInterfaceB());
 		assertEquals(impl, originalClone);
+	}
+	
+	@Test
+	public void testExtraFieldArray() throws JSONObjectAdapterException {
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+		adapter.put("fromMe2", "fromMe2");
+		JSONArrayAdapterImpl array = new JSONArrayAdapterImpl();
+		array.put(0, "value one");
+		adapter.put("someExtra", array);
+		
+		ABImpl2 impl = new ABImpl2(adapter);
+		assertEquals("fromMe2", impl.getFromMe2());
+		
+		JSONObjectAdapterImpl clone = new JSONObjectAdapterImpl();
+		impl.writeToJSONObject(clone);
+		assertEquals("fromMe2", clone.get("fromMe2"));
+		assertEquals("[\"value one\"]", clone.get("someExtra").toString());
 	}
 }

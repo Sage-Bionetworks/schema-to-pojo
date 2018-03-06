@@ -182,4 +182,5 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	 * @throws JSONObjectAdapterException
 	 */
 	public boolean validateURI(String uri) throws JSONObjectAdapterException;
+
 }

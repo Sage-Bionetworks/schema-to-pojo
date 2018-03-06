@@ -370,6 +370,17 @@ public class GwtTestSuite extends GWTTestCase {
 	}
 	
 	@Test
+	public void testObjectArrayRoundTrip() throws JSONObjectAdapterException{
+		JSONArrayAdapter array = adapterObject.createNewArray();
+		array.put(0, Boolean.TRUE);
+		adapterObject.put(propertyKey, array);
+		assertTrue(adapterObject.has(propertyKey));
+		assertEquals(array.toJSONString(), adapterObject.getJSONArray(propertyKey).toJSONString());
+		// Make sure we can also get it as an object
+		assertEquals(array.toJSONString(), adapterObject.get(propertyKey).toString());
+	}
+	
+	@Test
 	public void testObjectJSONObjectAdapterRoundTrip() throws JSONObjectAdapterException{
 		JSONObjectAdapter value = adapterArray.createNew();
 		assertNotNull(value);
@@ -533,6 +544,19 @@ public class GwtTestSuite extends GWTTestCase {
 		assertNotNull(extraFields);
 		assertEquals(1, extraFields.size());
 		assertEquals("extraValue", extraFields.get("extraKey"));
+	}
+	
+	@Test
+	public void testExtraFieldsForGWTArray() throws JSONObjectAdapterException {
+		adapterObject.put("keyOne", "valueOne");
+		adapterObject.put("keyTwo", "valueTwo");
+		adapterArray.put(1, "extraValue");
+		adapterObject.put("extraKey", adapterArray);
+	
+		Map<String,Object> extraFields = ExtraFields.createExtraFieldsMap(adapterObject, "keyOne", "keyTwo");
+		assertNotNull(extraFields);
+		assertEquals(1, extraFields.size());
+		assertEquals(adapterArray, extraFields.get("extraKey"));
 	}
 	
 	@Test

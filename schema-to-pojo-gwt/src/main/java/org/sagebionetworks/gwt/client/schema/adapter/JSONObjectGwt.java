@@ -306,6 +306,4 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 			throw new JSONObjectAdapterException(e);
 		}
 	}
-
-
 }
