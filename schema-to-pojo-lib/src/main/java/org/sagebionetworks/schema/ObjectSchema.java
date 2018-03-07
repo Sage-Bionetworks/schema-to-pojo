@@ -29,6 +29,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  */
 public class ObjectSchema implements JSONEntity {
 
+	
 	private static final String JSON_DEPENDENCIES = "dependencies";
 	public static final String JSON_SCHEMA = "schema";
 	public static final String JSON_DISALLOW = "disallow";
@@ -90,7 +91,7 @@ public class ObjectSchema implements JSONEntity {
 	/**
 	 * Template used to create key constants for property names.
 	 */
-	public static final String TEMPLATE_KEY_CONSTANT = "_KEY_%1$S";
+	private static final String KEY_PREFIX = "_KEY_";
 	
 	/**
 	 * Get the name of the key constant for the given property name.
@@ -99,10 +100,11 @@ public class ObjectSchema implements JSONEntity {
 	 * @return
 	 */
 	public static String getKeyConstantName(String propertyName) {
-		return String.format(TEMPLATE_KEY_CONSTANT, propertyName);
+		StringBuilder builder = new StringBuilder();
+		builder.append(KEY_PREFIX);
+		builder.append(propertyName.toUpperCase());
+		return builder.toString();
 	}
-	
-	private static final String TEMPLATE_PROP_CANNOT_BE_NULL = "Property: '%1$s' is required and cannot be null";
 	
 	/**
 	 * Create an error message: 'Property: 'name' is required and cannot be null'
@@ -111,7 +113,10 @@ public class ObjectSchema implements JSONEntity {
 	 * @return
 	 */
 	public static String createPropertyCannotBeNullMessage(String propertyName) {
-		return String.format(TEMPLATE_PROP_CANNOT_BE_NULL, propertyName);
+		StringBuilder builder = new StringBuilder("Property: '");
+		builder.append(propertyName);
+		builder.append("' is required and cannot be null");
+		return builder.toString();
 	}
 
 	/*
