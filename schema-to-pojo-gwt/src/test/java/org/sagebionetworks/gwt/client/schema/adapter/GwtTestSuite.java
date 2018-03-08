@@ -389,7 +389,7 @@ public class GwtTestSuite extends GWTTestCase {
 	
 	@Test
 	public void testObjectJSONObjectAdapterRoundTrip() throws JSONObjectAdapterException{
-		JSONObjectAdapter value = adapterArray.createNew();
+		JSONObjectAdapter value = adapterObject.createNew();
 		assertNotNull(value);
 		value.put("someValue", 123);
 		assertNotNull(value);
@@ -397,6 +397,8 @@ public class GwtTestSuite extends GWTTestCase {
 		assertTrue(adapterObject.has(propertyKey));
 		assertNotNull(adapterObject.getJSONObject(propertyKey));
 		assertEquals(value.toJSONString(), adapterObject.getJSONObject(propertyKey).toJSONString());
+		// Make sure we can also get it as an object
+		assertEquals(value.toJSONString(), adapterObject.get(propertyKey).toString());
 	}
 	
 	@Test

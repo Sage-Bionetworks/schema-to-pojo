@@ -49,6 +49,8 @@ public class JSONValueUtil {
 			return null;
 		}else if(value.isArray() != null){
 			return value.isArray();
+		}else if(value.isObject() != null){
+			return value.isObject();
 		}else {
 			throw new JSONObjectAdapterException("Cannot get key: "+key+" as an Object. Value class: "+value.getClass().getName());
 		}
