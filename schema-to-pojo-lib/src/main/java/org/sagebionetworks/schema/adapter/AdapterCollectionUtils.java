@@ -62,8 +62,6 @@ public class AdapterCollectionUtils {
 				adapter.put(key, (JSONObjectAdapter) value);
 			} else if (value instanceof JSONArrayAdapter) {
 				adapter.put(key, (JSONArrayAdapter) value);
-			} else if (value instanceof JSONMapAdapter) {
-				adapter.put(key, (JSONMapAdapter) value);
 			}else{
 				throw new IllegalArgumentException("Unknown type: "+value.getClass().getName());
 			}

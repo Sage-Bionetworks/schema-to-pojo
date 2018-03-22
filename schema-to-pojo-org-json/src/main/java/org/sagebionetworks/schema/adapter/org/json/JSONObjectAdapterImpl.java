@@ -8,14 +8,11 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
-import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.binary.Base64;
@@ -122,15 +119,6 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 	public JSONArrayAdapter getJSONArray(String key) throws JSONObjectAdapterException {
 		try {
 			return new JSONArrayAdapterImpl(wrapped.getJSONArray(key));
-		} catch (JSONException e) {
-			throw new JSONObjectAdapterException(e);
-		}
-	}
-
-	@Override
-	public JSONMapAdapter getJSONMap(String key) throws JSONObjectAdapterException {
-		try {
-			return new JSONMapAdapterImpl(wrapped.getJSONArray(key));
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
 		}
@@ -255,18 +243,7 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 			throw new JSONObjectAdapterException(e);
 		}
 	}
-
-	@Override
-	public JSONObjectAdapter put(String key, JSONMapAdapter value) throws JSONObjectAdapterException {
-		JSONMapAdapterImpl impl = (JSONMapAdapterImpl) value;
-		try {
-			wrapped.put(key, impl.wrapped);
-			return this;
-		} catch (JSONException e) {
-			throw new JSONObjectAdapterException(e);
-		}
-	}
-
+	
 	@Override
 	public String convertDateToString(FORMAT format, Date toFormat) {
 		return JsonDateUtils.convertDateToString(format, toFormat);

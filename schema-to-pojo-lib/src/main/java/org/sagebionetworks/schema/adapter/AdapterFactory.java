@@ -33,18 +33,5 @@ public interface AdapterFactory {
 	 */
 	public JSONArrayAdapter createNewArray(String json) throws JSONObjectAdapterException;
 
-	/**
-	 * Create a new map.
-	 * 
-	 * @return
-	 */
-	public JSONMapAdapter createNewMap();
-
-	/**
-	 * Create a new map.
-	 * 
-	 * @return
-	 */
-	public JSONMapAdapter createNewMap(String json) throws JSONObjectAdapterException;
 
 }

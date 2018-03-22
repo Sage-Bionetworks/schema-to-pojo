@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -15,7 +15,6 @@ import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
-import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
@@ -23,7 +22,6 @@ import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JCatchBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JCommentPart;
@@ -40,7 +38,6 @@ import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JOp;
-import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
@@ -269,9 +266,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					throw new IllegalArgumentException(
 							"Cannot determine the key and value type of a map: "
 									+ typeClass.fullName());
-				ObjectSchema keyTypeSchema = propSchema.getKey();
-				if (keyTypeSchema == null)
-					throw new IllegalArgumentException("A property type is MAP but the getKey() returned null");
 				ObjectSchema valueTypeSchema = propSchema.getValue();
 				if (valueTypeSchema == null)
 					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
@@ -279,16 +273,17 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 				thenBlock.assign(
 						field,
-						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass,valueTypeClass)));
-				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "jsonMap", param.invoke("getJSONMap")
+						JExpr._new(classType.owner().ref(LinkedHashMap.class).narrow(keyTypeClass,valueTypeClass)));
+				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "jsonMap", param.invoke("getJSONObject")
 						.arg(propNameConstant));
+				JVar iterator = thenBlock.decl(classType.owner().ref(Iterator.class).narrow(String.class), VAR_PREFIX + "it", jsonMap.invoke("keys"));
 
-				JType keyObject = classType.owner().ref(Object.class);
-				JForEach loop = thenBlock.forEach(keyObject, VAR_PREFIX + "keyObject", jsonMap.invoke("keys"));
+				JWhileLoop loop = thenBlock._while(iterator.invoke("hasNext"));
 				JBlock loopBody = loop.body();
+				JVar key = loopBody.decl(classType.owner().ref(String.class), VAR_PREFIX+"key", iterator.invoke("next"));
 				// Handle abstract classes and interfaces
 				JVar value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value");
-				JConditional ifNull = loopBody._if(jsonMap.invoke("isNull").arg(loop.var()));
+				JConditional ifNull = loopBody._if(jsonMap.invoke("isNull").arg(key));
 				// if null
 				JBlock ifNulThenBlock = ifNull._then();
 				// then value = null
@@ -302,7 +297,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// first get the JSONObject for this array element
 					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
 							jsonMap
-							.invoke("getJSONObject").arg(loop.var()));
+							.invoke("getJSONObject").arg(key));
 
 					// Create the object from the register
 					ifNullElseBlock.assign(
@@ -314,10 +309,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// Initialize the object from the adapter.
 					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
 				} else {
-					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
+					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, key, valueTypeSchema, valueTypeClass));
 				}
-				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
-						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
 				loopBody.add(field.invoke("put").arg(key).arg(value));
 			} else {
 				// First extract the type
@@ -726,9 +719,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
 					throw new IllegalArgumentException("Cannot determine the key and value type of a map: " + typeClass.fullName());
-				ObjectSchema keyTypeSchema = propSchema.getKey();
-				if (keyTypeSchema == null)
-					throw new IllegalArgumentException("A property type is MAP but the getKey() returned null");
 				ObjectSchema valueTypeSchema = propSchema.getValue();
 				if (valueTypeSchema == null)
 					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
@@ -736,8 +726,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 
 				// Create the new JSONArray
-				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "map",
-						param.invoke("createNewMap"));
+				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "map",
+						param.invoke("createNew"));
 				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
 				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();

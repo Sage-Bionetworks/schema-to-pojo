@@ -2,7 +2,6 @@ package org.sagebionetworks.gwt.client.schema.adapter;
 
 import org.sagebionetworks.schema.adapter.AdapterFactory;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
-import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -41,17 +40,5 @@ public class GwtAdapterFactory implements AdapterFactory {
 		// Parse the passed string
 		JSONValue value = JSONParser.parseStrict(json);
 		return new JSONArrayGwt(value.isArray());
-	}
-
-	@Override
-	public JSONMapAdapter createNewMap() {
-		return new JSONMapGwt();
-	}
-
-	@Override
-	public JSONMapAdapter createNewMap(String json) throws JSONObjectAdapterException {
-		// Parse the passed string
-		JSONValue value = JSONParser.parseStrict(json);
-		return new JSONMapGwt(value.isArray());
 	}
 }

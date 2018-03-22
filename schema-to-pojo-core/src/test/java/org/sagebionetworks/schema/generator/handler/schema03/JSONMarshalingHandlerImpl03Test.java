@@ -25,6 +25,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 
 import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDeclaration;
@@ -1943,8 +1944,6 @@ public class JSONMarshalingHandlerImpl03Test {
 				new EnumValue("cat")
 		});
 
-		// add enum to property's key and value
-		propertySchema.setKey(keyEnum);
 		propertySchema.setValue(valueEnum);
 
 		// add property to schema
@@ -1952,10 +1951,7 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// add field to sampleClass
 		codeModel._package("org.sample");
-		JDefinedClass testKeyClass = _package._enum("Animals");
-		testKeyClass.enumConstant("puppy");
-		testKeyClass.enumConstant("mouse");
-		testKeyClass.enumConstant("elephant");
+		JClass testKeyClass = codeModel.ref(String.class);
 		JDefinedClass testValueClass = _package._enum("Pets");
 		testValueClass.enumConstant("dog");
 		testValueClass.enumConstant("cat");
@@ -1971,15 +1967,14 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
-		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.LinkedHashMap<java.lang.String, org.sample.Pets>();"));
 		assertTrue(methodString
-				.contains("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(_KEY_MAPWHOSEITEMISANENUM);"));
+				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __jsonMap = adapter.getJSONObject(_KEY_MAPWHOSEITEMISANENUM);"));
 		assertTrue(methodString.contains("org.sample.Pets __value;"));
-		assertTrue(methodString.contains("if (__jsonMap.isNull(__keyObject)) {"));
+		assertTrue(methodString.contains("if (__jsonMap.isNull(__key)) {"));
 		assertTrue(methodString.contains("__value = null;"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonMap.getString(__keyObject));"));
-		assertTrue(methodString.contains("org.sample.Animals __key = org.sample.Animals.valueOf(((java.lang.String) __keyObject));"));
+		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonMap.getString(__key));"));
 		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
 	}
 
@@ -2015,8 +2010,6 @@ public class JSONMarshalingHandlerImpl03Test {
 				new EnumValue("cat")
 		});
 
-		// add enum to property's key and value
-		propertySchema.setKey(keyEnum);
 		propertySchema.setValue(valueEnum);
 
 		// add property to schema

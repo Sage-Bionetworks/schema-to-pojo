@@ -42,7 +42,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 
 
 	@Override
-	public JType handelCreateType(JCodeModel codeModel, ObjectSchema schema, JType superType, JType arrayType, JType keyType,
+	public JType handelCreateType(JCodeModel codeModel, ObjectSchema schema, JType superType, JType arrayType,
 			JType valueType, JType[] interfanceTypes) throws ClassNotFoundException {
 		// Is this an enumeration
 		if(schema.getEnum() != null){
@@ -103,11 +103,9 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		}
 		if(TYPE.MAP == schema.getType()){
 			// We must have Items
-			if (keyType == null)
-				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the key");
-			// We must have Items
 			if (valueType == null)
 				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the value");
+			JType keyType = codeModel.ref(String.class);
 			// This is a map
 			return codeModel.ref(Map.class).narrow(keyType.boxify(), valueType.boxify());
 		}

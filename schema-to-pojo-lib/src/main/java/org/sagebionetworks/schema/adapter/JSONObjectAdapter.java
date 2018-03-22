@@ -20,7 +20,7 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	 * Key iterator.
 	 * @return
 	 */
-	public Iterator<String> keys(); 
+	public Iterator<String> keys();
 
     /**
      * Get the string associated with a key.
@@ -66,8 +66,6 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	public JSONObjectAdapter put(String key, JSONObjectAdapter value) throws JSONObjectAdapterException;
 	
 	public JSONObjectAdapter put(String key, JSONArrayAdapter value) throws JSONObjectAdapterException;
-	
-	public JSONObjectAdapter put(String key, JSONMapAdapter value) throws JSONObjectAdapterException;
 	
     /**
      * Get the long value associated with a key. If the number value is too
@@ -135,15 +133,6 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
      *  if the value is not a JSONArray.
      */
     public JSONArrayAdapter getJSONArray(String key) throws JSONObjectAdapterException;
-    
-    /**
-	 * Get the JSONMap value associated with a key.
-	 * 
-	 * @param key A key string.
-	 * @return A JSONMap which is the value.
-	 * @throws JSONObjectAdapterException if the key is not found or if the value is not a JSONMap.
-	 */
-	public JSONMapAdapter getJSONMap(String key) throws JSONObjectAdapterException;
 
 	/**
 	 * Get the JSONObject value associated with a key.

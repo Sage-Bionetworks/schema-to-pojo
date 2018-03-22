@@ -24,7 +24,7 @@ public interface TypeCreatorHandler {
 	 * @return - The type created.
 	 * @throws ClassNotFoundException
 	 */
-	public JType handelCreateType(JCodeModel model, ObjectSchema schema, JType superType, JType arrayType, JType keyType, JType valueType,
+	public JType handelCreateType(JCodeModel model, ObjectSchema schema, JType superType, JType arrayType, JType valueType,
 			JType[] interfanceTypes) throws ClassNotFoundException;
 
 }

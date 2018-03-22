@@ -6,7 +6,6 @@ import java.util.Iterator;
 
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
-import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.binary.Base64;
@@ -125,12 +124,6 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 	}
 
 	@Override
-	public JSONMapAdapter getJSONMap(String key) throws JSONObjectAdapterException {
-		// The utility will do the value validation.
-		return new JSONMapGwt(JSONValueUtil.getArrayValue(wrapped.get(key), key));
-	}
-
-	@Override
 	public JSONObjectAdapter getJSONObject(String key)
 			throws JSONObjectAdapterException {
 		// The utility will do the value validation.
@@ -204,18 +197,6 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 			this.wrapped.put(key, null);
 		}else{
 			JSONArrayGwt impl = (JSONArrayGwt) value;
-			// Pass the wrapped object to the wrapped.
-			this.wrapped.put(key, impl.wrapped);
-		}
-		return this;
-	}
-
-	@Override
-	public JSONObjectAdapter put(String key, JSONMapAdapter value) throws JSONObjectAdapterException {
-		if (value == null) {
-			this.wrapped.put(key, null);
-		} else {
-			JSONMapGwt impl = (JSONMapGwt) value;
 			// Pass the wrapped object to the wrapped.
 			this.wrapped.put(key, impl.wrapped);
 		}
