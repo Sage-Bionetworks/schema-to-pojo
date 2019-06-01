@@ -8,9 +8,11 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -58,14 +60,34 @@ public class EffectiveSchemaUtil {
 			throw new IllegalArgumentException("Schema cannot be null");
 		// First make a copy of the schema
 		JSONObjectAdapter adapter = schema.writeToJSONObject(new JSONObjectAdapterImpl());
-		;
 		adapter = new JSONObjectAdapterImpl(adapter.toJSONString());
 		ObjectSchema copy = new ObjectSchema(adapter);
 		// Clear the extends and and implements
 		copy.setExtends(null);
 		copy.setImplements(null);
-		copy.setProperties((LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap());
-		ObjectSchema.recursivelyAddAllExtendsProperties(copy.getProperties(), schema);
+
+		if(copy.getProperties() != null) {
+			//flatten out the properties for the current schema
+			LinkedHashMap<String, ObjectSchema> flattenedProperties = (LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap();
+			ObjectSchema.recursivelyAddAllExtendsProperties(flattenedProperties, schema);
+
+			//for flattened properties in this copy, recursively flatten all of their properties
+			for (Map.Entry<String, ObjectSchema> entry : flattenedProperties.entrySet()) {
+				flattenedProperties.put(entry.getKey(), generateEffectiveSchema(entry.getValue()));
+			}
+
+			copy.setProperties(flattenedProperties);
+		}
+
+		//flatten objectSchema for ARRAY types
+		if(copy.getItems() != null){
+			copy.setItems(generateEffectiveSchema(copy.getItems()));
+		}
+
+		//flatten objectSchema for MAP types
+		if(copy.getValue() != null){
+			copy.setValue(generateEffectiveSchema(copy.getValue()));
+		}
 		// Add any properties from the extends.
 		return copy;
 	}
