@@ -71,13 +71,9 @@ public class EffectiveSchemaUtil {
 			LinkedHashMap<String, ObjectSchema> flattenedProperties = (LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap();
 			ObjectSchema.recursivelyAddAllExtendsProperties(flattenedProperties, schema);
 
-			//for flattened properties in this copy, property fields of TYPE == ARRAY or MAP also need to have their inner items/values flattened
+			//for flattened properties in this copy, recursively flatten all of their properties
 			for (Map.Entry<String, ObjectSchema> entry : flattenedProperties.entrySet()) {
-				ObjectSchema propertyObjectSchema = entry.getValue();
-
-				if (propertyObjectSchema.getType() == TYPE.ARRAY || propertyObjectSchema.getType() == TYPE.MAP ) {
-					flattenedProperties.put(entry.getKey(), generateEffectiveSchema(propertyObjectSchema));
-				}
+				flattenedProperties.put(entry.getKey(), generateEffectiveSchema(entry.getValue()));
 			}
 
 			copy.setProperties(flattenedProperties);

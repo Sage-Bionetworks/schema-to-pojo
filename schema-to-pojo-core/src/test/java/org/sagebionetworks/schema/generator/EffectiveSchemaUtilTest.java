@@ -106,6 +106,17 @@ public class EffectiveSchemaUtilTest {
 	}
 
 	@Test
+	public void testGenerateEffectiveSchema_InterfaceImplementerInsidePropertyField() throws JSONObjectAdapterException{
+
+		ObjectSchema fieldCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		fieldCompositeSchema.putProperty("field", compositeSchema);
+
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(fieldCompositeSchema)
+				.getProperties().get("field");
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideARRAYProperty() throws JSONObjectAdapterException{
 
 		ObjectSchema arraySchema = new ObjectSchema(TYPE.ARRAY);
