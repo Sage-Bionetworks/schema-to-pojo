@@ -3,6 +3,8 @@ package org.sagebionetworks.schema.generator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -100,14 +102,75 @@ public class EffectiveSchemaUtilTest {
 	public void testGenerateEffectiveSchema() throws JSONObjectAdapterException{
 		// Create a schema
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(compositeSchema);
-		assertNotNull(effective);
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+	@Test
+	public void testGenerateEffectiveSchema_InterfaceImplementerInsideARRAYProperty() throws JSONObjectAdapterException{
+
+		ObjectSchema arraySchema = new ObjectSchema(TYPE.ARRAY);
+		arraySchema.setItems(compositeSchema);
+
+		ObjectSchema arrayCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		arrayCompositeSchema.putProperty("array", arraySchema);
+
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(arrayCompositeSchema)
+				.getProperties().get("array").getItems();
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+	@Test
+	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAPProperty() throws JSONObjectAdapterException{
+		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
+
+		ObjectSchema mapSchema = new ObjectSchema(TYPE.MAP);
+		mapSchema.setKey(stringKeySchema);
+		mapSchema.setValue(compositeSchema);
+
+		ObjectSchema mapCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		mapCompositeSchema.putProperty("map", mapSchema);
+
+		//check that the effective schema for compositeSchema got flattened even though it is nested
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(mapCompositeSchema)
+				.getProperties().get("map").getValue();
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+	@Test
+	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAP() throws JSONObjectAdapterException{
+		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
+
+		ObjectSchema mapSchema = new ObjectSchema(TYPE.MAP);
+		mapSchema.setKey(stringKeySchema);
+		mapSchema.setValue(compositeSchema);
+
+		//check that the effective schema for compositeSchema got flattened even though it is nested
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(mapSchema)
+				.getValue();
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+	@Test
+	public void testGenerateEffectiveSchema_InterfaceImplementerInsideArray() throws JSONObjectAdapterException{
+		ObjectSchema arraySchema = new ObjectSchema(TYPE.ARRAY);
+		arraySchema.setItems(compositeSchema);
+
+		//check that the effective schema for compositeSchema got flattened even though it is nested
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(arraySchema)
+				.getItems();
+		checkEffectiveCompositeSchemaIsFlattened(effective);
+	}
+
+
+	private void checkEffectiveCompositeSchemaIsFlattened(ObjectSchema effectiveCompositeSchema) {
+		assertNotNull(effectiveCompositeSchema);
 		// It should make a copy of the schema
-		assertFalse(effective == compositeSchema);
+		assertNotSame(effectiveCompositeSchema, compositeSchema);
 		// The effective should not have extends or implements
-		assertTrue(effective.getExtends() == null);
-		assertTrue(effective.getImplements() == null);
+		assertNull(effectiveCompositeSchema.getExtends());
+		assertNull(effectiveCompositeSchema.getImplements());
 		// Get the properties
-		Map<String, ObjectSchema> props = effective.getProperties();
+		Map<String, ObjectSchema> props = effectiveCompositeSchema.getProperties();
 		assertNotNull(props);
 		// All of the properties from the base class and interfaces should be in this object
 		assertEquals(5, props.size());
@@ -117,7 +180,8 @@ public class EffectiveSchemaUtilTest {
 		assertNotNull(props.get("fromChildInterface"));
 		assertNotNull(props.get("fromMe"));
 	}
-	
+
+
 	@Test (expected=IllegalArgumentException.class)
 	public void testGenerateJSONofEffectiveSchemaNull() throws JSONObjectAdapterException{
 		// Create a schema
