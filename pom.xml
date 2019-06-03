@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
@@ -11,12 +11,12 @@
 		<repository>
 			<id>sagebionetworks</id>
 			<name>sagebionetworks-releases</name>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local</url>
 		</repository>
 		<repository>
 			<id>sagebionetworks-ext</id>
 			<name>sagebionetworks-releases-ext</name>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/ext-releases-local</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/ext-releases-local</url>
 		</repository>
 	</repositories>
 	<modules>
@@ -118,7 +118,7 @@
 					</configuration>
 				</plugin>
 						<!-- Tell the eclipse m2e plugin to execute these lifecycle mappings
-					See: http://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
+					See: https://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -149,7 +149,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>sagebionetworks</id>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/plugins-releases-local/</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-releases-local/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -159,7 +159,7 @@
 		</pluginRepository>
 		<pluginRepository>
 			<id>sagebionetworks-snapshots</id>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/plugins-snapshots-local</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-snapshots-local</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -172,13 +172,13 @@
 		<repository>
 			<id>sagebionetworks</id>
 			<name>sagebionetworks-releases</name>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local
 			</url>
 		</repository>
 		<snapshotRepository>
 			<id>sagebionetworks</id>
 			<name>sagebionetworks-snapshots</name>
-			<url>http://sagebionetworks.jfrog.io/sagebionetworks/libs-snapshots-local
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-snapshots-local
 			</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -189,12 +189,12 @@
 				<repository>
 					<id>sagebionetworks</id>
 					<name>sagebionetworks-releases</name>
-					<url>http://sagebionetworks.jfrog.io/sagebionetworks/plugins-releases-local</url>
+					<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-releases-local</url>
 				</repository>
 				<snapshotRepository>
 					<id>sagebionetworks</id>
 					<name>sagebionetworks-snapshots</name>
-					<url>http://sagebionetworks.jfrog.io/sagebionetworks/plugins-snapshots-local</url>
+					<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-snapshots-local</url>
 				</snapshotRepository>
 			</distributionManagement>
      </profile>
