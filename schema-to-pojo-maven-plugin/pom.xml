@@ -36,12 +36,12 @@
 		<repository>
 			<id>sagebionetworks</id>
 			<name>sagebionetworks-releases</name>
-			<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-releases-local</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local</url>
 		</repository>
 		<snapshotRepository>
 			<id>sagebionetworks</id>
 			<name>sagebionetworks-snapshots</name>
-			<url>https://sagebionetworks.jfrog.io/sagebionetworks/plugins-snapshots-local</url>
+			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-snapshots-local</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<build>
