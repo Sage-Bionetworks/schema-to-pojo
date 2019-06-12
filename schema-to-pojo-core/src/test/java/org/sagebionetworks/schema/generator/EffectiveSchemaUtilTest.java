@@ -91,6 +91,15 @@ public class EffectiveSchemaUtilTest {
 			FileUtils.recursivelyDeleteDirectory(tempFolder);
 		}
 	}
+
+	@Test
+	public void testGenerateEffectiveSchema_classWithNoPropertiesImplementInterface() throws JSONObjectAdapterException {
+		ObjectSchema noPropertiesImplementation = new ObjectSchema();
+		noPropertiesImplementation.setImplements(new ObjectSchema[]{interfaceSchema});
+
+		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(noPropertiesImplementation);
+		assertTrue(effective.getProperties().containsKey("fromInterface"));
+	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testGenerateEffectiveSchemaNull() throws JSONObjectAdapterException{
