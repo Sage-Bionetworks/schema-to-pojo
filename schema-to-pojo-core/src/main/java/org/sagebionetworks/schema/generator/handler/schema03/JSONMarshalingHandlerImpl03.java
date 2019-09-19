@@ -279,7 +279,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 				thenBlock.assign(
 						field,
-						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass,valueTypeClass)));
+						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass, valueTypeClass)));
 				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "jsonMap", param.invoke("getJSONMap")
 						.arg(propNameConstant));
 
@@ -302,7 +302,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// first get the JSONObject for this array element
 					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
 							jsonMap
-							.invoke("getJSONObject").arg(loop.var()));
+									.invoke("getJSONObject").arg(loop.var()));
 
 					// Create the object from the register
 					ifNullElseBlock.assign(
@@ -319,6 +319,58 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
 						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
 				loopBody.add(field.invoke("put").arg(key).arg(value));
+			} else if (TYPE.STR_KEY_MAP == type){
+				// Determine the type of the key
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 2)
+					throw new IllegalArgumentException(
+							"Cannot determine the key and value type of a map: "
+									+ typeClass.fullName());
+				ObjectSchema valueTypeSchema = propSchema.getValue();
+				if (valueTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
+				JClass keyTypeClass = typeClass.getTypeParameters().get(0);
+				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
+				thenBlock.assign(
+						field,
+						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass, valueTypeClass)));
+				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "jsonStringMap", param.invoke("getJSONObject")
+						.arg(propNameConstant));
+
+				JType stringKeyType = classType.owner().ref(String.class);
+				JForEach loop = thenBlock.forEach(stringKeyType, VAR_PREFIX + "key", jsonMap.invoke("keySet"));
+				JBlock loopBody = loop.body();
+				// Handle abstract classes and interfaces
+				JVar value = loopBody.decl(valueTypeClass, VAR_PREFIX + "value");
+				JConditional ifNull = loopBody._if(jsonMap.invoke("isNull").arg(loop.var()));
+				// if null
+				JBlock ifNulThenBlock = ifNull._then();
+				// then value = null
+				ifNulThenBlock.assign(value, JExpr._null());
+				// else
+				JBlock ifNullElseBlock = ifNull._else();
+				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
+					if (interfaceFactoryGenerator == null)
+						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
+					// first get the JSONObject for this array element
+					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
+							jsonMap
+									.invoke("getJSONObject").arg(loop.var()));
+
+					// Create the object from the register
+					ifNullElseBlock.assign(
+							value,
+							JExpr.cast(
+									valueTypeClass,
+									createRegister.staticInvoke("singleton").invoke("newInstance")
+											.arg(valueAdapter.invoke("getString").arg(conreteTypeRef))));
+					// Initialize the object from the adapter.
+					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+				} else {
+					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
+				}
+				loopBody.add(field.invoke("put").arg(loop.var()).arg(value));
 			} else {
 				// First extract the type
 				// If we have a register then we need to use it
@@ -521,6 +573,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		} else if (TYPE.MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+		} else if (TYPE.STR_KEY_MAP == arrayType) {
+			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
 			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
@@ -552,9 +606,11 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JExpression stringExper = jsonMap.invoke(methodName).arg(jsonKey);
 			return convertStringAsNeeded(typeClass.owner(), adapter, format, stringExper);
 		}else if(TYPE.ARRAY == type){
-			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
+			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
 		} else if (TYPE.MAP == type) {
-			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+			throw new IllegalArgumentException("Maps of Maps are currently not supported");
+		} else if (TYPE.STR_KEY_MAP == type) {
+			throw new IllegalArgumentException("Maps of StringKeyMaps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
 			return JExpr._new(typeClass).arg(jsonMap.invoke("getJSONObject").arg(jsonKey));
@@ -748,6 +804,30 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 								.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
+			} else if (TYPE.STR_KEY_MAP == type) {
+				// Determine the type of the key
+				JClass typeClass = (JClass) field.type();
+				if (typeClass.getTypeParameters().size() != 2)
+					throw new IllegalArgumentException("Cannot determine the key and value type of a map: " + typeClass.fullName());
+				ObjectSchema valueTypeSchema = propSchema.getValue();
+				if (valueTypeSchema == null)
+					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
+				JClass keyTypeClass = typeClass.getTypeParameters().get(0);
+				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
+
+				// Create the new JSONObject
+				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "map",
+						param.invoke("createNew"));
+				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
+				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
+				JBlock loopBody = loop.body();
+				JConditional ifNull = loopBody._if(loop.var().invoke("getValue").eq(JExpr._null()));
+				ifNull._then().add(map.invoke("putNull").arg(loop.var().invoke("getKey")));
+				ifNull._else().add(
+						map.invoke("put").arg(loop.var().invoke("getKey"))
+								.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
+				// Now set the new JSONObject
+				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
 			} else {
 				// All others are treated as objects.
 				thenBlock.add(param
@@ -809,6 +889,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		} else if (TYPE.MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
+		} else if (TYPE.MAP == arrayType) {
+			throw new IllegalArgumentException("Arrays of StringKeyMaps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
@@ -837,6 +919,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
 		} else if (TYPE.MAP == type) {
 			throw new IllegalArgumentException("Maps of Maps are currently not supported");
+		} else if (TYPE.MAP == type) {
+			throw new IllegalArgumentException("Maps of StringKeyMaps are currently not supported");
 		} else {
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));

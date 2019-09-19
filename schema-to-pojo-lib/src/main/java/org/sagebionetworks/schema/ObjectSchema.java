@@ -2431,6 +2431,13 @@ public class ObjectSchema implements JSONEntity {
 			}
 			JSONMapAdapter defaultMap = (JSONMapAdapter) defaultObject;
 			adapter.put(JSON_DEFAULT, defaultMap);
+		} else if (TYPE.STR_KEY_MAP == type) {
+			if (!(defaultObject instanceof JSONObjectAdapter)) {
+				throw new JSONObjectAdapterException("TYPE of " + type + " does not match the type of the default value: "
+						+ defaultObject.getClass().getName());
+			}
+			JSONObjectAdapter defaultStringKeyMap = (JSONObjectAdapter) defaultObject;
+			adapter.put(JSON_DEFAULT, defaultStringKeyMap);
 		} else {
 			throw new JSONObjectAdapterException("Object " + defaultObject
 					+ " can't be added to adapter " + adapter
@@ -2481,6 +2488,10 @@ public class ObjectSchema implements JSONEntity {
 		} else if (TYPE.MAP == type) {
 			Object defaultMap = adapter.getJSONMap(JSON_DEFAULT);
 			schema.setDefault(defaultMap);
+		} else if (TYPE.STR_KEY_MAP == type){
+			//a string keymap is just a JSONObject w/ no defined schema
+			Object defaultStringKeyMap = adapter.getJSONObject(JSON_DEFAULT);
+			schema.setDefault(defaultStringKeyMap);
 		} else {
 			throw new JSONObjectAdapterException("can't add default object to "
 					+ schema + "because adapter " + "has a invalid type of "

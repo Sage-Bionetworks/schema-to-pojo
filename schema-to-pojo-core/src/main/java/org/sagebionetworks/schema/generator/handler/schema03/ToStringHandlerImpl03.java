@@ -109,7 +109,8 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.INTEGER == type || 
 					TYPE.BOOLEAN == type || 
 					TYPE.ARRAY == type || 
-					TYPE.MAP == type || 
+					TYPE.MAP == type ||
+					TYPE.STR_KEY_MAP == type ||
 					TYPE.OBJECT == type ||
 					TYPE.STRING == type ||
 					TYPE.INTERFACE == type){

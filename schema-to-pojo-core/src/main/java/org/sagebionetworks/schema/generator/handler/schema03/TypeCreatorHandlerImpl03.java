@@ -111,6 +111,15 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			// This is a map
 			return codeModel.ref(Map.class).narrow(keyType.boxify(), valueType.boxify());
 		}
+
+		if(TYPE.STR_KEY_MAP == schema.getType()){
+			// We must have Items
+			if (valueType == null)
+				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the value");
+			// This is a map
+			return codeModel.ref(Map.class).narrow(codeModel.ref(String.class), valueType.boxify());
+		}
+
 		// The last category is objects.
 		if(TYPE.OBJECT == schema.getType() || TYPE.INTERFACE == schema.getType()){
 			return createOrGetClassAndInterface(codeModel, schema, superType,

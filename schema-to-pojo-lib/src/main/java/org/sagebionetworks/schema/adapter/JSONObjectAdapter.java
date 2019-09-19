@@ -20,8 +20,9 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	 * Key iterator.
 	 * @return
 	 */
-	public Iterator<String> keys(); 
+	public Iterator<String> keys();
 
+	Iterable<String> keySet();
     /**
      * Get the string associated with a key.
      *

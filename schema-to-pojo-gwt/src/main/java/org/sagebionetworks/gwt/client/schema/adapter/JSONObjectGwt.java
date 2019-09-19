@@ -61,8 +61,18 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 	}
 
 	@Override
-	public Iterator keys() {
+	public Iterator<String> keys() {
 		return this.wrapped.keySet().iterator();
+	}
+
+	@Override
+	public Iterable<String> keySet(){
+		return new Iterable<String>() {
+			@Override
+			public Iterator<String> iterator() {
+				return JSONObjectGwt.this.keys();
+			}
+		};
 	}
 
 	@Override
