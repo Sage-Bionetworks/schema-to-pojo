@@ -26,7 +26,7 @@ public class StringKeyMapTest {
 		map.getStrKeyMapOfInterface().put("a", value);
 		ABImpl2 value2 = new ABImpl2();
 		value2.setFromMe2("bb");
-		map.getStrKeyMapOfInterface().put("b", value);
+		map.getStrKeyMapOfInterface().put("b", value2);
 
 		map.setStrKeyMapOfObject(new HashMap<>());
 		ABImpl concreteValue = new ABImpl();
