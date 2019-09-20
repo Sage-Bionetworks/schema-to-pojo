@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
-	<version>0.3.23</version>
+	<version>0.4.0</version>
 	<packaging>pom</packaging>
 	<name>schema-to-pojo</name>
 	<description>Container for the rest of the sub-projects</description>

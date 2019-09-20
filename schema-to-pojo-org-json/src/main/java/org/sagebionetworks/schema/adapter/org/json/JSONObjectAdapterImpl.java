@@ -175,6 +175,16 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 	}
 
 	@Override
+	public Iterable<String> keySet(){
+		return new Iterable<String>() {
+			@Override
+			public Iterator<String> iterator() {
+				return JSONObjectAdapterImpl.this.keys();
+			}
+		};
+	}
+
+	@Override
 	public JSONObjectAdapter put(String key, boolean value)
 			throws JSONObjectAdapterException {
 		try {

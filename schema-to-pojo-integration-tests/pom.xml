@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.3.23</version>
+		<version>0.4.0</version>
 	</parent>
 	<artifactId>schema-to-pojo-integration-tests</artifactId>
 	<name>schema-to-pojo-integration-tests</name>

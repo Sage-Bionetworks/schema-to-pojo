@@ -232,7 +232,7 @@ public class ToStringHandlerImpl03Test {
 		assertTrue(methodString.indexOf("result.append(\"stringPropKeyName=\");") > 0);
 		assertTrue(methodString.indexOf("result.append(stringPropKeyName);") > 0);  
 	}
-	
+
 	/**
 	 * Tests that toString works for a schema that has several properties.
 	 * @throws Exception
@@ -279,7 +279,34 @@ public class ToStringHandlerImpl03Test {
 		assertTrue(methodString.indexOf("result.append(\"]\");") > 0);
 		assertTrue(methodString.indexOf("return result.toString();") > 0);    
 	}
-	
+
+	/**
+	 * Tests that toString works for Boolean property.
+	 * @throws Exception
+	 */
+	@Test
+	public void testToStringForStringKeyMapProperty() throws Exception {
+		// Add a boolean property to the schema
+		ObjectSchema strKeyMapProp = new ObjectSchema();
+		strKeyMapProp.setType(TYPE.STR_KEY_MAP);
+		String mapPropertyName = "mapPropName";
+		schema.putProperty(mapPropertyName, strKeyMapProp);
+
+		//add field to sampleClass JDefinedClass
+		sampleClass.field(JMod.PRIVATE, sampleClass, mapPropertyName);
+
+		//handle
+		ToStringHandlerImpl03 handler = new ToStringHandlerImpl03();
+		JMethod method = handler.addToString(schema, sampleClass);
+
+		//let's see the results
+		String methodString = declareToString(method);
+
+		//verify everything was created correctly
+		assertTrue(methodString.indexOf("result.append(\"mapPropName=\");") > 0);
+		assertTrue(methodString.indexOf("result.append(mapPropName);") > 0);
+	}
+
 	/**
 	 * Helper to declare a model object to string.
 	 * @param toDeclare

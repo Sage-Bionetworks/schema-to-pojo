@@ -319,30 +319,6 @@ public class ObjectSchemaTest {
 		
 		//verify adapter has a default set and that it's of type boolean
 		assertNotNull(adapter.getBoolean("default"));
-		
-		adapter = new JSONObjectAdapterImpl();
-
-		//make an object that represents a JSONArrayAdapter 
-		JSONArrayAdapter arrayAdapter = new JSONArrayAdapterImpl();
-		arrayAdapter.put(0, "yoHello");
-		Object arrayObject = arrayAdapter;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.ARRAY.getJSONValue());
-		ObjectSchema.setDefaultType(arrayObject, adapter);
-		
-		//verify adapter has a default set and that it's of type array
-		assertNotNull(adapter.getJSONArray("default"));
-		
-		adapter = new JSONObjectAdapterImpl();
-		
-		//make an object that represents a JSONObjectAdapter
-		JSONObjectAdapter adap = new JSONObjectAdapterImpl();
-		adap.put("yoHelloKey", "yoHello");
-		Object adapObject = adap;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.OBJECT.getJSONValue());
-		ObjectSchema.setDefaultType(adapObject, adapter);
-		
-		//verify adapter has a default set and that it's of type object
-		assertNotNull(adapter.getJSONObject("default"));
 	}
 	
 	/**

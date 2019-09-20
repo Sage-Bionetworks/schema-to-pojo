@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.codemodel.JClass;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -2047,4 +2048,221 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("__map.put(__entry.getKey(), __entry.getValue().name())"));
 	}
 
+
+
+	/**
+	 * Tests that an schema that has a property of type STR_KEY_MAP, whose values are in an enumeration is supported in
+	 * initializeFromJSONObject methods created by handler.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithEnumValue() throws Exception {
+		// create a property that is an Map
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STR_KEY_MAP);
+		String propName = "mapWhoseItemIsAnEnum";
+
+		ObjectSchema valueEnum = new ObjectSchema();
+		valueEnum.setType(TYPE.STRING);
+		valueEnum.setName("Pets");
+		valueEnum.setId("pets");
+		valueEnum.setEnum(new EnumValue[] {
+				new EnumValue("dog"),
+				new EnumValue("cat")
+		});
+
+		// add enum to property's value
+		propertySchema.setValue(valueEnum);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to sampleClass
+		codeModel._package("org.sample");
+		JClass testKeyClass = codeModel.ref(String.class);
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		addKeyConstant(sampleClass, propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		//method under test
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+
+		// check that map of enumeration got created successfully, and
+		// assignments are correct
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<java.lang.String, org.sample.Pets>();"));
+		assertTrue(methodString
+				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __jsonStringMap = adapter.getJSONObject(_KEY_MAPWHOSEITEMISANENUM);"));
+		assertTrue(methodString.contains("org.sample.Pets __value;"));
+		assertTrue(methodString.contains("if (__jsonStringMap.isNull(__key)) {"));
+		assertTrue(methodString.contains("__value = null;"));
+		assertTrue(methodString.contains("} else {"));
+		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonStringMap.getString(__key));"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_nullValue() throws Exception {
+		// create a property that is an Map
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STR_KEY_MAP);
+		String propName = "mapWhoseItemIsAnEnum";
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to sampleClass
+		codeModel._package("org.sample");
+		JClass testKeyClass = codeModel.ref(String.class);
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		addKeyConstant(sampleClass, propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+
+		// value type is explicitly set to null
+		propertySchema.setValue(null);
+		//method under test
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+	}
+
+	@Test
+	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithInterfaceValue() throws Exception {
+		// create a property that is an Map
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STR_KEY_MAP);
+		String propName = "mapWhoseItemIsAnInterface";
+
+		// add enum to property's value
+		propertySchema.setValue(schemaInterface);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to sampleClass
+		JClass testKeyClass = codeModel.ref(String.class);
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, sampleInterface), propName);
+		addKeyConstant(sampleClass, propName);
+
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema, schemaInterface, schemaInterfaceImpl));
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		//method under test
+		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
+
+		// Now get the string and check it.
+		String methodString = declareToString(method);
+		System.out.println(methodString);
+
+		// check that map of enumeration got created successfully, and
+		// assignments are correct
+		assertTrue(methodString.contains("mapWhoseItemIsAnInterface = new java.util.HashMap<java.lang.String, org.sample.SampleInterface>();"));
+		assertTrue(methodString
+				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __jsonStringMap = adapter.getJSONObject(_KEY_MAPWHOSEITEMISANINTERFACE);"));
+		assertTrue(methodString.contains("org.sample.SampleInterface __value;"));
+		assertTrue(methodString.contains("if (__jsonStringMap.isNull(__key)) {"));
+		assertTrue(methodString.contains("__value = null;"));
+		assertTrue(methodString.contains("} else {"));
+		assertTrue(methodString.contains("__value = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__valueAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+		assertTrue(methodString.contains("__value.initializeFromJSONObject(__valueAdapter);"));
+
+		assertTrue(methodString.contains("mapWhoseItemIsAnInterface.put(__key, __value);"));
+	}
+
+
+
+	/**
+	 * Tests that writeToJSONObject works for Array type that has an Enum for it's key.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testWriteToJSONObjectStringKeyMap_WithValue() throws Exception {
+		// make an array property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STR_KEY_MAP);
+		String propName = "stringKeyMapPropWithEnum";
+
+		ObjectSchema valueEnum = new ObjectSchema();
+		valueEnum.setType(TYPE.STRING);
+		valueEnum.setName("Pets");
+		valueEnum.setId("pets");
+		valueEnum.setEnum(new EnumValue[] {
+				new EnumValue("dog"),
+				new EnumValue("cat")
+		});
+
+		propertySchema.setValue(valueEnum);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to test JDefinedClass
+		codeModel._package("org.sample");
+		JDefinedClass testKeyClass = _package._enum("Animals");
+		testKeyClass.enumConstant("puppy");
+		testKeyClass.enumConstant("mouse");
+		testKeyClass.enumConstant("elephant");
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		addKeyConstant(sampleClass, propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+
+		// make sure everything was created correctly
+		assertTrue(methodString.contains("if (__entry.getValue() == null) {"));
+		assertTrue(methodString.contains("__map.putNull(__entry.getKey());"));
+		assertTrue(methodString.contains("} else {"));
+		assertTrue(methodString.contains("__map.put(__entry.getKey(), __entry.getValue().name())"));
+	}
+
+
+	/**
+	 * Tests that writeToJSONObject works for Array type that has an Enum for it's key.
+	 *
+	 * @throws Exception
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testWriteToJSONObjectStringKeyMap_nullValue() throws Exception {
+		// make an array property
+		ObjectSchema propertySchema = new ObjectSchema();
+		propertySchema.setType(TYPE.STR_KEY_MAP);
+		String propName = "stringKeyMapPropWithEnum";
+
+
+		propertySchema.setValue(null);
+
+		// add property to schema
+		schema.putProperty(propName, propertySchema);
+
+		// add field to test JDefinedClass
+		codeModel._package("org.sample");
+		JDefinedClass testKeyClass = _package._enum("Animals");
+		testKeyClass.enumConstant("puppy");
+		testKeyClass.enumConstant("mouse");
+		testKeyClass.enumConstant("elephant");
+		JDefinedClass testValueClass = _package._enum("Pets");
+		testValueClass.enumConstant("dog");
+		testValueClass.enumConstant("cat");
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(Map.class).narrow(testKeyClass, testValueClass), propName);
+		addKeyConstant(sampleClass, propName);
+
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+	}
 }

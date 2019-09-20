@@ -41,6 +41,11 @@ public enum TYPE {
 	 * Value MUST be a map
 	 */
 	MAP("map", false, Map.class.getName(), "getJSONMap()"),
+
+	/**
+	 * Map where the key is always a String so we can use the native JSON Map to encode the mapping
+	 */
+	STR_KEY_MAP("stringmap", false, Map.class.getName(), "getJSONObject"),
 	/*
 	 * Value MUST be null. Note this is mainly for purpose of being able use
 	 * union types to define nullability. If this type is not included in a
