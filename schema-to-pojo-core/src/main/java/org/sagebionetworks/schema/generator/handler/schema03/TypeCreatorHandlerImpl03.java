@@ -115,7 +115,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		if(TYPE.STR_KEY_MAP == schema.getType()){
 			// We must have Items
 			if (valueType == null)
-				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the value");
+				throw new IllegalArgumentException("A schema with TYPE.STR_KEY_MAP must have a type for the value");
 			// This is a map
 			return codeModel.ref(Map.class).narrow(codeModel.ref(String.class), valueType.boxify());
 		}

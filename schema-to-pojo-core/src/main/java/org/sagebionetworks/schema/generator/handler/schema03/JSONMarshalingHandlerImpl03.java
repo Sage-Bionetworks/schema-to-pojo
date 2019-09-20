@@ -811,7 +811,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					throw new IllegalArgumentException("Cannot determine the key and value type of a map: " + typeClass.fullName());
 				ObjectSchema valueTypeSchema = propSchema.getValue();
 				if (valueTypeSchema == null)
-					throw new IllegalArgumentException("A property type is MAP but the getValue() returned null");
+					throw new IllegalArgumentException("A property type is STR_KEY_MAP but the getValue() returned null");
 				JClass keyTypeClass = typeClass.getTypeParameters().get(0);
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 
@@ -979,8 +979,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			propShouldBe = JExpr.lit(defaultBoolean);
 		}
 		else {
-			throw new RuntimeException("can't assign default value " 
-					+ propSchema.getDefault() + " as it is not a supported type");
+			throw new RuntimeException("can't assign default value"
+					+ propSchema.getDefault() + " for TYPE=" + type + " because it does not support default values");
 		}
 		return propShouldBe;
 	}

@@ -9,6 +9,8 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import javax.xml.validation.Schema;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
@@ -306,6 +308,42 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(classString.indexOf(description) > 0);
 		assertTrue(classString.indexOf(TypeCreatorHandlerImpl03.AUTO_GENERATED_MESSAGE) > 0);
 		assertTrue(classString.contains("two's description"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testHandelCreateType_StringKeyMap_nullValue() throws ClassNotFoundException{
+		String title = "This is the title";
+		String description = "Add a description";
+		schema.setTitle(title);
+		schema.setDescription(description);
+		schema.setType(TYPE.STR_KEY_MAP);
+		schema.setName("SampleEnum");
+
+		schema.setValue(null);
+
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+	}
+
+	@Test
+	public void testHandelCreateType_StringKeyMap_Value() throws ClassNotFoundException{
+		String title = "This is the title";
+		String description = "Add a description";
+		schema.setTitle(title);
+		schema.setDescription(description);
+		schema.setType(TYPE.STR_KEY_MAP);
+		schema.setName("SampleEnum");
+
+		ObjectSchema valueSchema = new ObjectSchema();
+		valueSchema.setType(TYPE.INTEGER);
+		schema.setValue(valueSchema);
+
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		// Create the class
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, codeModel.ref(Integer.class), null);
+		assertNotNull(clazz);
+		assertEquals("java.util.Map<java.lang.String,java.lang.Integer>", clazz.fullName());
 	}
 	
 	@Test

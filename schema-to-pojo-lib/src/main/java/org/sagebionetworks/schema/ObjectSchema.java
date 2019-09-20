@@ -2408,36 +2408,6 @@ public class ObjectSchema implements JSONEntity {
 			}
 			Boolean defaultBool = (Boolean) defaultObject;
 			adapter.put(JSON_DEFAULT, defaultBool);
-		} else if (TYPE.OBJECT == type) {
-			if (!(defaultObject instanceof JSONObjectAdapter)) {
-				throw new JSONObjectAdapterException("TYPE of " + type
-						+ " does not match the type of the default value: "
-						+ defaultObject.getClass().getName());
-			}
-			JSONObjectAdapter defaultAdapter = (JSONObjectAdapter) defaultObject;
-			adapter.put(JSON_DEFAULT, defaultAdapter);
-		} else if (TYPE.ARRAY == type) {
-			if (!(defaultObject instanceof JSONArrayAdapter)) {
-				throw new JSONObjectAdapterException("TYPE of " + type
-						+ " does not match the type of the default value: "
-						+ defaultObject.getClass().getName());
-			}
-			JSONArrayAdapter defaultArray = (JSONArrayAdapter) defaultObject;
-			adapter.put(JSON_DEFAULT, defaultArray);
-		} else if (TYPE.MAP == type) {
-			if (!(defaultObject instanceof JSONMapAdapter)) {
-				throw new JSONObjectAdapterException("TYPE of " + type + " does not match the type of the default value: "
-						+ defaultObject.getClass().getName());
-			}
-			JSONMapAdapter defaultMap = (JSONMapAdapter) defaultObject;
-			adapter.put(JSON_DEFAULT, defaultMap);
-		} else if (TYPE.STR_KEY_MAP == type) {
-			if (!(defaultObject instanceof JSONObjectAdapter)) {
-				throw new JSONObjectAdapterException("TYPE of " + type + " does not match the type of the default value: "
-						+ defaultObject.getClass().getName());
-			}
-			JSONObjectAdapter defaultStringKeyMap = (JSONObjectAdapter) defaultObject;
-			adapter.put(JSON_DEFAULT, defaultStringKeyMap);
 		} else {
 			throw new JSONObjectAdapterException("Object " + defaultObject
 					+ " can't be added to adapter " + adapter
@@ -2479,22 +2449,9 @@ public class ObjectSchema implements JSONEntity {
 		} else if (TYPE.BOOLEAN == type) {
 			Object defaultBoolean = adapter.getBoolean(JSON_DEFAULT);
 			schema.setDefault(defaultBoolean);
-		} else if (TYPE.OBJECT == type) {
-			Object defaultJSONObject = adapter.getJSONObject(JSON_DEFAULT);
-			schema.setDefault(defaultJSONObject);
-		} else if (TYPE.ARRAY == type) {
-			Object defaultArray = adapter.getJSONArray(JSON_DEFAULT);
-			schema.setDefault(defaultArray);
-		} else if (TYPE.MAP == type) {
-			Object defaultMap = adapter.getJSONMap(JSON_DEFAULT);
-			schema.setDefault(defaultMap);
-		} else if (TYPE.STR_KEY_MAP == type){
-			//a string keymap is just a JSONObject w/ no defined schema
-			Object defaultStringKeyMap = adapter.getJSONObject(JSON_DEFAULT);
-			schema.setDefault(defaultStringKeyMap);
 		} else {
 			throw new JSONObjectAdapterException("can't add default object to "
-					+ schema + "because adapter " + "has a invalid type of "
+					+ schema + "because adapter " + "has a unsupported type of "
 					+ type);
 		}
 	}
