@@ -143,7 +143,7 @@ public class EffectiveSchemaUtilTest {
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAPProperty() throws JSONObjectAdapterException{
 		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
 
-		ObjectSchema mapSchema = new ObjectSchema(TYPE.MAP);
+		ObjectSchema mapSchema = new ObjectSchema(TYPE.TUPLE_ARRAY_MAP);
 		mapSchema.setKey(stringKeySchema);
 		mapSchema.setValue(compositeSchema);
 
@@ -160,7 +160,7 @@ public class EffectiveSchemaUtilTest {
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAP() throws JSONObjectAdapterException{
 		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
 
-		ObjectSchema mapSchema = new ObjectSchema(TYPE.MAP);
+		ObjectSchema mapSchema = new ObjectSchema(TYPE.TUPLE_ARRAY_MAP);
 		mapSchema.setKey(stringKeySchema);
 		mapSchema.setValue(compositeSchema);
 

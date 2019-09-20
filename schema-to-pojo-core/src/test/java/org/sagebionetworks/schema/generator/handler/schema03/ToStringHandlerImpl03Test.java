@@ -288,7 +288,7 @@ public class ToStringHandlerImpl03Test {
 	public void testToStringForStringKeyMapProperty() throws Exception {
 		// Add a boolean property to the schema
 		ObjectSchema strKeyMapProp = new ObjectSchema();
-		strKeyMapProp.setType(TYPE.STR_KEY_MAP);
+		strKeyMapProp.setType(TYPE.MAP);
 		String mapPropertyName = "mapPropName";
 		schema.putProperty(mapPropertyName, strKeyMapProp);
 
