@@ -1919,7 +1919,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testCreateMethodInitializeFromJSONObjectMapWithKeyValueEnumItem() throws Exception {
 		// create a property that is an Map
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.MAP);
+		propertySchema.setType(TYPE.TUPLE_ARRAY_MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
 		// create an enum ObjectSchema and add it to propertySchema's items
@@ -1993,7 +1993,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testWriteToJSONObjectMapWKeyEnum() throws Exception {
 		// make an array property
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.MAP);
+		propertySchema.setType(TYPE.TUPLE_ARRAY_MAP);
 		String propName = "arrayPropWithEnum";
 
 		// make the ObjectSchema that represents the array's items that contains an enum
@@ -2060,7 +2060,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithEnumValue() throws Exception {
 		// create a property that is an Map
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STR_KEY_MAP);
+		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
 		ObjectSchema valueEnum = new ObjectSchema();
@@ -2112,7 +2112,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_nullValue() throws Exception {
 		// create a property that is an Map
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STR_KEY_MAP);
+		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
 		// add property to schema
@@ -2139,7 +2139,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithInterfaceValue() throws Exception {
 		// create a property that is an Map
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STR_KEY_MAP);
+		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnInterface";
 
 		// add enum to property's value
@@ -2188,7 +2188,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testWriteToJSONObjectStringKeyMap_WithValue() throws Exception {
 		// make an array property
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STR_KEY_MAP);
+		propertySchema.setType(TYPE.MAP);
 		String propName = "stringKeyMapPropWithEnum";
 
 		ObjectSchema valueEnum = new ObjectSchema();
@@ -2241,7 +2241,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	public void testWriteToJSONObjectStringKeyMap_nullValue() throws Exception {
 		// make an array property
 		ObjectSchema propertySchema = new ObjectSchema();
-		propertySchema.setType(TYPE.STR_KEY_MAP);
+		propertySchema.setType(TYPE.MAP);
 		String propName = "stringKeyMapPropWithEnum";
 
 

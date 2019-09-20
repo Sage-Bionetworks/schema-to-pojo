@@ -1,6 +1,5 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
@@ -109,8 +108,8 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.INTEGER == type || 
 					TYPE.BOOLEAN == type || 
 					TYPE.ARRAY == type || 
+					TYPE.TUPLE_ARRAY_MAP == type ||
 					TYPE.MAP == type ||
-					TYPE.STR_KEY_MAP == type ||
 					TYPE.OBJECT == type ||
 					TYPE.STRING == type ||
 					TYPE.INTERFACE == type){

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -23,7 +22,6 @@ import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.ClassType;
 import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JCatchBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JCommentPart;
@@ -40,7 +38,6 @@ import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JOp;
-import com.sun.codemodel.JTryBlock;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 import com.sun.codemodel.JWhileLoop;
@@ -262,7 +259,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 									createExpresssionToGetFromArray(param, jsonArray, arrayTypeSchema, arrayTypeClass, i))));
 				}
 
-			} else if (TYPE.MAP == type) {
+			} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 				// Determine the type of the key
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
@@ -319,7 +316,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
 						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
 				loopBody.add(field.invoke("put").arg(key).arg(value));
-			} else if (TYPE.STR_KEY_MAP == type){
+			} else if (TYPE.MAP == type){
 				// Determine the type of the key
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
@@ -571,9 +568,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
-		} else if (TYPE.MAP == arrayType) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
-		} else if (TYPE.STR_KEY_MAP == arrayType) {
+		} else if (TYPE.MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
@@ -607,9 +604,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return convertStringAsNeeded(typeClass.owner(), adapter, format, stringExper);
 		}else if(TYPE.ARRAY == type){
 			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
-		} else if (TYPE.MAP == type) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 			throw new IllegalArgumentException("Maps of Maps are currently not supported");
-		} else if (TYPE.STR_KEY_MAP == type) {
+		} else if (TYPE.MAP == type) {
 			throw new IllegalArgumentException("Maps of StringKeyMaps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
@@ -640,7 +637,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return convertStringAsNeeded(typeClass.owner(), adapter, format, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
 		}else if(TYPE.ARRAY == type){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
-		} else if (TYPE.MAP == type) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
@@ -777,7 +774,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				loopBody.directStatement(VAR_PREFIX + "index++;");
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(propNameConstant).arg(array));
-			} else if (TYPE.MAP == type) {
+			} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 				// Determine the type of the key
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
@@ -804,7 +801,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 								.arg(createExpresssionToSetFromMap(valueTypeSchema, valueTypeClass, loop.var().invoke("getValue"), param)));
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
-			} else if (TYPE.STR_KEY_MAP == type) {
+			} else if (TYPE.MAP == type) {
 				// Determine the type of the key
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
@@ -887,9 +884,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return assignPropertyToJSONLong(arrayTypeClass.owner(), arrayTypeSchema, value);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
-		} else if (TYPE.MAP == arrayType) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of Maps are currently not supported");
-		} else if (TYPE.MAP == arrayType) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == arrayType) {
 			throw new IllegalArgumentException("Arrays of StringKeyMaps are currently not supported");
 		}else{
 			// Now we need to create an object of the the type
@@ -917,9 +914,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return assignPropertyToJSONLong(typeClass.owner(), typeSchema, value);
 		} else if (TYPE.ARRAY == type) {
 			throw new IllegalArgumentException("Maps of Arrays are currently not supported");
-		} else if (TYPE.MAP == type) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 			throw new IllegalArgumentException("Maps of Maps are currently not supported");
-		} else if (TYPE.MAP == type) {
+		} else if (TYPE.TUPLE_ARRAY_MAP == type) {
 			throw new IllegalArgumentException("Maps of StringKeyMaps are currently not supported");
 		} else {
 			// Now we need to create an object of the the type

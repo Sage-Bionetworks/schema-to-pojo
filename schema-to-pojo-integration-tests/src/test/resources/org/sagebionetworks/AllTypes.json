@@ -77,7 +77,7 @@
 			}
 		},
 		"stringIntegerMap": {
-			"type": "map",
+			"type": "tuplearraymap",
 			"key": {
 				"type": "string"
 			},
@@ -86,7 +86,7 @@
 			}
 		},
 		"objectEnumMap": {
-			"type": "map",
+			"type": "tuplearraymap",
 			"key": {
 				"type": "object"
 			},
@@ -95,7 +95,7 @@
 			}
 		},
 		"enumBooleanMap": {
-			"type": "map",
+			"type": "tuplearraymap",
 			"key": {
 				"type": "string",
 				"name": "PetType",

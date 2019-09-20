@@ -101,7 +101,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				return codeModel.ref(List.class).narrow(arrayType);
 			}
 		}
-		if(TYPE.MAP == schema.getType()){
+		if(TYPE.TUPLE_ARRAY_MAP == schema.getType()){
 			// We must have Items
 			if (keyType == null)
 				throw new IllegalArgumentException("A schema with TYPE.MAP must have a type for the key");
@@ -112,7 +112,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			return codeModel.ref(Map.class).narrow(keyType.boxify(), valueType.boxify());
 		}
 
-		if(TYPE.STR_KEY_MAP == schema.getType()){
+		if(TYPE.MAP == schema.getType()){
 			// We must have Items
 			if (valueType == null)
 				throw new IllegalArgumentException("A schema with TYPE.STR_KEY_MAP must have a type for the value");

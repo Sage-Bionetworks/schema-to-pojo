@@ -38,14 +38,14 @@ public enum TYPE {
 	 */
 	ARRAY("array", false, "[]", "getJSONArray"),
 	/*
-	 * Value MUST be a map
+	 * represented in JSON as [{"key": "my key 1", "value": "my value 1"}, {"key": "my key 2", "value": "my value 2"}]
 	 */
-	MAP("map", false, Map.class.getName(), "getJSONMap()"),
+	TUPLE_ARRAY_MAP("tuplearraymap", false, Map.class.getName(), "getJSONMap()"),
 
 	/**
 	 * Map where the key is always a String so we can use the native JSON Map to encode the mapping
 	 */
-	STR_KEY_MAP("stringmap", false, Map.class.getName(), "getJSONObject"),
+	MAP("map", false, Map.class.getName(), "getJSONObject"),
 	/*
 	 * Value MUST be null. Note this is mainly for purpose of being able use
 	 * union types to define nullability. If this type is not included in a

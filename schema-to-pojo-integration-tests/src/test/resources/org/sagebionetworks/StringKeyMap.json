@@ -1,25 +1,25 @@
 {
 	"properties": {
 		"strKeyMapOfString": {
-			"type": "stringmap",
+			"type": "map",
 			"value": {
 				"type": "string"
 			}
 		},
 		"strKeyMapOfInt": {
-			"type": "stringmap",
+			"type": "map",
 			"value": {
 				"type": "integer"
 			}
 		},
 		"strKeyMapOfInterface": {
-			"type": "stringmap",
+			"type": "map",
 			"value": {
 				"$ref": "org.sagebionetworks.InterfaceA"
 			}
 		},
 		"strKeyMapOfObject": {
-			"type": "stringmap",
+			"type": "map",
 			"value": {
 				"$ref": "org.sagebionetworks.ABImpl"
 			}

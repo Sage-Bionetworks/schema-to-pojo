@@ -9,8 +9,6 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
-import javax.xml.validation.Schema;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
@@ -316,7 +314,7 @@ public class TypeCreatorHandlerImpl03Test {
 		String description = "Add a description";
 		schema.setTitle(title);
 		schema.setDescription(description);
-		schema.setType(TYPE.STR_KEY_MAP);
+		schema.setType(TYPE.MAP);
 		schema.setName("SampleEnum");
 
 		schema.setValue(null);
@@ -332,7 +330,7 @@ public class TypeCreatorHandlerImpl03Test {
 		String description = "Add a description";
 		schema.setTitle(title);
 		schema.setDescription(description);
-		schema.setType(TYPE.STR_KEY_MAP);
+		schema.setType(TYPE.MAP);
 		schema.setName("SampleEnum");
 
 		ObjectSchema valueSchema = new ObjectSchema();
