@@ -11,12 +11,15 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -341,5 +344,24 @@ public class JSONObjectAdapterImplTest {
 		byte[] cloneArray = adapter.getBinary("binary");
 		String clone = new String(cloneArray, "UTF-8");
 		assertEquals(startString, clone);
+	}
+	
+	@Test
+	public void testRecursiveWriteToJSONObject() throws JSONObjectAdapterException {
+		ObjectSchema schema = new ObjectSchema();
+		schema.setName("Recursive");
+		
+		ObjectSchema array = new ObjectSchema();
+		array.setType(TYPE.ARRAY);
+		array.setItems(schema);
+		
+		LinkedHashMap<String, ObjectSchema> properties = new LinkedHashMap<String, ObjectSchema>();
+		properties.put("listOfRecursive", array);
+		schema.setProperties(properties);
+		
+		schema.writeToJSONObject(adapter);
+		
+		String result = adapter.toJSONString();
+		System.out.println(result);
 	}
 }
