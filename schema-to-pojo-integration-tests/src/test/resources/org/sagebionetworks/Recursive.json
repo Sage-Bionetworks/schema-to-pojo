@@ -1,0 +1,12 @@
+{
+	"type": "object",
+	"properties": {
+		"listOfRecursive": {
+			"type": "array",
+			"items": {
+				"$ref": "org.sagebionetworks.Recursive"
+			}
+		}
+	}
+}
+}
