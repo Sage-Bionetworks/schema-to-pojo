@@ -19,6 +19,6 @@
             ],
             "description":"The property is constrained by an enumeration",
             "required":true
-        },
+        }
     }
 }

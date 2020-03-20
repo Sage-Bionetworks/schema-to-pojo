@@ -20,47 +20,47 @@ public class ObjectSchemaUnitTest {
 	public void testSubSchemaIterator() {
 		Map<String, ObjectSchema> expectedMap = new HashMap<String, ObjectSchema>();
 		// The root schema to put objects into
-		ObjectSchema root = new ObjectSchema();
+		ObjectSchema root = new ObjectSchemaImpl();
 		// Now add some sub-schema
 		
 		// Add a property sub-schema
 		String string = new String("one");
-		ObjectSchema sub = new ObjectSchema();
+		ObjectSchema sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.putProperty("someKey", sub);
 		
 		// Add an additionalProperty sub-schema
 		string = new String("two");
-		sub = new ObjectSchema();
+		sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.putAdditionalProperty("addKey", sub);
 		
 		// Add an item sub
 		string = new String("three");
-		sub = new ObjectSchema();
+		sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.setItems(sub);
 		
 		// Add an additional item
 		string = new String("four");
-		sub = new ObjectSchema();
+		sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.setAdditionalItems(sub);
 		
 		// Extends
 		string = new String("five");
-		sub = new ObjectSchema();
+		sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.setExtends(sub);
 		
 		// Implements
 		string = new String("six");
-		sub = new ObjectSchema();
+		sub = new ObjectSchemaImpl();
 		sub.setId(string);
 		expectedMap.put(string, sub);
 		root.setImplements(new ObjectSchema[]{sub});
@@ -85,23 +85,23 @@ public class ObjectSchemaUnitTest {
 	@Test
 	public void testGetObjectFieldMap(){
 		// First create some Interface hierarchy
-		ObjectSchema baseInterface = new ObjectSchema();
+		ObjectSchema baseInterface = new ObjectSchemaImpl();
 		baseInterface.setType(TYPE.INTERFACE);
 		baseInterface.setName("BaseInterface");
-		baseInterface.putProperty("stringFromBase", new ObjectSchema(TYPE.STRING));
+		baseInterface.putProperty("stringFromBase", new ObjectSchemaImpl(TYPE.STRING));
 		
 		// Now add one more implementation
-		ObjectSchema implementsBase = new ObjectSchema();
+		ObjectSchema implementsBase = new ObjectSchemaImpl();
 		implementsBase.setType(TYPE.INTERFACE);
 		implementsBase.setName("BaseImpl");
-		implementsBase.putProperty("longFromBaseImpl", new ObjectSchema(TYPE.INTEGER));
+		implementsBase.putProperty("longFromBaseImpl", new ObjectSchemaImpl(TYPE.INTEGER));
 		implementsBase.setImplements(new ObjectSchema[]{baseInterface});
 		
 		// Now add a class that implements both
-		ObjectSchema implImpl = new ObjectSchema();
+		ObjectSchema implImpl = new ObjectSchemaImpl();
 		implImpl.setType(TYPE.OBJECT);
 		implImpl.setName("ImplImpl");
-		implImpl.putProperty("doubleFromImplImpl", new ObjectSchema(TYPE.NUMBER));
+		implImpl.putProperty("doubleFromImplImpl", new ObjectSchemaImpl(TYPE.NUMBER));
 		implImpl.setImplements(new ObjectSchema[]{implementsBase});
 		
 		// Get the field map
@@ -117,23 +117,23 @@ public class ObjectSchemaUnitTest {
 	@Test
 	public void testGetObjectFieldMapDuplicate(){
 		// First create some Interface hierarchy
-		ObjectSchema baseInterface = new ObjectSchema();
+		ObjectSchema baseInterface = new ObjectSchemaImpl();
 		baseInterface.setType(TYPE.INTERFACE);
 		baseInterface.setName("BaseInterface");
-		baseInterface.putProperty("definedInBase", new ObjectSchema(TYPE.STRING));
+		baseInterface.putProperty("definedInBase", new ObjectSchemaImpl(TYPE.STRING));
 		
 		// Now add one more implementation
-		ObjectSchema implementsBase = new ObjectSchema();
+		ObjectSchema implementsBase = new ObjectSchemaImpl();
 		implementsBase.setType(TYPE.INTERFACE);
 		implementsBase.setName("BaseImpl");
-		implementsBase.putProperty("longFromBaseImpl", new ObjectSchema(TYPE.INTEGER));
+		implementsBase.putProperty("longFromBaseImpl", new ObjectSchemaImpl(TYPE.INTEGER));
 		implementsBase.setImplements(new ObjectSchema[]{baseInterface});
 		
 		// Now add a class that implements both
-		ObjectSchema implImpl = new ObjectSchema();
+		ObjectSchema implImpl = new ObjectSchemaImpl();
 		implImpl.setType(TYPE.OBJECT);
 		implImpl.setName("ImplImpl");
-		implImpl.putProperty("definedInBase", new ObjectSchema(TYPE.NUMBER));
+		implImpl.putProperty("definedInBase", new ObjectSchemaImpl(TYPE.NUMBER));
 		implImpl.setImplements(new ObjectSchema[]{implementsBase});
 		
 		// Get the field map
@@ -152,7 +152,7 @@ public class ObjectSchemaUnitTest {
 
 	@Test
 	public void testGetPackageName(){
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		schema.setName("SampleClass");
 		schema.setId("org.sample."+schema.getName());
 		String packageName = schema.getPackageName();
@@ -162,7 +162,7 @@ public class ObjectSchemaUnitTest {
 	
 	@Test
 	public void testGetPackageNameDefault(){
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		schema.setName("SampleClass");
 		schema.setId(""+schema.getName());
 		String packageName = schema.getPackageName();
@@ -172,11 +172,11 @@ public class ObjectSchemaUnitTest {
 	
 	@Test
 	public void testIterationOrder(){
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		schema.setName("SampleClass");
-		schema.putProperty("0", new ObjectSchema(TYPE.STRING));
-		schema.putProperty("1", new ObjectSchema(TYPE.STRING));
-		schema.putProperty("2", new ObjectSchema(TYPE.STRING));
+		schema.putProperty("0", new ObjectSchemaImpl(TYPE.STRING));
+		schema.putProperty("1", new ObjectSchemaImpl(TYPE.STRING));
+		schema.putProperty("2", new ObjectSchemaImpl(TYPE.STRING));
 		// Iterate over the properties
 		Iterator<String> keyIt =schema.getProperties().keySet().iterator();
 		int index = 0;

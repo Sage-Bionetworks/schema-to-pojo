@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -54,7 +55,7 @@ public class GwtTestSuite extends GWTTestCase {
 	
 	@Test
 	public void testCreatePropertyCannotBeNullMessage() {
-		String result = ObjectSchema.createPropertyCannotBeNullMessage("propertyName");
+		String result = ObjectSchemaImpl.createPropertyCannotBeNullMessage("propertyName");
 		assertEquals("Property: 'propertyName' is required and cannot be null", result);
 	}
 	

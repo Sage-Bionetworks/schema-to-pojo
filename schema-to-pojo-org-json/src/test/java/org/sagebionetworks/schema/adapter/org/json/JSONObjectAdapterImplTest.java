@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -347,13 +348,17 @@ public class JSONObjectAdapterImplTest {
 	}
 	
 	@Test
-	public void testRecursiveWriteToJSONObject() throws JSONObjectAdapterException {
-		ObjectSchema schema = new ObjectSchema();
-		schema.setName("Recursive");
+	public void testRecursiveJSONRoundTrip() throws JSONObjectAdapterException {
+		ObjectSchema schema = new ObjectSchemaImpl();
+		schema.setTitle("Recrusive");
+		schema.set$recursiveAnchor(Boolean.TRUE);
 		
-		ObjectSchema array = new ObjectSchema();
+		ObjectSchema recursiveRef = new ObjectSchemaImpl();
+		recursiveRef.set$recursiveRef("#");
+		
+		ObjectSchema array = new ObjectSchemaImpl();
 		array.setType(TYPE.ARRAY);
-		array.setItems(schema);
+		array.setItems(recursiveRef);
 		
 		LinkedHashMap<String, ObjectSchema> properties = new LinkedHashMap<String, ObjectSchema>();
 		properties.put("listOfRecursive", array);
@@ -361,7 +366,10 @@ public class JSONObjectAdapterImplTest {
 		
 		schema.writeToJSONObject(adapter);
 		
-		String result = adapter.toJSONString();
-		System.out.println(result);
+		String resultJson = adapter.toJSONString();
+		System.out.println(resultJson);
+		ObjectSchema clone = new ObjectSchemaImpl();
+		clone.initializeFromJSONObject(new JSONObjectAdapterImpl(resultJson));
+		assertEquals(clone, schema);
 	}
 }

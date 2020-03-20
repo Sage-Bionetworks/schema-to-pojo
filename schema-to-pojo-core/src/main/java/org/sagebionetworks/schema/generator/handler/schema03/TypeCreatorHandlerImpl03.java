@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
@@ -52,7 +53,9 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 		if(superType.isPrimitive()) return superType;
 		
 		// Determine the type of this class
-		if(schema.getType() == null) throw new IllegalArgumentException("TYPE cannot be null");
+		if(schema.getType() == null) {
+			throw new IllegalArgumentException("TYPE cannot be null");
+		}
 		
 		// First check to see if this is a date format
 		if(schema.getFormat() != null){
@@ -190,7 +193,7 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			while (keyIt.hasNext()) {
 				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
 				String key = keyIt.next();
-				String name = ObjectSchema.getKeyConstantName(key);
+				String name = ObjectSchemaImpl.getKeyConstantName(key);
 				JExpression value = JExpr.lit(key);
 				JFieldVar keyConst= newClass.field(mods, stringType , name, value);
 				keyConstants.add(keyConst);

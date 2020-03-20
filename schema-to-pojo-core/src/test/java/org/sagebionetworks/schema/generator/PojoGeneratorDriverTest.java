@@ -13,10 +13,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -37,21 +39,23 @@ public class PojoGeneratorDriverTest {
 	
 	PojoGeneratorDriver driver = null;
 	ObjectSchema schema;
+	Stack<ObjectSchema> recursiveAnchors;
 	
 	@Before
 	public void before(){
 		driver = new PojoGeneratorDriver(new HandlerFactoryImpl03());
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		schema.setName("SampleClass");
 		schema.setId("org.sample."+schema.getName());
+		recursiveAnchors = new Stack<ObjectSchema>();
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testRegisterAllIdentifiedObjectSchemasDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		list.add(ObjectSchema.createNewWithId("one"));
-		list.add(ObjectSchema.createNewWithId("one"));
+		list.add(ObjectSchemaImpl.createNewWithId("one"));
+		list.add(ObjectSchemaImpl.createNewWithId("one"));
 		// This should fail due to the duplicate
 		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 	}
@@ -60,14 +64,14 @@ public class PojoGeneratorDriverTest {
 	public void testRegisterAllIdentifiedObjectSchemasNestedDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
+		ObjectSchema root1 = ObjectSchemaImpl.createNewWithId("rootOne");
 		list.add(root1);
-		ObjectSchema root2 = ObjectSchema.createNewWithId("rootTwo");
+		ObjectSchema root2 = ObjectSchemaImpl.createNewWithId("rootTwo");
 		list.add(root2);
 		// Add a child to each with a duplicate name
-		root1.setItems(ObjectSchema.createNewWithId("child"));
+		root1.setItems(ObjectSchemaImpl.createNewWithId("child"));
 		// Add a child to each with a duplicate name
-		root2.setItems(ObjectSchema.createNewWithId("child"));
+		root2.setItems(ObjectSchemaImpl.createNewWithId("child"));
 		// This should fail due to the duplicate
 		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 	}
@@ -76,14 +80,14 @@ public class PojoGeneratorDriverTest {
 	public void testRegisterAllIdentifiedObjectSchemasNested() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
-		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
+		ObjectSchema root1 = ObjectSchemaImpl.createNewWithId("rootOne");
 		list.add(root1);
-		ObjectSchema root2 = ObjectSchema.createNewWithId("rootTwo");
+		ObjectSchema root2 = ObjectSchemaImpl.createNewWithId("rootTwo");
 		list.add(root2);
 		// Add a child to each with a unique name
-		root1.setItems(ObjectSchema.createNewWithId("child1"));
+		root1.setItems(ObjectSchemaImpl.createNewWithId("child1"));
 		// Add a child to each with a unique name
-		root2.setItems(ObjectSchema.createNewWithId("child2"));
+		root2.setItems(ObjectSchemaImpl.createNewWithId("child2"));
 		// This should not fail this time.
 		Map<String, ObjectSchema> map = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		assertNotNull(map);
@@ -97,7 +101,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testReplaceRefrence() {
 		// This is not a reference so the replace should just return it.
-		ObjectSchema root1 = ObjectSchema.createNewWithId("rootOne");
+		ObjectSchema root1 = ObjectSchemaImpl.createNewWithId("rootOne");
 		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), root1, null);
 		assertEquals(root1, replaced);
 	}
@@ -105,12 +109,12 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testReplaceRefrenceSelf() {
 		// This is not a reference so the replace should just return it.
-		ObjectSchema self = ObjectSchema.createNewWithId("rootOne");
+		ObjectSchema self = ObjectSchemaImpl.createNewWithId("rootOne");
 		// Create a self self reference
-		ObjectSchema refrenceToSelf = new ObjectSchema();
-		refrenceToSelf.setRef(ObjectSchema.SELF_REFERENCE);
+		ObjectSchema refrenceToSelf = new ObjectSchemaImpl();
+		refrenceToSelf.setRef(ObjectSchemaImpl.SELF_REFERENCE);
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), refrenceToSelf, self);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), refrenceToSelf, recursiveAnchors);
 		// Should be replaced with self
 		assertEquals(self, replaced);
 	}
@@ -119,18 +123,18 @@ public class PojoGeneratorDriverTest {
 	public void testReplaceRefrenceRegistry() {
 		// This is not a reference so the replace should just return it.
 		String referenceId = "rootOne";
-		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
+		ObjectSchema referenced = ObjectSchemaImpl.createNewWithId(referenceId);
 		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a self self reference
-		ObjectSchema referenceToOther = new ObjectSchema();
+		ObjectSchema referenceToOther = new ObjectSchemaImpl();
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId("self");
+		ObjectSchema self = ObjectSchemaImpl.createNewWithId("self");
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, self);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors);
 		// Should be replaced with referenced
 		assertEquals(referenced, replaced);
 	}
@@ -142,13 +146,13 @@ public class PojoGeneratorDriverTest {
 		// This time the referenced is not in the register
 		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Create a self self reference
-		ObjectSchema referenceToOther = new ObjectSchema();
+		ObjectSchema referenceToOther = new ObjectSchemaImpl();
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
+		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
 		// This should fail since the referenced is not in the register
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, self);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors);
 	}
 	
 	@Test
@@ -156,25 +160,25 @@ public class PojoGeneratorDriverTest {
 		// Build up a map with one reference and one not
 		// This is not a reference so the replace should just return it.
 		String referenceId = new String("rootOne");
-		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
+		ObjectSchema referenced = ObjectSchemaImpl.createNewWithId(referenceId);
 		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a self self reference
-		ObjectSchema referenceToOther = new ObjectSchema();
+		ObjectSchema referenceToOther = new ObjectSchemaImpl();
 		referenceToOther.setRef(referenceId);
 		
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
-		ObjectSchema refToSelf = new ObjectSchema();
-		refToSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
+		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
+		ObjectSchema refToSelf = new ObjectSchemaImpl();
+		refToSelf.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
 		// Now add all three to the a map
 		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
 		map.put("one", referenced);
 		map.put("two", referenceToOther);
 		map.put("three", refToSelf);
 		
-		Map<String, ObjectSchema> results = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry,map, self);
+		Map<String, ObjectSchema> results = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry,map, recursiveAnchors);
 		assertNotNull(results);
 		assertEquals(3, results.size());
 		assertEquals(referenced, results.get("one"));
@@ -185,16 +189,16 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testFindAndReplaceAllReferencesSchemasFull(){
 		String referenceId = new String("rootOne");
-		ObjectSchema referenced = ObjectSchema.createNewWithId(referenceId);
+		ObjectSchema referenced = ObjectSchemaImpl.createNewWithId(referenceId);
 		HashMap<String, ObjectSchema> registry = new HashMap<String, ObjectSchema>();
 		// Add the referenced schema to the register.
 		registry.put(referenceId, referenced);
 		// Create a third self
-		ObjectSchema self = ObjectSchema.createNewWithId(new String("self"));
-		ObjectSchema refToSelf = new ObjectSchema();
-		refToSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
+		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
+		ObjectSchema refToSelf = new ObjectSchemaImpl();
+		refToSelf.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
 		
-		ObjectSchema referenceToOther = new ObjectSchema();
+		ObjectSchema referenceToOther = new ObjectSchemaImpl();
 		referenceToOther.setRef(referenceId);
 		
 		// Add references in all places
@@ -205,7 +209,7 @@ public class PojoGeneratorDriverTest {
 		self.setImplements(new ObjectSchema[]{referenceToOther});
 		
 		// find and replace
-		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry, self);
+		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry, recursiveAnchors);
 		// Make sure there are no references
 		Iterator<ObjectSchema> it = self.getSubSchemaIterator();
 		while(it.hasNext()){
@@ -218,22 +222,22 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testNestedObjects() throws JSONObjectAdapterException{
 		// Create an object with nesting
-		ObjectSchema root = new ObjectSchema();
+		ObjectSchema root = new ObjectSchemaImpl();
 		root.setName("Root");
 		root.setId(new String("root"));
 		// Create a child class
-		ObjectSchema child = new ObjectSchema();
+		ObjectSchema child = new ObjectSchemaImpl();
 		child.setName("Child");
 		child.setType(TYPE.OBJECT);
 		root.putProperty("childInstance1", child);
 		// Create a grand child
-		ObjectSchema grand = new ObjectSchema();
+		ObjectSchema grand = new ObjectSchemaImpl();
 		grand.setName("Grand");
 		grand.setType(TYPE.OBJECT);
 		String grandId = new String("grand");
 		grand.setId(grandId);
 		child.putProperty("grandChildInstance1", grand);
-		ObjectSchema grandRef = new ObjectSchema();
+		ObjectSchema grandRef = new ObjectSchemaImpl();
 		grandRef.setRef(grandId);
 		child.putProperty("grandChildInstance2", grandRef);
 		System.out.println(root.toJSONString(new JSONObjectAdapterImpl()));
@@ -257,19 +261,19 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testNestedSelfObjects() throws JSONObjectAdapterException {
 		// Create an object with nesting
-		ObjectSchema root = new ObjectSchema();
+		ObjectSchema root = new ObjectSchemaImpl();
 		root.setName("Root");
 		root.setId(new String("root"));
 		// Create a child class
-		ObjectSchema child = new ObjectSchema();
+		ObjectSchema child = new ObjectSchemaImpl();
 		String childId = new String("child");
 		child.setName("Child");
 		child.setId(childId);
 		child.setType(TYPE.OBJECT);
 		root.putProperty("childInstance1", child);
 		// Add a self reference child
-		ObjectSchema childSelf = new ObjectSchema();
-		childSelf.setRef(new String(ObjectSchema.SELF_REFERENCE));
+		ObjectSchema childSelf = new ObjectSchemaImpl();
+		childSelf.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
 		child.putProperty("selfRefrence", childSelf);
 		// Create a grand child
 
@@ -282,27 +286,27 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testInterfaceField() throws JSONObjectAdapterException, ClassNotFoundException {
 		// Create an object with nesting
-		ObjectSchema inter = new ObjectSchema();
+		ObjectSchema inter = new ObjectSchemaImpl();
 		inter.setName("SomeInterface");
 		inter.setType(TYPE.INTERFACE);
 		inter.setId("example.org.SomeInterface");
 		
-		ObjectSchema interRef = new ObjectSchema();
+		ObjectSchema interRef = new ObjectSchemaImpl();
 		interRef.setRef(inter.getId());
 		
-		ObjectSchema impl = new ObjectSchema();
+		ObjectSchema impl = new ObjectSchemaImpl();
 		impl.setName("SomeInterfaceImpl");
 		impl.setType(TYPE.OBJECT);
 		impl.setId("example.org.SomeInterfaceImpl");
 		impl.setImplements(new ObjectSchema[]{interRef});
 		
-		ObjectSchema root = new ObjectSchema();
+		ObjectSchema root = new ObjectSchemaImpl();
 		root.setName("Root");
 		root.setId(new String("root"));
 		root.setType(TYPE.OBJECT);
 
 		// Create a child class
-		ObjectSchema child = new ObjectSchema();
+		ObjectSchema child = new ObjectSchemaImpl();
 		String childId = new String("child");
 		child.setName("Child");
 		child.setId(childId);
@@ -323,19 +327,19 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testCycle() throws JSONObjectAdapterException {
 		// Create an object with nesting
-		ObjectSchema root = new ObjectSchema();
+		ObjectSchema root = new ObjectSchemaImpl();
 		root.setName("Root");
 		String rootId = new String("root");
 		root.setId(rootId);
 		// Create a child class
-		ObjectSchema child = new ObjectSchema();
+		ObjectSchema child = new ObjectSchemaImpl();
 		String childId = new String("child");
 		child.setName("Child");
 		child.setId(childId);
 		child.setType(TYPE.OBJECT);
 		root.putProperty("childInstance1", child);
 		// Add a self reference child
-		ObjectSchema rootRef = new ObjectSchema();
+		ObjectSchema rootRef = new ObjectSchemaImpl();
 		rootRef.setRef(rootId);
 		child.putProperty("rootRef", rootRef);
 		// Create a grand child
@@ -348,7 +352,7 @@ public class PojoGeneratorDriverTest {
 
 	@Test
 	public void testRecursivlyCreateAllTypesNumber() throws ClassNotFoundException{
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		schema.setType(TYPE.NUMBER);
 		JCodeModel codeModel = new JCodeModel();
 		schema.setId("org.sample.SampleClass");
@@ -416,7 +420,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayString() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.STRING);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -430,7 +434,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.STRING);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -442,7 +446,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayInteger() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.INTEGER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -456,7 +460,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.INTEGER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -468,7 +472,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayBoolean() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.BOOLEAN);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -482,7 +486,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.BOOLEAN);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -494,7 +498,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNumber() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.NUMBER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -508,7 +512,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.NUMBER);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -520,7 +524,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayAny() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.ANY);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -534,7 +538,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.ANY);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -546,7 +550,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testRecursivlyCreateAllTypesArrayNull() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.NULL);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -560,7 +564,7 @@ public class PojoGeneratorDriverTest {
 		schema.setType(TYPE.ARRAY);
 		// set it to be unique to get a set
 		schema.setUniqueItems(true);
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.NULL);
 		schema.setItems(arrayType);
 		JCodeModel codeModel = new JCodeModel();
@@ -572,7 +576,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testCreateOrGetTypeExtends() throws ClassNotFoundException{
 		JCodeModel codeModel = new JCodeModel();
-		ObjectSchema parent = new ObjectSchema();
+		ObjectSchema parent = new ObjectSchemaImpl();
 		parent.setType(TYPE.OBJECT);
 		parent.setName("ParentClass");
 		parent.setId("org.sample."+parent.getName());
@@ -589,7 +593,7 @@ public class PojoGeneratorDriverTest {
 	@Test
 	public void testCreateOrGetTypeImplements() throws ClassNotFoundException{
 		JCodeModel codeModel = new JCodeModel();
-		ObjectSchema parent = new ObjectSchema();
+		ObjectSchema parent = new ObjectSchemaImpl();
 		parent.setType(TYPE.INTERFACE);
 		parent.setName("ParentInterface");
 		parent.setId("org.sample."+parent.getName());
@@ -614,7 +618,7 @@ public class PojoGeneratorDriverTest {
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
 			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
+			ObjectSchema schema = new ObjectSchemaImpl(new JSONObjectAdapterImpl(fileString));
 //			schema.setName(name);
 			schema.setId(schema.getName());
 			schemaList.add(schema);
@@ -655,7 +659,7 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
-		assertNotNull(fields.get(ObjectSchema.EXTRA_FIELDS));
+		assertNotNull(fields.get(ObjectSchemaImpl.EXTRA_FIELDS));
 	}
 	
 	@Test
@@ -667,7 +671,7 @@ public class PojoGeneratorDriverTest {
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
 			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
+			ObjectSchema schema = new ObjectSchemaImpl(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);
 		}
@@ -697,7 +701,7 @@ public class PojoGeneratorDriverTest {
 		List<ObjectSchema> schemaList = new ArrayList<ObjectSchema>();
 		for(String name: namesToLoad){
 			String fileString = FileHelper.loadFileAsStringFromClasspath(PojoGeneratorDriverTest.class.getClassLoader(), name);
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(fileString));
+			ObjectSchema schema = new ObjectSchemaImpl(new JSONObjectAdapterImpl(fileString));
 			schema.setId(schema.getName());
 			schemaList.add(schema);
 		}
@@ -708,6 +712,49 @@ public class PojoGeneratorDriverTest {
 		JDefinedClass impl =  null;
 		try{
 			impl = _package._class("PetEnum");
+		}catch (JClassAlreadyExistsException e) {
+			impl = e.getExistingClass();
+		} 
+		String classString = declareToString(impl);
+		System.out.println(classString);
+		
+		Map<String, JFieldVar> fields = impl.fields();
+		assertNotNull(fields);
+		// Enums should have no fields
+		assertEquals(0, fields.size());
+		Collection<JMethod> methods = impl.methods();
+		assertNotNull(methods);
+		// enums should have no methods
+		assertEquals(0, methods.size());
+		// Enums should have no constructors
+		assertFalse(impl.constructors().hasNext());
+	}
+	
+	@Test
+	public void testRecursive() throws Exception{
+		ObjectSchema root = new ObjectSchemaImpl();
+		root.setType(TYPE.OBJECT);
+		root.setId(new String("root"));
+		root.set$recursiveAnchor(true);
+		
+		ObjectSchema refToRoot = new ObjectSchemaImpl();
+		refToRoot.set$recursiveRef("#");
+		
+		ObjectSchema array = new ObjectSchemaImpl(TYPE.ARRAY);
+		array.setItems(refToRoot);
+		
+		root.putProperty("listOfRecursive", array);
+
+		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
+		list.add(root);
+		JCodeModel codeModel = new JCodeModel();
+		
+		driver.createAllClasses(codeModel, list);
+		// Get the class
+		JPackage _package = codeModel._package("");
+		JDefinedClass impl =  null;
+		try{
+			impl = _package._class("Recursive");
 		}catch (JClassAlreadyExistsException e) {
 			impl = e.getExistingClass();
 		} 

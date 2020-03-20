@@ -3,7 +3,7 @@
     "properties":{
         "fromBase":{
             "type":"string",
-            "title":"title",
+            "title":"title"
         }
     }
 }

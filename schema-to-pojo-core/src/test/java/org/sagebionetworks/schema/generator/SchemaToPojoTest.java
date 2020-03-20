@@ -107,6 +107,10 @@ public class SchemaToPojoTest {
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
+		result = new File(outputDir, "Recursive.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
 		// Load the file string
 		String resultString = FileUtils.readToString(result);
 		System.out.println(resultString);

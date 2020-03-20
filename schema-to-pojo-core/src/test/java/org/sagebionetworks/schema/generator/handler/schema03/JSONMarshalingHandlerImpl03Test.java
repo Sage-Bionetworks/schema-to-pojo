@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
@@ -59,17 +60,17 @@ public class JSONMarshalingHandlerImpl03Test {
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
 		sampleInterface = _package._interface("SampleInterface");
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		schema.setType(TYPE.OBJECT);
 		
 		// Create a schema interface
-		schemaInterface = new ObjectSchema();
+		schemaInterface = new ObjectSchemaImpl();
 		schemaInterface.setType(TYPE.INTERFACE);
-		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
+		schemaInterface.putProperty("fromInterface", new ObjectSchemaImpl(TYPE.BOOLEAN));
 		schemaInterface.setId(sampleInterface.fullName());
 
 		// impl
-		schemaInterfaceImpl = new ObjectSchema();
+		schemaInterfaceImpl = new ObjectSchemaImpl();
 		schemaInterfaceImpl.setType(TYPE.OBJECT);
 		schemaInterfaceImpl.setId("org.sample.SampleImpl");
 		schemaInterfaceImpl.setImplements(new ObjectSchema[]{schemaInterface});
@@ -108,7 +109,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateConstructorSuperClass() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setExtends(schema);
 		JDefinedClass childClasss = codeModel._class("ChildOfSample");
 		childClasss._extends(sampleClass);
@@ -164,7 +165,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateBaseMethodSuper() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setExtends(schema);
 		JDefinedClass childClasss = codeModel._class("ChildOfSample");
 		childClasss._extends(sampleClass);
@@ -186,7 +187,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		String propName = "stringName";
 		schema.putProperty(propName, propertySchema);
@@ -212,7 +213,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringURI() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.URI);
 		String propName = "uriName";
@@ -238,7 +239,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignJSONStringToPropertyNullFormat(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		// The format is null as this is simply a string
 		propertySchema.setFormat(null);
@@ -257,7 +258,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignJSONStringToPropertyDateTime(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.DATE_TIME);
 		String propName = "dateName";
@@ -275,7 +276,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignJSONStringToPropertyDate(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.DATE);
 		String propName = "dateName";
@@ -293,7 +294,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignJSONStringToURI(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.URI);
 		String propName = "someURI";
@@ -311,7 +312,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignJSONStringToPropertyTime(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.TIME);
 		String propName = "dateName";
@@ -330,7 +331,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringFormateDateTime() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.DATE_TIME);
 		String propName = "dateName";
@@ -358,7 +359,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectLongFormatedUtcMilisecs() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
 		String propName = "dateName";
@@ -387,7 +388,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectRequiredProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		// Make this required
 		propertySchema.setRequired(true);
@@ -412,7 +413,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectLongProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		String propName = "longName";
 		schema.putProperty(propName, propertySchema);
@@ -433,7 +434,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectDoubleProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.NUMBER);
 		String propName = "doubleName";
 		schema.putProperty(propName, propertySchema);
@@ -454,7 +455,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectBooleanProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.BOOLEAN);
 		String propName = "propName";
 		schema.putProperty(propName, propertySchema);
@@ -539,7 +540,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectArrayWithReg() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Set the property type to be the same as the object
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
 		ObjectSchema arrayTypeSchema = schema;
@@ -596,7 +597,7 @@ public class JSONMarshalingHandlerImpl03Test {
 			vars = new JFieldVar[propertyNames.length];
 			int index = 0;
 			for(String propertyName: propertyNames) {
-				JFieldVar var = toAddTo.field(JMod.PRIVATE | JMod.FINAL | JMod.STATIC, String[].class, ObjectSchema.getKeyConstantName(propertyName));
+				JFieldVar var = toAddTo.field(JMod.PRIVATE | JMod.FINAL | JMod.STATIC, String[].class, ObjectSchemaImpl.getKeyConstantName(propertyName));
 				vars[index] = var;
 				index++;
 			}
@@ -609,10 +610,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectArrayPrimitive() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.STRING);
 		propertySchema.setItems(arrayTypeSchema);
 		schema.putProperty(propName, propertySchema);
@@ -636,10 +637,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectSetPrimitive() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.STRING);
 		propertySchema.setItems(arrayTypeSchema);
 		propertySchema.setUniqueItems(true);
@@ -661,7 +662,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectArrayObjects() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
 		ObjectSchema arrayTypeSchema = schema;
@@ -689,7 +690,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectEnum() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setEnum(new EnumValue[]{
 				new EnumValue("A"),
@@ -715,7 +716,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignPropertyToJSONStringNullFormat(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		// The format is null as this is simply a string
 		propertySchema.setFormat(null);
@@ -734,7 +735,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignPropertyToJSONStringDateTime(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.DATE_TIME);
 		String propName = "dateName";
@@ -752,7 +753,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignPropertyToJSONStringDate(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.DATE);
 		String propName = "dateName";
@@ -770,7 +771,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignPropertyToJSONStringTime(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.TIME);
 		String propName = "dateName";
@@ -788,7 +789,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testAssignPropertyToJSONStringURI(){
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setFormat(FORMAT.URI);
 		String propName = "uriName";
@@ -825,7 +826,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectDateProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		// Dates are strings with a date-time format.
 		propertySchema.setFormat(FORMAT.DATE_TIME);
@@ -850,7 +851,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectRequiredProperty() throws JClassAlreadyExistsException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		// Make this required
 		propertySchema.setRequired(true);
@@ -872,7 +873,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectLongProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		String propName = "longName";
 		schema.putProperty(propName, propertySchema);
@@ -892,7 +893,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectLongFormatedUTC() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		propertySchema.setFormat(FORMAT.UTC_MILLISEC);
 		String propName = "dateName";
@@ -913,7 +914,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectDoubleProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.NUMBER);
 		String propName = "doubleName";
 		schema.putProperty(propName, propertySchema);
@@ -933,7 +934,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectBooleanProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.BOOLEAN);
 		String propName = "propName";
 		schema.putProperty(propName, propertySchema);
@@ -972,10 +973,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayPrimitive() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.STRING);
 		propertySchema.setItems(arrayTypeSchema);
 		schema.putProperty(propName, propertySchema);
@@ -1002,10 +1003,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayDate() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayDates";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.STRING);
 		arrayTypeSchema.setFormat(FORMAT.DATE_TIME);
 		propertySchema.setItems(arrayTypeSchema);
@@ -1036,10 +1037,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayDateUTCMilisec() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayDates";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.INTEGER);
 		arrayTypeSchema.setFormat(FORMAT.UTC_MILLISEC);
 		propertySchema.setItems(arrayTypeSchema);
@@ -1069,10 +1070,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayLong() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "longList";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.INTEGER);
 		propertySchema.setItems(arrayTypeSchema);
 		schema.putProperty(propName, propertySchema);
@@ -1101,10 +1102,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayDouble() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "doubleList";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.NUMBER);
 		propertySchema.setItems(arrayTypeSchema);
 		schema.putProperty(propName, propertySchema);
@@ -1133,10 +1134,10 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectSetPrimitive() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
-		ObjectSchema arrayTypeSchema = new ObjectSchema();
+		ObjectSchema arrayTypeSchema = new ObjectSchemaImpl();
 		arrayTypeSchema.setType(TYPE.STRING);
 		propertySchema.setItems(arrayTypeSchema);
 		propertySchema.setUniqueItems(true);
@@ -1160,7 +1161,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayObjects() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayName";
 		ObjectSchema arrayTypeSchema = schema;
@@ -1184,7 +1185,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectEnum() throws JClassAlreadyExistsException, ClassNotFoundException {
 		// Add add a string property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		propertySchema.setEnum(new EnumValue[]{
 				new EnumValue("A"),
@@ -1211,7 +1212,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test (expected=IllegalArgumentException.class)
 	public void testAddJSONMarshalingInterfance(){
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		ObjectSchema interfaceSchema = new ObjectSchema();
+		ObjectSchema interfaceSchema = new ObjectSchemaImpl();
 		interfaceSchema.setType(TYPE.INTERFACE);
 		interfaceSchema.setName("SampleInterface");
 		handler.addJSONMarshaling(interfaceSchema, sampleInterface, null);
@@ -1220,7 +1221,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testInitializeFromJSONForImplements() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
@@ -1243,7 +1244,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectForImplements() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
@@ -1324,7 +1325,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultStringProperty() throws Exception {
 		//make a property that has default set with a string
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		String defaultString = "defaultString";
 		propertySchema.setDefault(defaultString);
 		propertySchema.setType(TYPE.STRING);
@@ -1359,8 +1360,8 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONDateList() throws Exception {
 		//make a property that has default set with a string
-		ObjectSchema propertySchema = new ObjectSchema();
-		ObjectSchema dateType = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		ObjectSchema dateType = new ObjectSchemaImpl();
 		dateType.setType(TYPE.STRING);
 		dateType.setFormat(FORMAT.DATE_TIME);
 		propertySchema.setType(TYPE.ARRAY);
@@ -1398,8 +1399,8 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromLongList() throws Exception {
 		//make a property that has default set with a string
-		ObjectSchema propertySchema = new ObjectSchema();
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.INTEGER);
 		propertySchema.setType(TYPE.ARRAY);
 		propertySchema.setItems(arrayType);
@@ -1435,8 +1436,8 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromDoubleList() throws Exception {
 		//make a property that has default set with a string
-		ObjectSchema propertySchema = new ObjectSchema();
-		ObjectSchema arrayType = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		ObjectSchema arrayType = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.NUMBER);
 		propertySchema.setType(TYPE.ARRAY);
 		propertySchema.setItems(arrayType);
@@ -1471,8 +1472,8 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONDateListUtcMilisec() throws Exception {
 		//make a property that has default set with a string
-		ObjectSchema propertySchema = new ObjectSchema();
-		ObjectSchema dateType = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		ObjectSchema dateType = new ObjectSchemaImpl();
 		dateType.setType(TYPE.INTEGER);
 		dateType.setFormat(FORMAT.UTC_MILLISEC);
 		propertySchema.setType(TYPE.ARRAY);
@@ -1512,7 +1513,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultDoubleProperty() throws Exception {
 		//make a property that has default set with a double
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		double defaultDouble = 7.12;
 		propertySchema.setDefault(defaultDouble);
 		propertySchema.setType(TYPE.NUMBER);
@@ -1552,7 +1553,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultIntegerProperty() throws Exception {
 		//make a property that has a default set with a integer
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		long defaultLong = 77;
 		propertySchema.setDefault(defaultLong);
 		propertySchema.setType(TYPE.INTEGER);
@@ -1591,7 +1592,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultBooleanProperty() throws Exception {
 		//make a property that has a default set with a boolean
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		boolean defaultBoolean = false;
 		propertySchema.setDefault(defaultBoolean);
 		propertySchema.setType(TYPE.BOOLEAN);
@@ -1631,7 +1632,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultObjectProperty() throws Exception {
 		//make a property that has default sent with a JSONObject
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		JSONObject defaultObject = new JSONObject();
 		defaultObject.put("imABool", true);
 		propertySchema.setDefault(defaultObject);
@@ -1665,14 +1666,14 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectArrayWithEnumItem() throws Exception {
 		//create a property that is an Array
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayWhoseItemIsAnEnum";
 		
 		//create an enum ObjectSchema and add it to propertySchema's items
 		//it must have a name, id, and it's type must be STRING
 		//it must have an enum defined
-		ObjectSchema typesEnum = new ObjectSchema();
+		ObjectSchema typesEnum = new ObjectSchemaImpl();
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
@@ -1724,13 +1725,13 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectArrayWithAndWithoutEnumItem() throws Exception {
 		//create a property that is an Array with item that is an enum
-		ObjectSchema propertySchemaOne = new ObjectSchema();
+		ObjectSchema propertySchemaOne = new ObjectSchemaImpl();
 		propertySchemaOne.setType(TYPE.ARRAY);
 		String propName = "arrayWhoseItemIsAnEnum";
 		//create an enum ObjectSchema and add it to propertySchema's items
 		//it must have a name, id, and it's type must be STRING
 		//it must have an enum defined
-		ObjectSchema typesEnum = new ObjectSchema();
+		ObjectSchema typesEnum = new ObjectSchemaImpl();
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
@@ -1756,10 +1757,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
 		
 		//now create a property that is an Array with item that is not an enum
-		ObjectSchema propertySchemaTwo = new ObjectSchema();
+		ObjectSchema propertySchemaTwo = new ObjectSchemaImpl();
 		propertySchemaTwo.setType(TYPE.ARRAY);
 		String propTwoName = "arrayWhoseItemIsNotEnum";
-		ObjectSchema typesString = new ObjectSchema();
+		ObjectSchema typesString = new ObjectSchemaImpl();
 		typesString.setType(TYPE.STRING);
 		propertySchemaTwo.setItems(typesString);
 		schema.putProperty(propTwoName, propertySchemaTwo);
@@ -1799,12 +1800,12 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayWEnum()throws Exception {
 		//make an array property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "arrayPropWithEnum";
 		
 		//make the ObjectSchema that represents the array's items that contains an enum
-		ObjectSchema itemWithEnum = new ObjectSchema();
+		ObjectSchema itemWithEnum = new ObjectSchemaImpl();
 		itemWithEnum.setType(TYPE.STRING);
 		itemWithEnum.setName("Animals");
 		itemWithEnum.setId("Animals");
@@ -1850,11 +1851,11 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectArrayWEnumAndWithoutEnum()throws Exception {
 		//create a property that is an Array with item that is an enum
-		ObjectSchema propertySchemaOne = new ObjectSchema();
+		ObjectSchema propertySchemaOne = new ObjectSchemaImpl();
 		propertySchemaOne.setType(TYPE.ARRAY);
 		String propName = "arrayWhoseItemIsAnEnum";
 		//create an enum ObjectSchema and add it to propertySchema's items
-		ObjectSchema typesEnum = new ObjectSchema();
+		ObjectSchema typesEnum = new ObjectSchemaImpl();
 		typesEnum.setType(TYPE.STRING);
 		typesEnum.setName("Animals");
 		typesEnum.setId("Animals");
@@ -1880,10 +1881,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(testClass), propName);
 		
 		//now create a property that is an Array with item that is not an enum
-		ObjectSchema propertySchemaTwo = new ObjectSchema();
+		ObjectSchema propertySchemaTwo = new ObjectSchemaImpl();
 		propertySchemaTwo.setType(TYPE.ARRAY);
 		String propTwoName = "arrayWhoseItemIsNotEnum";
-		ObjectSchema typesString = new ObjectSchema();
+		ObjectSchema typesString = new ObjectSchemaImpl();
 		typesString.setType(TYPE.STRING);
 		propertySchemaTwo.setItems(typesString);
 		schema.putProperty(propTwoName, propertySchemaTwo);
@@ -1918,14 +1919,14 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectMapWithKeyValueEnumItem() throws Exception {
 		// create a property that is an Map
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.TUPLE_ARRAY_MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
 		// create an enum ObjectSchema and add it to propertySchema's items
 		// it must have a name, id, and it's type must be STRING
 		// it must have an enum defined
-		ObjectSchema keyEnum = new ObjectSchema();
+		ObjectSchema keyEnum = new ObjectSchemaImpl();
 		keyEnum.setType(TYPE.STRING);
 		keyEnum.setName("Animals");
 		keyEnum.setId("Animals");
@@ -1935,7 +1936,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				new EnumValue("elephant")
 		});
 
-		ObjectSchema valueEnum = new ObjectSchema();
+		ObjectSchema valueEnum = new ObjectSchemaImpl();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
@@ -1992,12 +1993,12 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectMapWKeyEnum() throws Exception {
 		// make an array property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.TUPLE_ARRAY_MAP);
 		String propName = "arrayPropWithEnum";
 
 		// make the ObjectSchema that represents the array's items that contains an enum
-		ObjectSchema keyEnum = new ObjectSchema();
+		ObjectSchema keyEnum = new ObjectSchemaImpl();
 		keyEnum.setType(TYPE.STRING);
 		keyEnum.setName("Animals");
 		keyEnum.setId("Animals");
@@ -2007,7 +2008,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				new EnumValue("elephant")
 		});
 
-		ObjectSchema valueEnum = new ObjectSchema();
+		ObjectSchema valueEnum = new ObjectSchemaImpl();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
@@ -2059,11 +2060,11 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithEnumValue() throws Exception {
 		// create a property that is an Map
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
-		ObjectSchema valueEnum = new ObjectSchema();
+		ObjectSchema valueEnum = new ObjectSchemaImpl();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
@@ -2111,7 +2112,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_nullValue() throws Exception {
 		// create a property that is an Map
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnEnum";
 
@@ -2138,7 +2139,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_WithInterfaceValue() throws Exception {
 		// create a property that is an Map
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.MAP);
 		String propName = "mapWhoseItemIsAnInterface";
 
@@ -2187,11 +2188,11 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test
 	public void testWriteToJSONObjectStringKeyMap_WithValue() throws Exception {
 		// make an array property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.MAP);
 		String propName = "stringKeyMapPropWithEnum";
 
-		ObjectSchema valueEnum = new ObjectSchema();
+		ObjectSchema valueEnum = new ObjectSchemaImpl();
 		valueEnum.setType(TYPE.STRING);
 		valueEnum.setName("Pets");
 		valueEnum.setId("pets");
@@ -2240,7 +2241,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	@Test(expected = IllegalArgumentException.class)
 	public void testWriteToJSONObjectStringKeyMap_nullValue() throws Exception {
 		// make an array property
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.MAP);
 		String propName = "stringKeyMapPropWithEnum";
 

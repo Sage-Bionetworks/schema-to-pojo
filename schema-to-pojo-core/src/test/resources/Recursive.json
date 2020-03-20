@@ -5,7 +5,7 @@
 		"listOfRecursive": {
 			"type": "array",
 			"items": {
-				"$ref": "#"
+				"$recursiveRef": "#"
 			}
 		}
 	}

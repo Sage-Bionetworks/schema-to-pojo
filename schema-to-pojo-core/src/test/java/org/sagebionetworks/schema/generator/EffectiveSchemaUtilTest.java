@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -35,45 +36,45 @@ public class EffectiveSchemaUtilTest {
 	@Before
 	public void before() throws IOException{
 		// A base class.
-		baseClassSchema = new ObjectSchema();
+		baseClassSchema = new ObjectSchemaImpl();
 		baseClassSchema.setType(TYPE.OBJECT);
 		baseClassSchema.setName("BaseClass");
 		baseClassSchema.setId("org.sample.BaseClass");
-		baseClassSchema.putProperty("fromBase", new ObjectSchema(TYPE.STRING));
+		baseClassSchema.putProperty("fromBase", new ObjectSchemaImpl(TYPE.STRING));
 		
-		childClassSchema = new ObjectSchema();
+		childClassSchema = new ObjectSchemaImpl();
 		childClassSchema.setType(TYPE.OBJECT);
 		childClassSchema.setName("ChildClass");
 		childClassSchema.setId("org.sample.ChildClass");
-		childClassSchema.putProperty("fromChild", new ObjectSchema(TYPE.NUMBER));
+		childClassSchema.putProperty("fromChild", new ObjectSchemaImpl(TYPE.NUMBER));
 		childClassSchema.setExtends(baseClassSchema);
 		
 		// An interface
-		interfaceSchema = new ObjectSchema();
+		interfaceSchema = new ObjectSchemaImpl();
 		interfaceSchema.setType(TYPE.INTERFACE);
 		interfaceSchema.setName("InterfaceSchema");
 		interfaceSchema.setId("org.sample.InterfaceSchema");
-		interfaceSchema.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
+		interfaceSchema.putProperty("fromInterface", new ObjectSchemaImpl(TYPE.BOOLEAN));
 		
-		childInterface = new ObjectSchema();
+		childInterface = new ObjectSchemaImpl();
 		childInterface.setType(TYPE.INTERFACE);
 		childInterface.setName("ChildInterfaceSchema");
 		childInterface.setId("org.sample.ChildInterfaceSchema");
-		childInterface.putProperty("fromChildInterface", new ObjectSchema(TYPE.STRING));
+		childInterface.putProperty("fromChildInterface", new ObjectSchemaImpl(TYPE.STRING));
 		childInterface.setImplements(new ObjectSchema[]{interfaceSchema});
 		
 		// Create a schema that uses both
-		compositeSchema = new ObjectSchema();
+		compositeSchema = new ObjectSchemaImpl();
 		compositeSchema.setType(TYPE.OBJECT);
 		compositeSchema.setName("CompositeSchema");
 		compositeSchema.setId("org.sample.CompositeSchema");
-		compositeSchema.putProperty("fromMe", new ObjectSchema(TYPE.INTEGER));
+		compositeSchema.putProperty("fromMe", new ObjectSchemaImpl(TYPE.INTEGER));
 		// It extends the child
 		compositeSchema.setExtends(childClassSchema);
 		// It implements the child interface
 		compositeSchema.setImplements(new ObjectSchema[]{childInterface});
 		
-		enumSchema = new ObjectSchema();
+		enumSchema = new ObjectSchemaImpl();
 		enumSchema.setName("EnEnum");
 		enumSchema.setEnum(new EnumValue[] {
 				new EnumValue("a", "a description"),
@@ -94,7 +95,7 @@ public class EffectiveSchemaUtilTest {
 
 	@Test
 	public void testGenerateEffectiveSchema_classWithNoPropertiesImplementInterface() throws JSONObjectAdapterException {
-		ObjectSchema noPropertiesImplementation = new ObjectSchema();
+		ObjectSchema noPropertiesImplementation = new ObjectSchemaImpl();
 		noPropertiesImplementation.setImplements(new ObjectSchema[]{interfaceSchema});
 
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(noPropertiesImplementation);
@@ -117,7 +118,7 @@ public class EffectiveSchemaUtilTest {
 	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsidePropertyField() throws JSONObjectAdapterException{
 
-		ObjectSchema fieldCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema fieldCompositeSchema = new ObjectSchemaImpl(TYPE.OBJECT);
 		fieldCompositeSchema.putProperty("field", compositeSchema);
 
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(fieldCompositeSchema)
@@ -128,10 +129,10 @@ public class EffectiveSchemaUtilTest {
 	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideARRAYProperty() throws JSONObjectAdapterException{
 
-		ObjectSchema arraySchema = new ObjectSchema(TYPE.ARRAY);
+		ObjectSchema arraySchema = new ObjectSchemaImpl(TYPE.ARRAY);
 		arraySchema.setItems(compositeSchema);
 
-		ObjectSchema arrayCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema arrayCompositeSchema = new ObjectSchemaImpl(TYPE.OBJECT);
 		arrayCompositeSchema.putProperty("array", arraySchema);
 
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(arrayCompositeSchema)
@@ -141,13 +142,13 @@ public class EffectiveSchemaUtilTest {
 
 	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAPProperty() throws JSONObjectAdapterException{
-		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
+		ObjectSchema stringKeySchema = new ObjectSchemaImpl(TYPE.STRING);
 
-		ObjectSchema mapSchema = new ObjectSchema(TYPE.TUPLE_ARRAY_MAP);
+		ObjectSchema mapSchema = new ObjectSchemaImpl(TYPE.TUPLE_ARRAY_MAP);
 		mapSchema.setKey(stringKeySchema);
 		mapSchema.setValue(compositeSchema);
 
-		ObjectSchema mapCompositeSchema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema mapCompositeSchema = new ObjectSchemaImpl(TYPE.OBJECT);
 		mapCompositeSchema.putProperty("map", mapSchema);
 
 		//check that the effective schema for compositeSchema got flattened even though it is nested
@@ -158,9 +159,9 @@ public class EffectiveSchemaUtilTest {
 
 	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideMAP() throws JSONObjectAdapterException{
-		ObjectSchema stringKeySchema = new ObjectSchema(TYPE.STRING);
+		ObjectSchema stringKeySchema = new ObjectSchemaImpl(TYPE.STRING);
 
-		ObjectSchema mapSchema = new ObjectSchema(TYPE.TUPLE_ARRAY_MAP);
+		ObjectSchema mapSchema = new ObjectSchemaImpl(TYPE.TUPLE_ARRAY_MAP);
 		mapSchema.setKey(stringKeySchema);
 		mapSchema.setValue(compositeSchema);
 
@@ -172,7 +173,7 @@ public class EffectiveSchemaUtilTest {
 
 	@Test
 	public void testGenerateEffectiveSchema_InterfaceImplementerInsideArray() throws JSONObjectAdapterException{
-		ObjectSchema arraySchema = new ObjectSchema(TYPE.ARRAY);
+		ObjectSchema arraySchema = new ObjectSchemaImpl(TYPE.ARRAY);
 		arraySchema.setItems(compositeSchema);
 
 		//check that the effective schema for compositeSchema got flattened even though it is nested
@@ -217,7 +218,7 @@ public class EffectiveSchemaUtilTest {
 		ObjectSchema effective = EffectiveSchemaUtil.generateEffectiveSchema(compositeSchema);
 		assertNotNull(effective);
 		// Create a clone from the json
-		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(json));
+		ObjectSchema clone = new ObjectSchemaImpl(new JSONObjectAdapterImpl(json));
 		assertNotNull(clone);
 		assertEquals(effective, clone);
 	}
@@ -229,14 +230,14 @@ public class EffectiveSchemaUtilTest {
 		System.out.println(json);
 		
 		// Create a clone from the json
-		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(json));
+		ObjectSchema clone = new ObjectSchemaImpl(new JSONObjectAdapterImpl(json));
 		assertNotNull(clone);
 		assertEquals(enumSchema, clone);
 	}
 	
 	@Test
 	public void testCreateFileNameForSchema() throws IOException {
-		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema schema = new ObjectSchemaImpl(TYPE.OBJECT);
 		schema.setId("org.sample.FooBar");
 		// call under test
 		File result = EffectiveSchemaUtil.createFileForSchema(tempFolder, schema);
@@ -260,7 +261,7 @@ public class EffectiveSchemaUtilTest {
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testCreateFileNameForSchemaNullId() throws IOException {
-		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema schema = new ObjectSchemaImpl(TYPE.OBJECT);
 		schema.setId(null);
 		// call under test
 		EffectiveSchemaUtil.createFileForSchema(tempFolder, schema);
@@ -275,8 +276,8 @@ public class EffectiveSchemaUtilTest {
 		assertTrue(result.isFile());
 		String jsonString = FileUtils.readToString(result);
 		assertNotNull(jsonString);
-		ObjectSchema expected = new ObjectSchema(new JSONObjectAdapterImpl(EffectiveSchemaUtil.generateJSONofEffectiveSchema(compositeSchema)));
-		ObjectSchema clone = new ObjectSchema(new JSONObjectAdapterImpl(jsonString));
+		ObjectSchema expected = new ObjectSchemaImpl(new JSONObjectAdapterImpl(EffectiveSchemaUtil.generateJSONofEffectiveSchema(compositeSchema)));
+		ObjectSchema clone = new ObjectSchemaImpl(new JSONObjectAdapterImpl(jsonString));
 		assertEquals(expected, clone);
 	}
 	

@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 
 import com.sun.codemodel.JClass;
@@ -39,7 +40,7 @@ public class TypeCreatorHandlerImpl03Test {
 		codeModel = new JCodeModel();
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		schema.setType(TYPE.OBJECT);
 		// give it a name
 		schema.setName("Sample");
@@ -333,7 +334,7 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setType(TYPE.MAP);
 		schema.setName("SampleEnum");
 
-		ObjectSchema valueSchema = new ObjectSchema();
+		ObjectSchema valueSchema = new ObjectSchemaImpl();
 		valueSchema.setType(TYPE.INTEGER);
 		schema.setValue(valueSchema);
 
@@ -347,8 +348,8 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test
 	public void testAddKeyConstantsConcreteClass() throws JClassAlreadyExistsException {
 		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
-		props.put("foo", new ObjectSchema(TYPE.STRING));
-		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		props.put("foo", new ObjectSchemaImpl(TYPE.STRING));
+		props.put("bar", new ObjectSchemaImpl(TYPE.INTEGER));
 		schema.setProperties(props);
 
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
@@ -364,11 +365,11 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test
 	public void testAddKeyConstantsInterfaceImplementor() throws JClassAlreadyExistsException {
 		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
-		props.put("foo", new ObjectSchema(TYPE.STRING));
-		props.put("bar", new ObjectSchema(TYPE.INTEGER));
-		props.put(ObjectSchema.CONCRETE_TYPE, new ObjectSchema(TYPE.STRING));
+		props.put("foo", new ObjectSchemaImpl(TYPE.STRING));
+		props.put("bar", new ObjectSchemaImpl(TYPE.INTEGER));
+		props.put(ObjectSchema.CONCRETE_TYPE, new ObjectSchemaImpl(TYPE.STRING));
 		schema.setProperties(props);
-		schema.setImplements(new ObjectSchema[] {new ObjectSchema(TYPE.INTERFACE)});
+		schema.setImplements(new ObjectSchema[] {new ObjectSchemaImpl(TYPE.INTERFACE)});
 
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
 		// call under test
@@ -385,8 +386,8 @@ public class TypeCreatorHandlerImpl03Test {
 	@Test
 	public void testAddKeyConstantsInterface() throws JClassAlreadyExistsException {
 		LinkedHashMap<String, ObjectSchema> props = new LinkedHashMap<String, ObjectSchema>();
-		props.put("foo", new ObjectSchema(TYPE.STRING));
-		props.put("bar", new ObjectSchema(TYPE.INTEGER));
+		props.put("foo", new ObjectSchemaImpl(TYPE.STRING));
+		props.put("bar", new ObjectSchemaImpl(TYPE.INTEGER));
 		schema.setProperties(props);
 		
 		JDefinedClass someInterface = _package._interface("SomeInterface");
@@ -396,8 +397,8 @@ public class TypeCreatorHandlerImpl03Test {
 		handler.addKeyConstants(schema, someInterface);
 		String classString = declareToString(someInterface);
 		System.out.println(classString);
-		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("foo")));
-		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("bar")));
+		assertFalse(classString.contains(ObjectSchemaImpl.getKeyConstantName("foo")));
+		assertFalse(classString.contains(ObjectSchemaImpl.getKeyConstantName("bar")));
 		assertFalse(classString.contains(ObjectSchema.ALL_KEYS_NAME));
 	}
 	
@@ -411,7 +412,7 @@ public class TypeCreatorHandlerImpl03Test {
 		handler.addKeyConstants(schema, someEnum);
 		String classString = declareToString(someEnum);
 		System.out.println(classString);
-		assertFalse(classString.contains(ObjectSchema.getKeyConstantName("foo")));
+		assertFalse(classString.contains(ObjectSchemaImpl.getKeyConstantName("foo")));
 		assertFalse(classString.contains(ObjectSchema.ALL_KEYS_NAME));
 	}
 	

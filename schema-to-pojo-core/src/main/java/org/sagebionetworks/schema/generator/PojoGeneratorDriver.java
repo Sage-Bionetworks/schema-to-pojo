@@ -1,14 +1,19 @@
 package org.sagebionetworks.schema.generator;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.JCodeModel;
@@ -203,13 +208,14 @@ public class PojoGeneratorDriver {
 	 * @throws IllegalArgumentException if a reference cannot be resolved.
 	 */
 	protected static List<ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, List<ObjectSchema> list){
+		Stack<ObjectSchema> recursiveAnchors = new Stack<ObjectSchema>();
 		List<ObjectSchema> results = new ArrayList<ObjectSchema>();
 		for(ObjectSchema schema: list){
 			// If this schema is a reference then replace it.
-			schema = replaceRefrence(map, schema, schema);
+			schema = replaceRefrence(map, schema, recursiveAnchors);
 			results.add(schema);
 			// Replace all references in this schema
-			recursiveFindAndReplaceAllReferencesSchemas(map, schema);
+			recursiveFindAndReplaceAllReferencesSchemas(map, schema, recursiveAnchors);
 		}
 		return results;
 	}
@@ -217,15 +223,24 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
+	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema, Stack<ObjectSchema> recursiveAnchors){
+		if(schema.get$recursiveAnchor() != null) {
+			System.out.println("Found one");
+		}
+		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
+			recursiveAnchors.push(schema);
+		}
 		// First replace for each child
 		Iterator<ObjectSchema> it = schema.getSubSchemaIterator();
 		while(it.hasNext()){
 			ObjectSchema sub = it.next();
-			recursiveFindAndReplaceAllReferencesSchemas(map, sub);
+			recursiveFindAndReplaceAllReferencesSchemas(map, sub, recursiveAnchors);
+		}
+		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
+			recursiveAnchors.pop();
 		}
 		// Now do the replace for this object
-		findAndReplaceAllReferencesSchemas(map,schema);
+		findAndReplaceAllReferencesSchemas(map,schema, recursiveAnchors);
 	}
 	
 	/**
@@ -233,39 +248,39 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
+	protected static void findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema, Stack<ObjectSchema> recursiveAnchors){
 		// Properties
 		if(schema.getProperties() != null){
-			schema.setProperties(findAndReplaceAllReferencesSchemas(map, schema.getProperties(), schema));
+			schema.setProperties(findAndReplaceAllReferencesSchemas(map, schema.getProperties(), recursiveAnchors));
 		}
 		// Additional
 		if(schema.getAdditionalProperties() != null){
-			schema.setAdditionalProperties(findAndReplaceAllReferencesSchemas(map, schema.getAdditionalProperties(), schema));
+			schema.setAdditionalProperties(findAndReplaceAllReferencesSchemas(map, schema.getAdditionalProperties(), recursiveAnchors));
 		}
 		// Items
 		if(schema.getItems() != null){
-			schema.setItems(replaceRefrence(map, schema.getItems(), schema));
+			schema.setItems(replaceRefrence(map, schema.getItems(), recursiveAnchors));
 		}
 		// Key
 		if (schema.getKey() != null) {
-			schema.setKey(replaceRefrence(map, schema.getKey(), schema));
+			schema.setKey(replaceRefrence(map, schema.getKey(), recursiveAnchors));
 		}
 		// Value
 		if (schema.getValue() != null) {
-			schema.setValue(replaceRefrence(map, schema.getValue(), schema));
+			schema.setValue(replaceRefrence(map, schema.getValue(), recursiveAnchors));
 		}
 		// AdditionItems
 		if(schema.getAdditionalItems() != null){
-			schema.setAdditionalItems(replaceRefrence(map, schema.getAdditionalItems(), schema));
+			schema.setAdditionalItems(replaceRefrence(map, schema.getAdditionalItems(), recursiveAnchors));
 		}
 		// Extends
 		if(schema.getExtends() != null){
-			schema.setExtends(replaceRefrence(map, schema.getExtends(), schema));
+			schema.setExtends(replaceRefrence(map, schema.getExtends(), recursiveAnchors));
 		}
 		// Implements
 		if(schema.getImplements() != null){
 			for(int i=0; i<schema.getImplements().length; i++){
-				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], schema);
+				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], recursiveAnchors);
 			}
 		}
 	}
@@ -277,13 +292,13 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static LinkedHashMap<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
+	protected static LinkedHashMap<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, Stack<ObjectSchema> recursiveAnchors){
 		LinkedHashMap<String, ObjectSchema> newMap = new LinkedHashMap<String, ObjectSchema>();
 		Iterator<String> it = toCheck.keySet().iterator();
 		while(it.hasNext()){
 			String key = it.next();
 			ObjectSchema schema = toCheck.get(key);
-			schema = replaceRefrence(registry, schema, self);
+			schema = replaceRefrence(registry, schema, recursiveAnchors);
 			newMap.put(key, schema);
 		}
 		return newMap;
@@ -296,22 +311,45 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, ObjectSchema self) {
+	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, Stack<ObjectSchema> recursiveAnchors) {
 		// Nothing to do if it is not a reference.
-		if (toCheck.getRef() == null)
+		if (toCheck.getRef() == null && toCheck.get$recursiveRef() == null) {
 			return toCheck;
-		// Is it a self reference?
-		if (ObjectSchema.SELF_REFERENCE.equals(toCheck.getRef().toString())) {
-			return self;
-		} else {
-			// Find it in the registry
-			ObjectSchema fromRegistry = registry.get(toCheck.getRef());
-			if (fromRegistry == null) throw new IllegalArgumentException("Cannot find the referenced schema: "+ toCheck.getRef());
-			return fromRegistry;
 		}
+		if(ObjectSchema.SELF_REFERENCE.equals(toCheck.get$recursiveRef())){
+			if(recursiveAnchors.isEmpty()) {
+				throw new IllegalArgumentException("Found a $recursiveRef but did not find a matching $recursiveAnchor");
+			}
+			return createRecurisveProxy(recursiveAnchors.peek());
+			//return recursiveAnchors.peek();
+		}
+		// Is it a self reference?
+		if (ObjectSchema.SELF_REFERENCE.equals(toCheck.getRef())) {
+			return toCheck;
+		}
+		// Find it in the registry
+		ObjectSchema fromRegistry = registry.get(toCheck.getRef());
+		if (fromRegistry == null) throw new IllegalArgumentException("Cannot find the referenced schema: "+ toCheck.getRef());
+		return fromRegistry;
 	}
-
-
-
+	
+	/**
+	 * A recursive proxy behaves exactly like a regular object except when it is written out to JSON.
+	 * @param toProxy
+	 * @return
+	 */
+	protected static ObjectSchema createRecurisveProxy(ObjectSchema toProxy) {
+		return (ObjectSchema) Proxy.newProxyInstance(ObjectSchema.class.getClassLoader(),
+				new Class[] { ObjectSchema.class }, (Object proxy, Method method, Object[] args) -> {
+					// When a recursive schema reference is written back to json we write it as a  object is written back to JSON
+					if(method.getName().equals("writeToJSONObject") && args.length == 1 && (args[0] instanceof JSONObjectAdapter)) {
+						JSONObjectAdapter copy = (JSONObjectAdapter)args[0];
+						copy.put("$recursiveRef", "#");
+						return copy;
+					}
+					// Most method we just want to forward to the original object
+					return method.invoke(toProxy, args);
+				});
+	}
 
 }
