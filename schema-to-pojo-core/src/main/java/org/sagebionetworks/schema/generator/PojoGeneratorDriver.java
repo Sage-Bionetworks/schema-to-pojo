@@ -224,9 +224,6 @@ public class PojoGeneratorDriver {
 	 * @param schema
 	 */
 	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema, Stack<ObjectSchema> recursiveAnchors){
-		if(schema.get$recursiveAnchor() != null) {
-			System.out.println("Found one");
-		}
 		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
 			recursiveAnchors.push(schema);
 		}

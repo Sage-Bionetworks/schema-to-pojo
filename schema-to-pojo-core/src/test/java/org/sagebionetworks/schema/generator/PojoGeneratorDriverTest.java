@@ -110,11 +110,9 @@ public class PojoGeneratorDriverTest {
 	public void testReplaceRefrenceSelf() {
 		// This is not a reference so the replace should just return it.
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId("rootOne");
-		// Create a self self reference
-		ObjectSchema refrenceToSelf = new ObjectSchemaImpl();
-		refrenceToSelf.setRef(ObjectSchemaImpl.SELF_REFERENCE);
+		self.setRef(ObjectSchemaImpl.SELF_REFERENCE);
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), refrenceToSelf, recursiveAnchors);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), self, recursiveAnchors);
 		// Should be replaced with self
 		assertEquals(self, replaced);
 	}
@@ -170,13 +168,12 @@ public class PojoGeneratorDriverTest {
 		
 		// Create a third self
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
-		ObjectSchema refToSelf = new ObjectSchemaImpl();
-		refToSelf.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
+		self.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
 		// Now add all three to the a map
 		HashMap<String, ObjectSchema> map = new HashMap<String, ObjectSchema>();
 		map.put("one", referenced);
 		map.put("two", referenceToOther);
-		map.put("three", refToSelf);
+		map.put("three", self);
 		
 		Map<String, ObjectSchema> results = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry,map, recursiveAnchors);
 		assertNotNull(results);
@@ -195,8 +192,7 @@ public class PojoGeneratorDriverTest {
 		registry.put(referenceId, referenced);
 		// Create a third self
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
-		ObjectSchema refToSelf = new ObjectSchemaImpl();
-		refToSelf.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
+		self.setRef(new String(ObjectSchemaImpl.SELF_REFERENCE));
 		
 		ObjectSchema referenceToOther = new ObjectSchemaImpl();
 		referenceToOther.setRef(referenceId);
@@ -204,12 +200,15 @@ public class PojoGeneratorDriverTest {
 		// Add references in all places
 		self.putProperty("one", referenceToOther);
 		self.putAdditionalProperty("two", referenceToOther);
-		self.setItems(refToSelf);
-		self.setAdditionalItems(refToSelf);
+		self.setItems(referenceToOther);
+		self.setAdditionalItems(referenceToOther);
 		self.setImplements(new ObjectSchema[]{referenceToOther});
 		
+		List<ObjectSchema> listToCheck = new ArrayList<ObjectSchema>();
+		listToCheck.add(self);
+		
 		// find and replace
-		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry, recursiveAnchors);
+		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(registry, listToCheck);
 		// Make sure there are no references
 		Iterator<ObjectSchema> it = self.getSubSchemaIterator();
 		while(it.hasNext()){
