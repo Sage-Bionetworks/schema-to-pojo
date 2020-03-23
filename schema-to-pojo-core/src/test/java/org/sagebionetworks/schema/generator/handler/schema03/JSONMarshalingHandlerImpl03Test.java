@@ -405,7 +405,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// There should be an else block
 		assertTrue(methodString.indexOf("} else {") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchema.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
 		// This case should not have a set to null
 		assertFalse(methodString.indexOf("stringName = null;") > 0);
 	}
@@ -867,7 +867,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		System.out.println(methodString);
 		// There should be an else block
 		assertTrue(methodString.indexOf("} else {") > 0);
-		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchema.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
+		assertTrue(methodString.indexOf("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createPropertyCannotBeNullMessage(_KEY_STRINGNAME));") > 0);
 	}
 	
 	@Test

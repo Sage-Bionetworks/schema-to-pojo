@@ -6,9 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.joda.time.Period;
 import org.json.JSONException;
@@ -24,7 +22,7 @@ import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 public class ObjectSchemaTest {
 	
 	/**
-	 * Test to make sure when each field is set it makes the round trip from ObjectSchema to JSON and back to ObjectSchema.
+	 * Test to make sure when each field is set it makes the round trip from ObjectSchema to JSON and back to ObjectSchemaImpl.
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws JSONObjectAdapterException
@@ -32,7 +30,7 @@ public class ObjectSchemaTest {
 	 */
 	@Test
 	public void testRoundTripEachField() throws IllegalArgumentException, IllegalAccessException, JSONObjectAdapterException, JSONException{
-		Field[] fields = ObjectSchema.class.getDeclaredFields();
+		Field[] fields = ObjectSchemaImpl.class.getDeclaredFields();
 		for(Field field: fields){
 			ObjectSchema toTest = createSchemaWithField(field);
 			if(toTest != null){
@@ -45,7 +43,7 @@ public class ObjectSchemaTest {
 				assertEquals(json, json2);
 				System.out.println(json);
 				// Now create a new object using the JSON String
-				ObjectSchema clone = new  ObjectSchema(new JSONObjectAdapterImpl(new JSONObject(json)));
+				ObjectSchema clone = new  ObjectSchemaImpl(new JSONObjectAdapterImpl(new JSONObject(json)));
 				assertNotNull(clone);
 				System.out.println(clone.toJSONString(new JSONObjectAdapterImpl()));
 				assertEquals("Field named: '"+field.getName()+"' did not make the round trip from ObjectSchema to JSON back to ObjectSchema",toTest, clone);
@@ -66,7 +64,7 @@ public class ObjectSchemaTest {
 			return null;
 		}
 		field.setAccessible(true);
-		ObjectSchema toTest = new ObjectSchema();
+		ObjectSchemaImpl toTest = new ObjectSchemaImpl();
 		if(field.getName().equals("_default")){
 			toTest.setType(TYPE.STRING);
 			field.set(toTest, "defaultString value");
@@ -76,12 +74,14 @@ public class ObjectSchemaTest {
 			field.set(toTest, TYPE.STRING);
 		}else if(field.getType() == LinkedHashMap.class){
 			LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
-			map.put("somePropertyKey", new ObjectSchema(TYPE.BOOLEAN));
+			map.put("somePropertyKey", new ObjectSchemaImpl(TYPE.BOOLEAN));
 			field.set(toTest, map);
+		}else if(field.getType() == ObjectSchemaImpl.class){
+			field.set(toTest, new ObjectSchemaImpl(TYPE.INTEGER));
 		}else if(field.getType() == ObjectSchema.class){
-			field.set(toTest, new ObjectSchema(TYPE.INTEGER));
+			field.set(toTest, new ObjectSchemaImpl(TYPE.INTEGER));
 		}else if(field.getType() == ObjectSchema[].class){
-			ObjectSchema[] array = new ObjectSchema[]{new ObjectSchema(TYPE.INTEGER), new ObjectSchema(TYPE.STRING)};
+			ObjectSchema[] array = new ObjectSchema[]{new ObjectSchemaImpl(TYPE.INTEGER), new ObjectSchemaImpl(TYPE.STRING)};
 			field.set(toTest, array);
 		}else if(field.getType() == String[].class){
 			String[] array = new String[]{"a", "b", "c"};
@@ -125,12 +125,12 @@ public class ObjectSchemaTest {
 	@Test
 	public void testRoundTrip() throws JSONObjectAdapterException, JSONException{
 		// Create a ObjectModel from the spec example.
-		ObjectSchema example = new ObjectSchema();
+		ObjectSchema example = new ObjectSchemaImpl();
 		example.setName("Product");
 		example.setId(new String("someId"));
 		// Add the properties
 		// id
-		ObjectSchema property = new ObjectSchema();
+		ObjectSchema property = new ObjectSchemaImpl();
 		property.setType(TYPE.NUMBER);
 		property.setDescription("Product identifier");
 		property.setRequired(true);
@@ -139,45 +139,45 @@ public class ObjectSchemaTest {
 		property.setDefault(requiredPI);
 		example.putProperty("id", property);
 		// Name
-		property = new ObjectSchema();
+		property = new ObjectSchemaImpl();
 		property.setType(TYPE.STRING);
 		property.setFormat(FORMAT.DATE_TIME);
 		property.setDescription("Name of the product");
 		property.setRequired(true);
 		example.putProperty("name", property);
 		// price
-		property = new ObjectSchema();
+		property = new ObjectSchemaImpl();
 		property.setType(TYPE.NUMBER);
 		property.setMinimum(0);
 		property.setRequired(true);
 		// Add an array
-		property = new ObjectSchema();
+		property = new ObjectSchemaImpl();
 		property.setType(TYPE.ARRAY);
 		property.setUniqueItems(true);
-		ObjectSchema arrayType  = new ObjectSchema();
+		ObjectSchema arrayType  = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.INTEGER);
 		property.setAdditionalItems(arrayType);
 		example.putProperty("array", property);
 		
 		// Add an additional property
-		property = new ObjectSchema();
+		property = new ObjectSchemaImpl();
 		property.setType(TYPE.STRING);
 		example.putAdditionalProperty("label", property);
 		
 		// Extends a reference
-		ObjectSchema _extends = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema _extends = new ObjectSchemaImpl(TYPE.OBJECT);
 		example.setExtends(_extends);
 		
 		// Implements
 		ObjectSchema[] _implements = new ObjectSchema[1];
 		example.setImplements(_implements);
-		_implements[0] = new ObjectSchema();
+		_implements[0] = new ObjectSchemaImpl();
 		_implements[0].setType(TYPE.INTERFACE);
 
 		// Add an array
-		property = new ObjectSchema();
+		property = new ObjectSchemaImpl();
 		property.setType(TYPE.ARRAY);
-		arrayType  = new ObjectSchema();
+		arrayType  = new ObjectSchemaImpl();
 		arrayType.setType(TYPE.BOOLEAN);
 		property.setAdditionalItems(arrayType);
 		example.putAdditionalProperty("array", property);
@@ -213,7 +213,7 @@ public class ObjectSchemaTest {
 		assertEquals(json, json2);
 		System.out.println(json);
 		// Now create a new object using the JSON String
-		ObjectSchema clone = new  ObjectSchema(new JSONObjectAdapterImpl(new JSONObject(json)));
+		ObjectSchema clone = new  ObjectSchemaImpl(new JSONObjectAdapterImpl(new JSONObject(json)));
 		assertNotNull(clone);
 		System.out.println(clone.toJSONString(new JSONObjectAdapterImpl()));
 		assertEquals(toValidate, clone);
@@ -222,14 +222,14 @@ public class ObjectSchemaTest {
 	@Test
 	public void testRoundTripRef() throws JSONObjectAdapterException, JSONException{
 		// Create a ObjectModel from the spec example.
-		ObjectSchema example = new ObjectSchema();
+		ObjectSchema example = new ObjectSchemaImpl();
 		example.setRef(new String("someId"));
 		
 		// Now go to the JSONString
 		String json = example.toJSONString( new JSONObjectAdapterImpl());
 		System.out.println(json);
 		// Now create a new object using the JSON String
-		ObjectSchema clone = new  ObjectSchema(new JSONObjectAdapterImpl(new JSONObject(json)));
+		ObjectSchema clone = new  ObjectSchemaImpl(new JSONObjectAdapterImpl(new JSONObject(json)));
 		assertNotNull(clone);
 		System.out.println(clone.toJSONString(new JSONObjectAdapterImpl()));
 		assertEquals(example, clone);
@@ -243,11 +243,11 @@ public class ObjectSchemaTest {
 		String key = "someInteger";
 		json.put(key, new Long(33));
 		// Now fetch the number
-		Number result = ObjectSchema.getNumberBasedOnType(TYPE.NUMBER, new JSONObjectAdapterImpl(json), key);
+		Number result = ObjectSchemaImpl.getNumberBasedOnType(TYPE.NUMBER, new JSONObjectAdapterImpl(json), key);
 		// Number should be mapped to doubles
 		assertTrue(result instanceof Double);
 		
-		result = ObjectSchema.getNumberBasedOnType(TYPE.INTEGER, new JSONObjectAdapterImpl(json), key);
+		result = ObjectSchemaImpl.getNumberBasedOnType(TYPE.INTEGER, new JSONObjectAdapterImpl(json), key);
 		// Integers should be mapped to Long
 		assertTrue(result instanceof Long);
 	}
@@ -258,12 +258,12 @@ public class ObjectSchemaTest {
 		String key = "someDouble";
 		json.put(key, new Double(33.44));
 		// Now fetch the number
-		Number result = ObjectSchema.getNumberBasedOnType(TYPE.NUMBER, new JSONObjectAdapterImpl(json), key);
+		Number result = ObjectSchemaImpl.getNumberBasedOnType(TYPE.NUMBER, new JSONObjectAdapterImpl(json), key);
 		// Number should be mapped to doubles
 		assertTrue(result instanceof Double);
 		System.out.println(result);
 		
-		result = ObjectSchema.getNumberBasedOnType(TYPE.INTEGER, new JSONObjectAdapterImpl(json), key);
+		result = ObjectSchemaImpl.getNumberBasedOnType(TYPE.INTEGER, new JSONObjectAdapterImpl(json), key);
 		// Integers should be mapped to Long
 		assertTrue(result instanceof Long);
 		System.out.println(result);
@@ -281,8 +281,8 @@ public class ObjectSchemaTest {
 		//make an object that represents a string
 		String str = "hello";
 		Object strObject = str;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.STRING.getJSONValue());
-		ObjectSchema.setDefaultType(strObject, adapter);
+		adapter.put(ObjectSchemaImpl.JSON_TYPE, TYPE.STRING.getJSONValue());
+		ObjectSchemaImpl.setDefaultType(strObject, adapter);
 		
 		//verify adapter has a default set and that it's of type string
 		assertNotNull(adapter.getString("default"));
@@ -292,8 +292,8 @@ public class ObjectSchemaTest {
 		//make an object that represents a number
 		Double doub = 7.77;
 		Object doubObject = doub;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.NUMBER.getJSONValue());
-		ObjectSchema.setDefaultType(doubObject, adapter);
+		adapter.put(ObjectSchemaImpl.JSON_TYPE, TYPE.NUMBER.getJSONValue());
+		ObjectSchemaImpl.setDefaultType(doubObject, adapter);
 		
 		//verify adapter has a default set and that it's of type double
 		assertNotNull(adapter.getDouble("default"));
@@ -303,8 +303,8 @@ public class ObjectSchemaTest {
 		//make an object that represents a integer
 		Long theLong = (long) 77;
 		Object longObject = theLong;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.INTEGER.getJSONValue());
-		ObjectSchema.setDefaultType(longObject, adapter);
+		adapter.put(ObjectSchemaImpl.JSON_TYPE, TYPE.INTEGER.getJSONValue());
+		ObjectSchemaImpl.setDefaultType(longObject, adapter);
 		
 		//verify adapter has a default set and that it's of type integer
 		assertNotNull(adapter.getLong("default"));
@@ -314,8 +314,8 @@ public class ObjectSchemaTest {
 		//make an object that represents a boolean
 		Boolean boole = true;
 		Object booleObject = boole;
-		adapter.put(ObjectSchema.JSON_TYPE, TYPE.BOOLEAN.getJSONValue());
-		ObjectSchema.setDefaultType(booleObject, adapter);
+		adapter.put(ObjectSchemaImpl.JSON_TYPE, TYPE.BOOLEAN.getJSONValue());
+		ObjectSchemaImpl.setDefaultType(booleObject, adapter);
 		
 		//verify adapter has a default set and that it's of type boolean
 		assertNotNull(adapter.getBoolean("default"));
@@ -333,7 +333,7 @@ public class ObjectSchemaTest {
 		//make object that is not of supported type
 		Period rentalPeriod = new Period().withDays(2).withHours(12);
 		Object nonJSONObject = rentalPeriod;
-		ObjectSchema.setDefaultType(nonJSONObject, adapter);
+		ObjectSchemaImpl.setDefaultType(nonJSONObject, adapter);
 	}
 	
 	/**
@@ -346,7 +346,7 @@ public class ObjectSchemaTest {
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		
 		Object lameNullObject = null;
-		ObjectSchema.setDefaultType(lameNullObject, adapter);
+		ObjectSchemaImpl.setDefaultType(lameNullObject, adapter);
 	}
 	
 	
@@ -357,7 +357,7 @@ public class ObjectSchemaTest {
 	 */
 	public void testSetDefaultObject() throws Exception {
 		//make ObjectSchema
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		
 		//make adapter whose type is set to string
 		//must have corresponding string object as default
@@ -366,7 +366,7 @@ public class ObjectSchemaTest {
 		String adaptersDefault = "imADefaultString";
 		adapter.put("default", adaptersDefault);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a stringObject as it's default
 		assertNotNull(schema.getDefault());
@@ -380,7 +380,7 @@ public class ObjectSchemaTest {
 		Double adapterDouble = 7.77;
 		adapter.put("default", adapterDouble);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a doubleObject as it's default
 		Object osDouble = schema.getDefault();
@@ -393,7 +393,7 @@ public class ObjectSchemaTest {
 		Long adapterLong = (long) 77;
 		adapter.put("default", adapterLong);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a longObject as it's default
 		Object osLong = schema.getDefault();
@@ -406,7 +406,7 @@ public class ObjectSchemaTest {
 		Boolean adapterBool = true;
 		adapter.put("default", adapterBool);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a boolean object as it's default
 		Object osBool = schema.getDefault();
@@ -420,7 +420,7 @@ public class ObjectSchemaTest {
 		defaultAdapter.put("name", "matilda");
 		adapter.put("default", defaultAdapter);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a adapter object as it's default
 		Object osAdapter = schema.getDefault();
@@ -434,7 +434,7 @@ public class ObjectSchemaTest {
 		defaultArray.put(0, "imInAnArray");
 		adapter.put("default", defaultArray);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 		
 		//verify that ObjectSchema has a array object as it's default
 		Object osArray = schema.getDefault();
@@ -449,14 +449,14 @@ public class ObjectSchemaTest {
 	@Test (expected = JSONObjectAdapterException.class)
 	public void testSetDefaultObjectWhenAdapterHasNoType() throws Exception {
 		//make ObjectSchema
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		
 		//make adapter who does not have type in it's JSON
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		String adaptersDefault = "imADefaultString";
 		adapter.put("default", adaptersDefault);
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 	}
 	
 	/**
@@ -467,7 +467,7 @@ public class ObjectSchemaTest {
 	@Test (expected = JSONObjectAdapterException.class)
 	public void testSetDefaultObjectWhenAdapterHasNullType() throws Exception {
 		//make ObjectSchema
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		
 		//make adapter who has null type
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
@@ -475,7 +475,7 @@ public class ObjectSchemaTest {
 		adapter.put("type", nullString);
 		adapter.put("default", "defaultString");
 		
-		ObjectSchema.setDefaultObject(schema, adapter);		
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);		
 	}
 	
 	/**
@@ -485,12 +485,12 @@ public class ObjectSchemaTest {
 	@Test (expected = JSONObjectAdapterException.class)
 	public void setDefaultObjectWhenAdapterHasNoDefault() throws Exception {
 		//make ObjectSchema
-		ObjectSchema schema = new ObjectSchema();
+		ObjectSchema schema = new ObjectSchemaImpl();
 		
 		//make adapter who has no default
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl();
 		adapter.put("type", "string");
 		
-		ObjectSchema.setDefaultObject(schema, adapter);
+		ObjectSchemaImpl.setDefaultObject(schema, adapter);
 	}
 }

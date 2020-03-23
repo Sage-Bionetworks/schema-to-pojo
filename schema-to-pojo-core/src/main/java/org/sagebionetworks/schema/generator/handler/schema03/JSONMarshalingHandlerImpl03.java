@@ -942,7 +942,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @return
 	 */
 	private JInvocation createIllegalArgumentExceptionPropertyNotNull(JDefinedClass classType, JFieldVar propConstRef){
-		JInvocation staticCall = classType.owner().ref(ObjectSchema.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propConstRef);
+		JInvocation staticCall = classType.owner().ref(ObjectSchemaImpl.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propConstRef);
 		return JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(staticCall);
 	}
 

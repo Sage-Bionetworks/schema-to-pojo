@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -30,7 +31,7 @@ public class RegisterTest {
 			assertEquals(newInstance.getClass().getName(), fullClassName);
 			// Should be able to load the schema for each registered file
 			String json = EffectiveSchemaUtil.loadEffectiveSchemaFromClasspath(newInstance.getClass());
-			ObjectSchema schema = new ObjectSchema(new JSONObjectAdapterImpl(json));
+			ObjectSchema schema = new ObjectSchemaImpl(new JSONObjectAdapterImpl(json));
 			assertEquals(newInstance.getClass().getName(), schema.getId());
 		}
 	}
