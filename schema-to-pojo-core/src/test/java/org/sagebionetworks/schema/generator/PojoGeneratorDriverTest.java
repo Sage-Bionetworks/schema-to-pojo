@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -347,6 +348,55 @@ public class PojoGeneratorDriverTest {
 		list.add(root);
 		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
 		PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
+	}
+	
+	@Test
+	public void testFindAndReplaceAllReferencesSchemas_MultipleLevelsOfRecursion() throws JSONObjectAdapterException {
+		// Create an object with nesting
+		ObjectSchema root = new ObjectSchemaImpl();
+		root.setId("root");
+		root.set$recursiveAnchor(true);
+
+		// First property is a list of type 'root'.
+		ObjectSchema arrayOfRoots = new ObjectSchemaImpl();
+		arrayOfRoots.setType(TYPE.ARRAY);
+		ObjectSchema arrayOfRootsItems = new ObjectSchemaImpl();
+		arrayOfRootsItems.set$recursiveRef("#");
+		arrayOfRoots.setItems(arrayOfRootsItems);
+		root.putProperty("listOfRoots", arrayOfRoots);
+		
+		ObjectSchema child = new ObjectSchemaImpl();
+		child.setId("child");
+		child.set$recursiveAnchor(true);
+		// sibling is of the same type as child.
+		ObjectSchema sibling = new ObjectSchemaImpl();
+		sibling.set$recursiveRef("#");
+		child.putProperty("sibling", sibling);
+		
+		root.putProperty("childWithSiblings", child);
+		
+		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
+		list.add(root);
+
+		Map<String, ObjectSchema> register = PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		// call under test
+		list = PojoGeneratorDriver.findAndReplaceAllReferencesSchemas(register, list);
+		assertNotNull(list);
+		assertEquals(1, list.size());
+		ObjectSchema newRoot = list.get(0);
+		assertEquals(newRoot.getId(), "root");
+		ObjectSchema listOfRoots = newRoot.getProperties().get("listOfRoots");
+		assertNotNull(listOfRoots);
+		assertNotNull(listOfRoots.getItems());
+		// recursive reference should be replaced with root.
+		assertEquals("root", listOfRoots.getItems().getId());
+		
+		ObjectSchema childWithSiblings = newRoot.getProperties().get("childWithSiblings");
+		assertNotNull(childWithSiblings);
+		sibling = childWithSiblings.getProperties().get("sibling");
+		assertNotNull(sibling);
+		// recursive reference should be replaced with child (not root).
+		assertEquals("child", sibling.getId());
 	}
 
 	@Test

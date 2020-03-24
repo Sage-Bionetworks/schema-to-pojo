@@ -233,11 +233,11 @@ public class PojoGeneratorDriver {
 			ObjectSchema sub = it.next();
 			recursiveFindAndReplaceAllReferencesSchemas(map, sub, recursiveAnchors);
 		}
+		// Now do the replace for this object
+		findAndReplaceAllReferencesSchemas(map,schema, recursiveAnchors);
 		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
 			recursiveAnchors.pop();
 		}
-		// Now do the replace for this object
-		findAndReplaceAllReferencesSchemas(map,schema, recursiveAnchors);
 	}
 	
 	/**
