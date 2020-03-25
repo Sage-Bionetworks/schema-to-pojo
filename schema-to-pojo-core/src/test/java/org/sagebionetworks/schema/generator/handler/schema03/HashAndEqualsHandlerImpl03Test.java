@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 
 import com.sun.codemodel.JBlock;
@@ -39,19 +40,19 @@ public class HashAndEqualsHandlerImpl03Test {
 		_package = codeModel._package("org.sample");
 		sampleClass = codeModel._class("Sample");
 		sampleInterface = _package._interface("SampleInterface");
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		schema.setType(TYPE.OBJECT);
 		// Create a schema interface
-		schemaInterface = new ObjectSchema();
+		schemaInterface = new ObjectSchemaImpl();
 		schemaInterface.setType(TYPE.INTERFACE);
-		schemaInterface.putProperty("fromInterface", new ObjectSchema(TYPE.BOOLEAN));
+		schemaInterface.putProperty("fromInterface", new ObjectSchemaImpl(TYPE.BOOLEAN));
 	}
 	
 	@Test
 	public void testHashCodeString(){
 		// Add a string property to the object
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(String.class), "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -74,7 +75,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testHashCodeSuper() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setExtends(schema);
 		JDefinedClass childClasss = codeModel._class("ChildOfSample");
 		childClasss._extends(sampleClass);
@@ -95,7 +96,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testHashImplements() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
@@ -130,7 +131,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testHashCodeArray(){
 		// Add a string property to the object
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "propertyName";
 		ObjectSchema arrayTypeSchema = schema;
@@ -154,7 +155,7 @@ public class HashAndEqualsHandlerImpl03Test {
 		// the second
 		sampleClass.field(JMod.PRIVATE, codeModel.DOUBLE, "propertyName");
 		sampleClass.field(JMod.PRIVATE, codeModel.DOUBLE, "propertyName2");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.NUMBER);
 		schema.putProperty("propertyName", propertySchema);
 		schema.putProperty("propertyName2", propertySchema);
@@ -172,7 +173,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testHashCodeLong(){
 		// Setup a long
 		sampleClass.field(JMod.PRIVATE, codeModel.LONG, "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -188,7 +189,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testHashCodeBoolean(){
 		// Setup a long
 		sampleClass.field(JMod.PRIVATE, codeModel.BOOLEAN, "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.BOOLEAN);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -204,7 +205,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testEqualsString(){
 		// Add a string property to the object
 		sampleClass.field(JMod.PRIVATE, codeModel.ref(String.class), "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.STRING);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -237,7 +238,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testEqualsSuper() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setExtends(schema);
 		JDefinedClass childClasss = codeModel._class("ChildOfSample");
 		childClasss._extends(sampleClass);
@@ -260,7 +261,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testEqualsImplements() throws JClassAlreadyExistsException {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setImplements(new ObjectSchema[]{schemaInterface});
 		JDefinedClass childClasss = codeModel._class("ImplementsInterface");
 		childClasss._implements(sampleInterface);
@@ -297,7 +298,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	@Test
 	public void testEqualsArray(){
 		// Add a string property to the object
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.ARRAY);
 		String propName = "propertyName";
 		ObjectSchema arrayTypeSchema = schema;
@@ -321,7 +322,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testEqualsDouble(){
 		// Test a double
 		sampleClass.field(JMod.PRIVATE, codeModel.DOUBLE, "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.NUMBER);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -337,7 +338,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testEqualsLong(){
 		// Setup a long
 		sampleClass.field(JMod.PRIVATE, codeModel.LONG, "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.INTEGER);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it
@@ -353,7 +354,7 @@ public class HashAndEqualsHandlerImpl03Test {
 	public void testEqualsBoolean(){
 		// Setup a long
 		sampleClass.field(JMod.PRIVATE, codeModel.BOOLEAN, "propertyName");
-		ObjectSchema propertySchema = new ObjectSchema();
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.BOOLEAN);
 		schema.putProperty("propertyName", propertySchema);
 		// Create the handler and add it

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
@@ -415,7 +416,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	}
 
 	private JFieldVar getPropertyKeyConstantReference(JDefinedClass classType, String propName) {
-		JFieldVar propNameConstant = classType.fields().get(ObjectSchema.getKeyConstantName(propName));
+		JFieldVar propNameConstant = classType.fields().get(ObjectSchemaImpl.getKeyConstantName(propName));
 		if (propNameConstant == null) {
 			throw new IllegalArgumentException(
 					"Failed to find the JFieldVar for constant property name: '"
@@ -941,7 +942,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @return
 	 */
 	private JInvocation createIllegalArgumentExceptionPropertyNotNull(JDefinedClass classType, JFieldVar propConstRef){
-		JInvocation staticCall = classType.owner().ref(ObjectSchema.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propConstRef);
+		JInvocation staticCall = classType.owner().ref(ObjectSchemaImpl.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propConstRef);
 		return JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(staticCall);
 	}
 

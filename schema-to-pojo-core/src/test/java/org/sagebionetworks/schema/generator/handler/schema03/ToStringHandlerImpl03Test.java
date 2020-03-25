@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 
 import com.sun.codemodel.JBlock;
@@ -36,7 +37,7 @@ public class ToStringHandlerImpl03Test {
 
 	@Before
 	public void setUp() throws Exception {
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		codeModel = new JCodeModel();
 		sampleClass = codeModel._class("ImASampleClass");
 	}
@@ -52,7 +53,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringSuper() throws Exception {
 		// For this case we want to use class that has the sample as a base class
-		ObjectSchema childSchema = new ObjectSchema();
+		ObjectSchema childSchema = new ObjectSchemaImpl();
 		childSchema.setExtends(schema);
 		JDefinedClass childClasss = codeModel._class("ChildOfSample");
 		childClasss._extends(sampleClass);
@@ -78,7 +79,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForObjectProperty() throws Exception {
 		// Add a object property to the schema
-		ObjectSchema imAObjectProp = new ObjectSchema();
+		ObjectSchema imAObjectProp = new ObjectSchemaImpl();
 		imAObjectProp.setType(TYPE.OBJECT);
 		String objectPropKey = "objectPropKeyName";
 		schema.putProperty(objectPropKey, imAObjectProp);
@@ -105,7 +106,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForArrayProperty() throws Exception {
 		// Add a array property to the schema
-		ObjectSchema imAArrayProp = new ObjectSchema();
+		ObjectSchema imAArrayProp = new ObjectSchemaImpl();
 		imAArrayProp.setType(TYPE.ARRAY);
 		String arrayPropKey = "arrayPropKeyName";
 		schema.putProperty(arrayPropKey, imAArrayProp);
@@ -132,7 +133,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForDoubleProperty() throws Exception {
 		// Add a double property to the schema
-		ObjectSchema imADoubleProp = new ObjectSchema();
+		ObjectSchema imADoubleProp = new ObjectSchemaImpl();
 		imADoubleProp.setType(TYPE.NUMBER);
 		String doublePropKey = "doublePropKeyName";
 		schema.putProperty(doublePropKey, imADoubleProp);
@@ -159,7 +160,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForLongProperty() throws Exception {
 		// Add a long property to the schema
-		ObjectSchema imALongProp = new ObjectSchema();
+		ObjectSchema imALongProp = new ObjectSchemaImpl();
 		imALongProp.setType(TYPE.INTEGER);
 		String longPropKey = "integerPropKeyName";
 		schema.putProperty(longPropKey, imALongProp);
@@ -186,7 +187,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForBooleanProperty() throws Exception {
 		// Add a boolean property to the schema
-		ObjectSchema imABoolProp = new ObjectSchema();
+		ObjectSchema imABoolProp = new ObjectSchemaImpl();
 		imABoolProp.setType(TYPE.BOOLEAN);
 		String boolPropKey = "booleanPropKeyName";
 		schema.putProperty(boolPropKey, imABoolProp);
@@ -213,7 +214,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForStringProperty() throws Exception {
 		// Add a string property to the schema
-		ObjectSchema imAStringProp = new ObjectSchema();
+		ObjectSchema imAStringProp = new ObjectSchemaImpl();
 		imAStringProp.setType(TYPE.STRING);
 		String stringPropKey = "stringPropKeyName";
 		schema.putProperty(stringPropKey, imAStringProp);
@@ -251,11 +252,11 @@ public class ToStringHandlerImpl03Test {
 		//set up a corresponding schema with the two properties
 		schema.setType(TYPE.OBJECT);
 		
-		ObjectSchema nextProperty =  new ObjectSchema();
+		ObjectSchema nextProperty =  new ObjectSchemaImpl();
 		nextProperty.setType(TYPE.STRING);
 		schema.putProperty("imAStringMemberVariable", nextProperty);
 		
-		nextProperty = new ObjectSchema();
+		nextProperty = new ObjectSchemaImpl();
 		nextProperty.setType(TYPE.BOOLEAN);
 		schema.putProperty("imABooleanMemberVariable", nextProperty);
 		
@@ -287,7 +288,7 @@ public class ToStringHandlerImpl03Test {
 	@Test
 	public void testToStringForStringKeyMapProperty() throws Exception {
 		// Add a boolean property to the schema
-		ObjectSchema strKeyMapProp = new ObjectSchema();
+		ObjectSchema strKeyMapProp = new ObjectSchemaImpl();
 		strKeyMapProp.setType(TYPE.MAP);
 		String mapPropertyName = "mapPropName";
 		schema.putProperty(mapPropertyName, strKeyMapProp);

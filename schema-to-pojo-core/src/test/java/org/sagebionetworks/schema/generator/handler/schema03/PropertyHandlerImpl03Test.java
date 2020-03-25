@@ -8,6 +8,7 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.generator.handler.PropertyHandler;
 
@@ -36,7 +37,7 @@ public class PropertyHandlerImpl03Test {
 		_package = codeModel._package("org.sample");
 		sampleClass = _package._class("Sample");
 		sampleInterfance = _package._interface("SampleInterface");
-		schema = new ObjectSchema();
+		schema = new ObjectSchemaImpl();
 		schema.setType(TYPE.STRING);
 		// Create a string property
 		type = codeModel.ref(String.class);

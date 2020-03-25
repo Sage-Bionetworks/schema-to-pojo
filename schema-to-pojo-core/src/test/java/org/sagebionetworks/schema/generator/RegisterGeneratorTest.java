@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 
@@ -36,12 +37,12 @@ public class RegisterGeneratorTest {
 	@Before
 	public void before(){
 		list = new ArrayList<ObjectSchema>();
-		ObjectSchema schema = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema schema = new ObjectSchemaImpl(TYPE.OBJECT);
 		schema.setName("one");
 		schema.setId("org.example.One");
 		list.add(schema);
 		
-		schema = new ObjectSchema(TYPE.OBJECT);
+		schema = new ObjectSchemaImpl(TYPE.OBJECT);
 		schema.setName("Two");
 		schema.setId("org.example.Two");
 		list.add(schema);
@@ -65,16 +66,16 @@ public class RegisterGeneratorTest {
 	public void testIsConcreteClass(){
 		RegisterGenerator regGen = new RegisterGenerator();
 		// Enums are not concrete classes
-		ObjectSchema enumClass = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema enumClass = new ObjectSchemaImpl(TYPE.OBJECT);
 		enumClass.setEnum(new EnumValue[] {
 				new EnumValue("one")
 		});
 		assertFalse(regGen.isConcreteClass(enumClass));
 		// Interface is not a concrete class.
-		ObjectSchema interfaceClass = new ObjectSchema(TYPE.INTERFACE);
+		ObjectSchema interfaceClass = new ObjectSchemaImpl(TYPE.INTERFACE);
 		assertFalse(regGen.isConcreteClass(interfaceClass));
 		// This is a concrete class
-		ObjectSchema concreteClass = new ObjectSchema(TYPE.OBJECT);
+		ObjectSchema concreteClass = new ObjectSchemaImpl(TYPE.OBJECT);
 		// Still needs an id
 		assertFalse(regGen.isConcreteClass(concreteClass));
 		concreteClass.setId("org.sample.Test");

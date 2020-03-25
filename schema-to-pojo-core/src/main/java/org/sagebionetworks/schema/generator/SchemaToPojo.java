@@ -9,13 +9,13 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.CodeWriter;
-import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.writer.FileCodeWriter;
@@ -64,7 +64,7 @@ public class SchemaToPojo {
 			// Create a new schema
 			ObjectSchema schema;
 			try {
-				schema = new ObjectSchema(new JSONObjectAdapterImpl(string));
+				schema = new ObjectSchemaImpl(new JSONObjectAdapterImpl(string));
 			} catch (JSONObjectAdapterException e) {
 				if (e.getCause() instanceof JSONException) {
 					JSONException e2 = (JSONException) e.getCause();

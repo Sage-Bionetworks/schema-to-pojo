@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
@@ -56,19 +57,25 @@ public class EffectiveSchemaUtil {
 	 * @throws JSONObjectAdapterException
 	 */
 	public static ObjectSchema generateEffectiveSchema(ObjectSchema schema) throws JSONObjectAdapterException {
-		if (schema == null)
+		if (schema == null) {
 			throw new IllegalArgumentException("Schema cannot be null");
+		}
+		if(schema.is$RecursiveRefInstance()) {
+			ObjectSchemaImpl ref = new ObjectSchemaImpl();
+			ref.set$recursiveRef(ObjectSchemaImpl.SELF_REFERENCE);
+			return ref;
+		}
 		// First make a copy of the schema
 		JSONObjectAdapter adapter = schema.writeToJSONObject(new JSONObjectAdapterImpl());
 		adapter = new JSONObjectAdapterImpl(adapter.toJSONString());
-		ObjectSchema copy = new ObjectSchema(adapter);
+		ObjectSchema copy = new ObjectSchemaImpl(adapter);
 		// Clear the extends and and implements
 		copy.setExtends(null);
 		copy.setImplements(null);
 
 		//flatten out the properties for the current schema
 		LinkedHashMap<String, ObjectSchema> flattenedProperties = (LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap();
-		ObjectSchema.recursivelyAddAllExtendsProperties(flattenedProperties, schema);
+		ObjectSchemaImpl.recursivelyAddAllExtendsProperties(flattenedProperties, schema);
 		if(flattenedProperties != null) {
 			//for flattened properties in this copy, recursively flatten all of their properties
 			for (Map.Entry<String, ObjectSchema> entry : flattenedProperties.entrySet()) {

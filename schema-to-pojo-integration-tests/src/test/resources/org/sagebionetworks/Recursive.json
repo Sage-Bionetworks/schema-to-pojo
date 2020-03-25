@@ -1,0 +1,18 @@
+{
+	"type": "object",
+	"$recursiveAnchor": true,
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"listOfRecursive": {
+			"type": "array",
+			"items": {
+				"$recursiveRef": "#"
+			}
+		},
+		"refToSelf": {
+			"$recursiveRef": "#"
+		}
+	}
+}

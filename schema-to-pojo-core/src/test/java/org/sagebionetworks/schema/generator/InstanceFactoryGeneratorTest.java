@@ -1,6 +1,8 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.sagebionetworks.schema.generator.InstanceFactoryGenerator.INSTANCE_FACTORY_SUFFIX;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +13,9 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import static org.sagebionetworks.schema.generator.InstanceFactoryGenerator.INSTANCE_FACTORY_SUFFIX;
+
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 
@@ -31,15 +34,15 @@ public class InstanceFactoryGeneratorTest {
 	@Before
 	public void before(){
 		// one
-		interfaceOne = new ObjectSchema();
+		interfaceOne = new ObjectSchemaImpl();
 		interfaceOne.setType(TYPE.INTERFACE);
 		interfaceOne.setId("org.example.InterfaceOne");
 		
-		interfaceTwo = new ObjectSchema();
+		interfaceTwo = new ObjectSchemaImpl();
 		interfaceTwo.setType(TYPE.INTERFACE);
 		interfaceTwo.setId("org.example.InterfaceTwo");
 		
-		interfaceThree = new ObjectSchema();
+		interfaceThree = new ObjectSchemaImpl();
 		interfaceThree.setType(TYPE.INTERFACE);
 		interfaceThree.setId("org.example.InterfaceThree");
 		// Three extends the first two.
@@ -47,23 +50,23 @@ public class InstanceFactoryGeneratorTest {
 		
 		// reference to two.
 		// one impl
-		oneImpl = new ObjectSchema();
+		oneImpl = new ObjectSchemaImpl();
 		oneImpl.setId("org.example.OneImpl");
 		oneImpl.setType(TYPE.OBJECT);
 		oneImpl.setImplements(new ObjectSchema[]{interfaceOne});
 		// two impl
-		twoImpl = new ObjectSchema();
+		twoImpl = new ObjectSchemaImpl();
 		twoImpl.setId("org.example.TwoImpl");
 		twoImpl.setType(TYPE.OBJECT);
 		twoImpl.setImplements(new ObjectSchema[]{interfaceTwo});
 		// Implements both
-		bothImpl = new ObjectSchema();
+		bothImpl = new ObjectSchemaImpl();
 		bothImpl.setId("org.example.BothImpl");
 		bothImpl.setType(TYPE.OBJECT);
 		bothImpl.setImplements(new ObjectSchema[]{interfaceOne, interfaceTwo});
 		
 		// three impl
-		threeImpl = new ObjectSchema();
+		threeImpl = new ObjectSchemaImpl();
 		threeImpl.setId("org.example.ThreeImpl");
 		threeImpl.setType(TYPE.OBJECT);
 		threeImpl.setImplements(new ObjectSchema[]{interfaceThree});

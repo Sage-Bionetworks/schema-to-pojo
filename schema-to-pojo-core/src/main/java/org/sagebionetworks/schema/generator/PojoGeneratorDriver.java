@@ -6,9 +6,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.JCodeModel;
@@ -203,13 +207,14 @@ public class PojoGeneratorDriver {
 	 * @throws IllegalArgumentException if a reference cannot be resolved.
 	 */
 	protected static List<ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, List<ObjectSchema> list){
+		Stack<ObjectSchema> recursiveAnchors = new Stack<ObjectSchema>();
 		List<ObjectSchema> results = new ArrayList<ObjectSchema>();
 		for(ObjectSchema schema: list){
 			// If this schema is a reference then replace it.
-			schema = replaceRefrence(map, schema, schema);
+			schema = replaceRefrence(map, schema, recursiveAnchors);
 			results.add(schema);
 			// Replace all references in this schema
-			recursiveFindAndReplaceAllReferencesSchemas(map, schema);
+			recursiveFindAndReplaceAllReferencesSchemas(map, schema, recursiveAnchors);
 		}
 		return results;
 	}
@@ -217,15 +222,21 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
+	protected static void recursiveFindAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema, Stack<ObjectSchema> recursiveAnchors){
+		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
+			recursiveAnchors.push(schema);
+		}
 		// First replace for each child
 		Iterator<ObjectSchema> it = schema.getSubSchemaIterator();
 		while(it.hasNext()){
 			ObjectSchema sub = it.next();
-			recursiveFindAndReplaceAllReferencesSchemas(map, sub);
+			recursiveFindAndReplaceAllReferencesSchemas(map, sub, recursiveAnchors);
 		}
 		// Now do the replace for this object
-		findAndReplaceAllReferencesSchemas(map,schema);
+		findAndReplaceAllReferencesSchemas(map,schema, recursiveAnchors);
+		if(Boolean.TRUE.equals(schema.get$recursiveAnchor())) {
+			recursiveAnchors.pop();
+		}
 	}
 	
 	/**
@@ -233,39 +244,39 @@ public class PojoGeneratorDriver {
 	 * @param map
 	 * @param schema
 	 */
-	protected static void findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema){
+	protected static void findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> map, ObjectSchema schema, Stack<ObjectSchema> recursiveAnchors){
 		// Properties
 		if(schema.getProperties() != null){
-			schema.setProperties(findAndReplaceAllReferencesSchemas(map, schema.getProperties(), schema));
+			schema.setProperties(findAndReplaceAllReferencesSchemas(map, schema.getProperties(), recursiveAnchors));
 		}
 		// Additional
 		if(schema.getAdditionalProperties() != null){
-			schema.setAdditionalProperties(findAndReplaceAllReferencesSchemas(map, schema.getAdditionalProperties(), schema));
+			schema.setAdditionalProperties(findAndReplaceAllReferencesSchemas(map, schema.getAdditionalProperties(), recursiveAnchors));
 		}
 		// Items
 		if(schema.getItems() != null){
-			schema.setItems(replaceRefrence(map, schema.getItems(), schema));
+			schema.setItems(replaceRefrence(map, schema.getItems(), recursiveAnchors));
 		}
 		// Key
 		if (schema.getKey() != null) {
-			schema.setKey(replaceRefrence(map, schema.getKey(), schema));
+			schema.setKey(replaceRefrence(map, schema.getKey(), recursiveAnchors));
 		}
 		// Value
 		if (schema.getValue() != null) {
-			schema.setValue(replaceRefrence(map, schema.getValue(), schema));
+			schema.setValue(replaceRefrence(map, schema.getValue(), recursiveAnchors));
 		}
 		// AdditionItems
 		if(schema.getAdditionalItems() != null){
-			schema.setAdditionalItems(replaceRefrence(map, schema.getAdditionalItems(), schema));
+			schema.setAdditionalItems(replaceRefrence(map, schema.getAdditionalItems(), recursiveAnchors));
 		}
 		// Extends
 		if(schema.getExtends() != null){
-			schema.setExtends(replaceRefrence(map, schema.getExtends(), schema));
+			schema.setExtends(replaceRefrence(map, schema.getExtends(), recursiveAnchors));
 		}
 		// Implements
 		if(schema.getImplements() != null){
 			for(int i=0; i<schema.getImplements().length; i++){
-				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], schema);
+				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], recursiveAnchors);
 			}
 		}
 	}
@@ -277,13 +288,13 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static LinkedHashMap<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, ObjectSchema self){
+	protected static LinkedHashMap<String, ObjectSchema> findAndReplaceAllReferencesSchemas(Map<String, ObjectSchema> registry, Map<String, ObjectSchema> toCheck, Stack<ObjectSchema> recursiveAnchors){
 		LinkedHashMap<String, ObjectSchema> newMap = new LinkedHashMap<String, ObjectSchema>();
 		Iterator<String> it = toCheck.keySet().iterator();
 		while(it.hasNext()){
 			String key = it.next();
 			ObjectSchema schema = toCheck.get(key);
-			schema = replaceRefrence(registry, schema, self);
+			schema = replaceRefrence(registry, schema, recursiveAnchors);
 			newMap.put(key, schema);
 		}
 		return newMap;
@@ -296,22 +307,45 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, ObjectSchema self) {
+	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, Stack<ObjectSchema> recursiveAnchors) {
 		// Nothing to do if it is not a reference.
-		if (toCheck.getRef() == null)
+		if (toCheck.getRef() == null && toCheck.get$recursiveRef() == null) {
 			return toCheck;
+		}
+		if(ObjectSchemaImpl.SELF_REFERENCE.equals(toCheck.get$recursiveRef())){
+			if(recursiveAnchors.isEmpty()) {
+				throw new IllegalArgumentException("Found a $recursiveRef but did not find a matching $recursiveAnchor");
+			}
+			return createRecurisveInstanceCopy(recursiveAnchors.peek());
+			//return recursiveAnchors.peek();
+		}
 		// Is it a self reference?
-		if (ObjectSchema.SELF_REFERENCE.equals(toCheck.getRef().toString())) {
-			return self;
-		} else {
-			// Find it in the registry
-			ObjectSchema fromRegistry = registry.get(toCheck.getRef());
-			if (fromRegistry == null) throw new IllegalArgumentException("Cannot find the referenced schema: "+ toCheck.getRef());
-			return fromRegistry;
+		if (ObjectSchemaImpl.SELF_REFERENCE.equals(toCheck.getRef())) {
+			return toCheck;
+		}
+		// Find it in the registry
+		ObjectSchema fromRegistry = registry.get(toCheck.getRef());
+		if (fromRegistry == null) throw new IllegalArgumentException("Cannot find the referenced schema: "+ toCheck.getRef());
+		return fromRegistry;
+	}
+	
+	/**
+	 * Create a copy of the given schema that is marked as a recursive instance.
+	 * @param originalSchema
+	 * @return
+	 */
+	protected static ObjectSchema createRecurisveInstanceCopy(ObjectSchema originalSchema) {
+		try {
+			// copy the original schema and mark the copy as a recursive reference.
+			JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+			originalSchema.writeToJSONObject(adapter);
+			ObjectSchema copy = new ObjectSchemaImpl();
+			copy.initializeFromJSONObject(adapter);
+			copy.setIs$RecursiveRefInstance(true);
+			return copy;
+		} catch (JSONObjectAdapterException e) {
+			throw new RuntimeException(e);
 		}
 	}
-
-
-
 
 }
