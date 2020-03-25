@@ -100,6 +100,8 @@ public class ObjectSchemaTest {
 			toTest.setType(TYPE.INTEGER);
 		}else if(field.getType() == Boolean.class){
 			field.set(toTest, Boolean.TRUE);
+		}else if(field.getType() == boolean.class){
+			field.set(toTest, Boolean.FALSE);
 		}else if(field.getType() == Object.class){
 			field.set(toTest, "SomeObjectString");
 		}else if(field.getType() == FORMAT.class){

@@ -385,11 +385,13 @@ public class PojoGeneratorDriverTest {
 		assertEquals(1, list.size());
 		ObjectSchema newRoot = list.get(0);
 		assertEquals(newRoot.getId(), "root");
+		assertFalse(newRoot.is$RecursiveRefInstance());
 		ObjectSchema listOfRoots = newRoot.getProperties().get("listOfRoots");
 		assertNotNull(listOfRoots);
 		assertNotNull(listOfRoots.getItems());
 		// recursive reference should be replaced with root.
 		assertEquals("root", listOfRoots.getItems().getId());
+		assertTrue(listOfRoots.getItems().is$RecursiveRefInstance());
 		
 		ObjectSchema childWithSiblings = newRoot.getProperties().get("childWithSiblings");
 		assertNotNull(childWithSiblings);
@@ -397,6 +399,7 @@ public class PojoGeneratorDriverTest {
 		assertNotNull(sibling);
 		// recursive reference should be replaced with child (not root).
 		assertEquals("child", sibling.getId());
+		assertTrue(sibling.is$RecursiveRefInstance());
 	}
 
 	@Test
@@ -820,6 +823,18 @@ public class PojoGeneratorDriverTest {
 		assertEquals(0, methods.size());
 		// Enums should have no constructors
 		assertFalse(impl.constructors().hasNext());
+	}
+	
+	@Test
+	public void testCreateRecurisveInstanceCopy() {
+		ObjectSchema toCopy = new ObjectSchemaImpl();
+		toCopy.setId("recursive");
+		assertFalse(toCopy.is$RecursiveRefInstance());
+		// call under test
+		ObjectSchema clone = PojoGeneratorDriver.createRecurisveInstanceCopy(toCopy);
+		assertNotNull(clone);
+		assertEquals(toCopy.getId(), clone.getId());
+		assertTrue(clone.is$RecursiveRefInstance());
 	}
 	/**
 	 * Helper to declare a model object to string.

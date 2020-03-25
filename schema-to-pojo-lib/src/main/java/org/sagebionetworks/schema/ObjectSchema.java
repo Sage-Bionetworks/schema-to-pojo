@@ -10,43 +10,6 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 public interface ObjectSchema extends JSONEntity {
 
-	public static final String JSON_DEPENDENCIES = "dependencies";
-	public static final String JSON_SCHEMA = "schema";
-	public static final String JSON_DISALLOW = "disallow";
-	public static final String JSON_DIVISIBLE_BY = "divisibleBy";
-	public static final String JSON_TITLE = "title";
-	public static final String JSON_MAX_LENGTH = "maxLength";
-	public static final String JSON_MIN_LENGTH = "minLength";
-	public static final String JSON_PATTERN = "pattern";
-	public static final String JSON_MAX_ITEMS = "maxItems";
-	public static final String JSON_MIN_ITEMS = "minItems";
-	public static final String JSON_TRANSIENT = "transient";
-	public static final String JSON_ID = "id";
-	public static final String JSON_NAME = "name";
-	public static final String JSON_TYPE = "type";
-	public static final String JSON_PROPERTIES = "properties";
-	public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
-	public static final String JSON_ITEMS = "items";
-	public static final String JSON_UNIQUE_ITEMS = "uniqueItems";
-	public static final String JSON_ADDITIONAL_ITEMS = "additionalItems";
-	public static final String JSON_KEY = "key";
-	public static final String JSON_VALUE = "value";
-	public static final String JSON_REQUIRED = "required";
-	public static final String JSON_MINIMUM = "minimum";
-	public static final String JSON_MAXIMUM = "maximum";
-	public static final String JSON_DESCRIPTION = "description";
-	public static final String JSON_IMPLEMENTS = "implements";
-	public static final String JSON_$REF = "$ref";
-	public static final String JSON_EXTENDS = "extends";
-	public static final String JSON_FORMAT = "format";
-	public static final String JSON_ENUM = "enum";
-	public static final String JSON_CONTENT_ENCODING = "contentEncoding";
-	public static final String SELF_REFERENCE = "#";
-	public static final String JSON_DEFAULT = "default";
-	public static final String JSON_LINKS = "links";
-	public static final String JSON_RECURSIVE_ANCHOR = "$recursiveAnchor";
-	public static final String JSON_RECURSIVE_REF = "$recursiveRef";
-	
 	/**
 	 * For the case where a POJO's fields types are an interfaces or abstract class,
 	 * we need to know the type of the concrete class used at runtime, to support parsing
@@ -995,5 +958,22 @@ public interface ObjectSchema extends JSONEntity {
 	 * @return
 	 */
 	public String getPackageName();
+	
+	/**
+	 * This is a flag that is used to allow callers to walk a trees of recursive
+	 * instances without a stack overflow. The root instance will return false,
+	 * while all leaf instances will return true. Specifically, an instance that
+	 * replaces a $recursiveRef will return true, while all other instances will
+	 * return false.
+	 * 
+	 * @return
+	 */
+	public boolean is$RecursiveRefInstance();
+	
+	/**
+	 * @See {{@link #is$RecursiveRefInstance()}
+	 * @param is$RecursiveRefInstance
+	 */
+	public void setIs$RecursiveRefInstance(boolean is$RecursiveRefInstance);
 
 }

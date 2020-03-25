@@ -57,8 +57,14 @@ public class EffectiveSchemaUtil {
 	 * @throws JSONObjectAdapterException
 	 */
 	public static ObjectSchema generateEffectiveSchema(ObjectSchema schema) throws JSONObjectAdapterException {
-		if (schema == null)
+		if (schema == null) {
 			throw new IllegalArgumentException("Schema cannot be null");
+		}
+		if(schema.is$RecursiveRefInstance()) {
+			ObjectSchemaImpl ref = new ObjectSchemaImpl();
+			ref.set$recursiveRef(ObjectSchemaImpl.SELF_REFERENCE);
+			return ref;
+		}
 		// First make a copy of the schema
 		JSONObjectAdapter adapter = schema.writeToJSONObject(new JSONObjectAdapterImpl());
 		adapter = new JSONObjectAdapterImpl(adapter.toJSONString());

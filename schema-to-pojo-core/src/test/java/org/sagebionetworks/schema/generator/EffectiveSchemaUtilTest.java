@@ -224,6 +224,18 @@ public class EffectiveSchemaUtilTest {
 	}
 	
 	@Test
+	public void testGenerateJSONofEffectiveSchemaRecursiveRef() throws JSONObjectAdapterException{
+		ObjectSchema recursiveRef = new ObjectSchemaImpl();
+		recursiveRef.setId("id.recursive");
+		recursiveRef.setIs$RecursiveRefInstance(true);
+		
+		ObjectSchema resultSchema = EffectiveSchemaUtil.generateEffectiveSchema(recursiveRef);
+		assertNotNull(resultSchema);
+		assertNull(resultSchema.getId());
+		assertEquals(ObjectSchemaImpl.SELF_REFERENCE, resultSchema.get$recursiveRef());
+	}
+	
+	@Test
 	public void testGenerateJSONofEffectiveSchemaWithEnum() throws JSONObjectAdapterException {
 		String json = EffectiveSchemaUtil.generateJSONofEffectiveSchema(enumSchema);
 		assertNotNull(json);

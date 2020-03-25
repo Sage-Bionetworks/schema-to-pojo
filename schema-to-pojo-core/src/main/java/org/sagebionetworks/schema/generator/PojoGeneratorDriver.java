@@ -1,8 +1,5 @@
 package org.sagebionetworks.schema.generator;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,8 +9,10 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 
 import com.sun.codemodel.JCodeModel;
@@ -313,15 +312,15 @@ public class PojoGeneratorDriver {
 		if (toCheck.getRef() == null && toCheck.get$recursiveRef() == null) {
 			return toCheck;
 		}
-		if(ObjectSchema.SELF_REFERENCE.equals(toCheck.get$recursiveRef())){
+		if(ObjectSchemaImpl.SELF_REFERENCE.equals(toCheck.get$recursiveRef())){
 			if(recursiveAnchors.isEmpty()) {
 				throw new IllegalArgumentException("Found a $recursiveRef but did not find a matching $recursiveAnchor");
 			}
-			return createRecurisveProxy(recursiveAnchors.peek());
+			return createRecurisveInstanceCopy(recursiveAnchors.peek());
 			//return recursiveAnchors.peek();
 		}
 		// Is it a self reference?
-		if (ObjectSchema.SELF_REFERENCE.equals(toCheck.getRef())) {
+		if (ObjectSchemaImpl.SELF_REFERENCE.equals(toCheck.getRef())) {
 			return toCheck;
 		}
 		// Find it in the registry
@@ -331,22 +330,22 @@ public class PojoGeneratorDriver {
 	}
 	
 	/**
-	 * A recursive proxy behaves exactly like a regular object except when it is written out to JSON.
-	 * @param toProxy
+	 * Create a copy of the given schema that is marked as a recursive instance.
+	 * @param originalSchema
 	 * @return
 	 */
-	protected static ObjectSchema createRecurisveProxy(ObjectSchema toProxy) {
-		return (ObjectSchema) Proxy.newProxyInstance(ObjectSchema.class.getClassLoader(),
-				new Class[] { ObjectSchema.class }, (Object proxy, Method method, Object[] args) -> {
-					// When a recursive schema reference is written back to json we write it as a  object is written back to JSON
-					if(method.getName().equals("writeToJSONObject") && args.length == 1 && (args[0] instanceof JSONObjectAdapter)) {
-						JSONObjectAdapter copy = (JSONObjectAdapter)args[0];
-						copy.put("$recursiveRef", "#");
-						return copy;
-					}
-					// Most method we just want to forward to the original object
-					return method.invoke(toProxy, args);
-				});
+	protected static ObjectSchema createRecurisveInstanceCopy(ObjectSchema originalSchema) {
+		try {
+			// copy the original schema and mark the copy as a recursive reference.
+			JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl();
+			originalSchema.writeToJSONObject(adapter);
+			ObjectSchema copy = new ObjectSchemaImpl();
+			copy.initializeFromJSONObject(adapter);
+			copy.setIs$RecursiveRefInstance(true);
+			return copy;
+		} catch (JSONObjectAdapterException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

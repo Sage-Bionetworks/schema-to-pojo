@@ -7,10 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
-import org.sagebionetworks.schema.adapter.JSONEntity;
-import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -524,6 +521,16 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	 * to its own root, identified by the empty fragment URI reference ("#"). 
 	 */
 	private String $recursiveRef;
+	
+	
+	/*
+	 * This is a flag that is used to allow callers to walk a trees of recursive
+	 * instances without a stack overflow. The root instance will return false,
+	 * while all leaf instances will return true. Specifically, an instance that
+	 * replaces a $recursiveRef will return true, while all other instances will
+	 * return false.
+	 */
+	private boolean is$RecursiveRefInstance = false;
 	
 	
 	
@@ -1650,6 +1657,7 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		result = prime * result + ((exclusiveMinimum == null) ? 0 : exclusiveMinimum.hashCode());
 		result = prime * result + ((format == null) ? 0 : format.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (is$RecursiveRefInstance ? 1231 : 1237);
 		result = prime * result + ((items == null) ? 0 : items.hashCode());
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + Arrays.hashCode(links);
@@ -1753,6 +1761,8 @@ public class ObjectSchemaImpl implements ObjectSchema {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		if (is$RecursiveRefInstance != other.is$RecursiveRefInstance)
+			return false;
 		if (items == null) {
 			if (other.items != null)
 				return false;
@@ -1847,25 +1857,19 @@ public class ObjectSchemaImpl implements ObjectSchema {
 
 	@Override
 	public String toString() {
-		return "ObjectSchema [name=" + name + ", type=" + type
-				+ ", properties=" + properties + ", additionalProperties="
-				+ additionalProperties + ", items=" + items
-				+ ", additionalItems=" + additionalItems + ", required="
-				+ required + ", dependencies=" + Arrays.toString(dependencies)
-				+ ", minimum=" + minimum + ", maximum=" + maximum
-				+ ", exclusiveMinimum=" + exclusiveMinimum
-				+ ", exclusiveMaximum=" + exclusiveMaximum + ", minItems="
-				+ minItems + ", maxItems=" + maxItems + ", uniqueItems="
-				+ uniqueItems + ", _transient=" + _transient + ", pattern="
-				+ pattern + ", minLength=" + minLength + ", maxLength="
-				+ maxLength + ", _enum=" + Arrays.toString(_enum)
-				+ ", _default=" + _default + ", title=" + title
-				+ ", description=" + description + ", format=" + format
-				+ ", divisibleBy=" + divisibleBy + ", disallow=" + disallow
-				+ ", _extends=" + _extends + ", _implements="
-				+ Arrays.toString(_implements) + ", id=" + id + ", ref=" + ref
-				+ ", schema=" + schema + ", contentEncoding=" + contentEncoding
-				+ "]";
+		return "ObjectSchemaImpl [name=" + name + ", type=" + type + ", properties=" + properties
+				+ ", additionalProperties=" + additionalProperties + ", items=" + items + ", additionalItems="
+				+ additionalItems + ", key=" + key + ", value=" + value + ", required=" + required + ", dependencies="
+				+ Arrays.toString(dependencies) + ", minimum=" + minimum + ", maximum=" + maximum
+				+ ", exclusiveMinimum=" + exclusiveMinimum + ", exclusiveMaximum=" + exclusiveMaximum + ", minItems="
+				+ minItems + ", maxItems=" + maxItems + ", uniqueItems=" + uniqueItems + ", _transient=" + _transient
+				+ ", pattern=" + pattern + ", minLength=" + minLength + ", maxLength=" + maxLength + ", _enum="
+				+ Arrays.toString(_enum) + ", _default=" + _default + ", title=" + title + ", description="
+				+ description + ", format=" + format + ", divisibleBy=" + divisibleBy + ", disallow=" + disallow
+				+ ", _extends=" + _extends + ", _implements=" + Arrays.toString(_implements) + ", id=" + id + ", ref="
+				+ ref + ", schema=" + schema + ", contentEncoding=" + contentEncoding + ", links="
+				+ Arrays.toString(links) + ", $recursiveAnchor=" + $recursiveAnchor + ", $recursiveRef=" + $recursiveRef
+				+ ", is$RecursiveRefInstance=" + is$RecursiveRefInstance + "]";
 	}
 
 	@Override
@@ -1926,6 +1930,11 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	@Override
 	public JSONObjectAdapter writeToJSONObject(JSONObjectAdapter copy)
 			throws JSONObjectAdapterException {
+		if(this.is$RecursiveRefInstance) {
+			// prevent stack overflow when writing recursive references
+			copy.put("$recursiveRef", "#");
+			return copy;
+		}
 		if (this.name != null) {
 			copy.put(JSON_NAME, this.name);
 		}
@@ -2508,5 +2517,15 @@ public class ObjectSchemaImpl implements ObjectSchema {
 					+ schema + "because adapter " + "has a unsupported type of "
 					+ type);
 		}
+	}
+
+	@Override
+	public boolean is$RecursiveRefInstance() {
+		return is$RecursiveRefInstance;
+	}
+
+	@Override
+	public void setIs$RecursiveRefInstance(boolean is$RecursiveRefInstance) {
+		this.is$RecursiveRefInstance = is$RecursiveRefInstance;
 	}
 }

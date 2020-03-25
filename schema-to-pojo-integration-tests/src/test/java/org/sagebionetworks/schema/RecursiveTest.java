@@ -2,6 +2,7 @@ package org.sagebionetworks.schema;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -48,5 +49,9 @@ public class RecursiveTest {
 		ObjectSchema items = listSchema.getItems();
 		assertNotNull(items);
 		assertEquals(items.get$recursiveRef(), "#");
+		ObjectSchema refToSelf = schema.getProperties().get("refToSelf");
+		assertNotNull(refToSelf);
+		assertEquals(refToSelf.get$recursiveRef(), "#");
+		assertNull(refToSelf.getProperties());
 	}
 }
