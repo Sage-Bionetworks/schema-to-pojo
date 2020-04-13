@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.4.3</version>
+		<version>0.4.4</version>
 	</parent>
 	<artifactId>schema-to-pojo-integration-tests</artifactId>
 	<name>schema-to-pojo-integration-tests</name>
@@ -34,6 +35,26 @@
 							<packageName>org.sagebionetworks</packageName>
 							<outputDirectory>target/auto-generated-pojos</outputDirectory>
 							<createRegister>org.sagebionetworks.Register</createRegister>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- This plugin adds the auto-generated code to the classpath, so eclipse will automatically include them.-->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/auto-generated-pojos/</source>
+							</sources>
 						</configuration>
 					</execution>
 				</executions>

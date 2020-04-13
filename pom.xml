@@ -1,9 +1,10 @@
-<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sagebionetworks</groupId>
 	<artifactId>schema-to-pojo</artifactId>
-	<version>0.4.3</version>
+	<version>0.4.4</version>
 	<packaging>pom</packaging>
 	<name>schema-to-pojo</name>
 	<description>Container for the rest of the sub-projects</description>
@@ -51,7 +52,19 @@
 						<target>1.8</target>
 					</configuration>
 				</plugin>
-
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.0.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
@@ -90,10 +103,10 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-								        <execute>
-								          <runOnIncremental>true</runOnIncremental>
-								          <runOnConfiguration>true</runOnConfiguration>
-								        </execute>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -117,7 +130,7 @@
 						</archive>
 					</configuration>
 				</plugin>
-						<!-- Tell the eclipse m2e plugin to execute these lifecycle mappings
+				<!-- Tell the eclipse m2e plugin to execute these lifecycle mappings 
 					See: https://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -184,7 +197,7 @@
 	</distributionManagement>
 	<profiles>
 		<profile>
-	      	<id>release-parent-pom</id>
+			<id>release-parent-pom</id>
 			<distributionManagement>
 				<repository>
 					<id>sagebionetworks</id>
@@ -197,6 +210,6 @@
 					<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-snapshots-local</url>
 				</snapshotRepository>
 			</distributionManagement>
-     </profile>
+		</profile>
 	</profiles>
 </project>
