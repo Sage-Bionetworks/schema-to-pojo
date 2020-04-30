@@ -656,7 +656,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 //		System.out.println(declareToString(constructor));
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("arrayName = new java.util.HashSet<java.lang.String>()") > 0);
+		assertTrue(methodString.indexOf("arrayName = new java.util.LinkedHashSet<java.lang.String>()") > 0);
 	}
 	
 	@Test
@@ -1973,7 +1973,7 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
-		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<org.sample.Animals, org.sample.Pets>();"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.LinkedHashMap<org.sample.Animals, org.sample.Pets>();"));
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONMapAdapter __jsonMap = adapter.getJSONMap(_KEY_MAPWHOSEITEMISANENUM);"));
 		assertTrue(methodString.contains("org.sample.Pets __value;"));
@@ -2098,7 +2098,7 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
-		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.HashMap<java.lang.String, org.sample.Pets>();"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnEnum = new java.util.LinkedHashMap<java.lang.String, org.sample.Pets>();"));
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __jsonStringMap = adapter.getJSONObject(_KEY_MAPWHOSEITEMISANENUM);"));
 		assertTrue(methodString.contains("org.sample.Pets __value;"));
@@ -2165,7 +2165,7 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// check that map of enumeration got created successfully, and
 		// assignments are correct
-		assertTrue(methodString.contains("mapWhoseItemIsAnInterface = new java.util.HashMap<java.lang.String, org.sample.SampleInterface>();"));
+		assertTrue(methodString.contains("mapWhoseItemIsAnInterface = new java.util.LinkedHashMap<java.lang.String, org.sample.SampleInterface>();"));
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __jsonStringMap = adapter.getJSONObject(_KEY_MAPWHOSEITEMISANINTERFACE);"));
 		assertTrue(methodString.contains("org.sample.SampleInterface __value;"));

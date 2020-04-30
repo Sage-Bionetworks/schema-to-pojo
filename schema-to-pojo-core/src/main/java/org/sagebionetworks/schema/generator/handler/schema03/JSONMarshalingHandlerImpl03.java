@@ -2,9 +2,9 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.sagebionetworks.schema.ExtraFields;
@@ -216,7 +216,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// Create a set
 					thenBlock.assign(
 							field,
-							JExpr._new(classType.owner().ref(HashSet.class)
+							JExpr._new(classType.owner().ref(LinkedHashSet.class)
 									.narrow(arrayTypeClass)));
 				}
 				// Create a local array
@@ -277,7 +277,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 				thenBlock.assign(
 						field,
-						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass, valueTypeClass)));
+						JExpr._new(classType.owner().ref(LinkedHashMap.class).narrow(keyTypeClass, valueTypeClass)));
 				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "jsonMap", param.invoke("getJSONMap")
 						.arg(propNameConstant));
 
@@ -331,7 +331,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JClass valueTypeClass = typeClass.getTypeParameters().get(1);
 				thenBlock.assign(
 						field,
-						JExpr._new(classType.owner().ref(HashMap.class).narrow(keyTypeClass, valueTypeClass)));
+						JExpr._new(classType.owner().ref(LinkedHashMap.class).narrow(keyTypeClass, valueTypeClass)));
 				JVar jsonMap = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "jsonStringMap", param.invoke("getJSONObject")
 						.arg(propNameConstant));
 
