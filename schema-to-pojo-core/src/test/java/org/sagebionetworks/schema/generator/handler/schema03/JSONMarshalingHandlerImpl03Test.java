@@ -1,10 +1,12 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -13,20 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.codemodel.JClass;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.sagebionetworks.schema.EnumValue;
-import org.sagebionetworks.schema.FORMAT;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.ObjectSchemaImpl;
-import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
-import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
-
 import com.sun.codemodel.JBlock;
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDeclaration;
@@ -40,6 +30,17 @@ import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.EnumValue;
+import org.sagebionetworks.schema.FORMAT;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
+import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
+import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
 
 public class JSONMarshalingHandlerImpl03Test {
 
@@ -53,7 +54,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	ObjectSchema schemaInterfaceImpl;
 
 
-	@Before
+	@BeforeEach
 	public void before() throws JClassAlreadyExistsException,
 			ClassNotFoundException {
 		codeModel = new JCodeModel();
@@ -126,16 +127,6 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Make sure there is a call to super.
 		assertTrue(constructorString.indexOf("super(adapter);") > 0);
 //		printClassToConsole(childClasss);
-	}
-	
-	@Test
-	public void testCreateMissingFieldsField() {
-		// Now handle the
-		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JFieldVar extraFields = handler.createMissingFieldField(sampleClass);
-
-		hasFragments(extraFields,
-				"private java.util.Map<java.lang.String, java.lang.Object> extraFieldsFromNewerVersion = null;");
 	}
 
 	
@@ -581,8 +572,6 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
-		// Is the primitive assigned correctly?
-		assertTrue(methodString.contains("extraFieldsFromNewerVersion = org.sagebionetworks.schema.ExtraFields.createExtraFieldsMap(adapter, _ALL_KEYS);"));
 	}
 	
 	/**
@@ -603,7 +592,6 @@ public class JSONMarshalingHandlerImpl03Test {
 			}
 		}
 		toAddTo.field(JMod.PRIVATE | JMod.FINAL | JMod.STATIC, String[].class, ObjectSchema.ALL_KEYS_NAME);
-		toAddTo.field(JMod.PRIVATE, Map.class, ObjectSchema.EXTRA_FIELDS);
 		return vars;
 	}
 	
@@ -803,24 +791,6 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = generateToString(rhs);
 //		System.out.println(methodString);
 		assertEquals("uriName", methodString);
-	}
-
-
-	@Test
-	public void testWriteToJSONObjectExtraFields() throws JClassAlreadyExistsException {
-		// Set the property type to be the same as the object
-		ObjectSchema propertySchema = schema;
-		String propName = "propName";
-		schema.putProperty(propName, propertySchema);
-		// Make sure this field exits
-		sampleClass.field(JMod.PRIVATE, sampleClass, propName);
-		addKeyConstant(sampleClass, propName);
-		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
-		// Now get the string and check it.
-		hasFragments(constructor,
-				"if (extraFieldsFromNewerVersion!= null) {",
-				"AdapterCollectionUtils.writeToObject(adapter, extraFieldsFromNewerVersion);");
 	}
 
 	@Test
@@ -1209,13 +1179,15 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.indexOf("adapter.put(_KEY_ENUMNAME, enumName.name());") > 0);
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testAddJSONMarshalingInterfance(){
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
 		ObjectSchema interfaceSchema = new ObjectSchemaImpl();
 		interfaceSchema.setType(TYPE.INTERFACE);
 		interfaceSchema.setName("SampleInterface");
-		handler.addJSONMarshaling(interfaceSchema, sampleInterface, null);
+		assertThrows(IllegalArgumentException.class, () ->
+			handler.addJSONMarshaling(interfaceSchema, sampleInterface, null)
+		);
 	}
 	
 	@Test
@@ -1628,7 +1600,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	 * Tests that initializeFromJSONObject works for properties
 	 * that have a default object set.
 	 */
-	@Ignore
+	@Disabled
 	@Test
 	public void testCreateMethodInitializeFromJSONWithDefaultObjectProperty() throws Exception {
 		//make a property that has default sent with a JSONObject
@@ -2109,7 +2081,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCreateMethodInitializeFromJSONObjectStringKeyMap_nullValue() throws Exception {
 		// create a property that is an Map
 		ObjectSchema propertySchema = new ObjectSchemaImpl();
@@ -2132,8 +2104,10 @@ public class JSONMarshalingHandlerImpl03Test {
 
 		// value type is explicitly set to null
 		propertySchema.setValue(null);
-		//method under test
-		JMethod method = handler.createMethodInitializeFromJSONObject(schema, sampleClass);
+		assertThrows(IllegalArgumentException.class, () ->
+			//method under test
+			handler.createMethodInitializeFromJSONObject(schema, sampleClass)
+		);
 	}
 
 	@Test
@@ -2238,7 +2212,7 @@ public class JSONMarshalingHandlerImpl03Test {
 	 *
 	 * @throws Exception
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWriteToJSONObjectStringKeyMap_nullValue() throws Exception {
 		// make an array property
 		ObjectSchema propertySchema = new ObjectSchemaImpl();
@@ -2264,6 +2238,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		addKeyConstant(sampleClass, propName);
 
 		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
-		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+		assertThrows(IllegalArgumentException.class, () ->
+				handler.createWriteToJSONObject(schema, sampleClass)
+		);
 	}
 }

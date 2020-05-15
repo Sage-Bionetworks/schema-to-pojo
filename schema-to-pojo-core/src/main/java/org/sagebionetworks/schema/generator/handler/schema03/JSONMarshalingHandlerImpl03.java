@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
@@ -56,9 +55,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// Make sure this class implements JSONEntity
 		classType._implements(JSONEntity.class);
 
-		// Create a field to handle overflow from newer type definitions
-		JFieldVar extraFields = createMissingFieldField(classType);
-
 		// Create the init method
 		JMethod initMethod = createMethodInitializeFromJSONObject(classSchema, classType, interfaceFactoryGenerator);
 		// setup a constructor.
@@ -66,12 +62,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 		// Add the second method.
 		createWriteToJSONObject(classSchema, classType);
-	}
-
-	JFieldVar createMissingFieldField(JDefinedClass classType) {
-		JFieldVar extraFields = classType.field(JMod.PRIVATE, classType.owner().ref(Map.class).narrow(String.class).narrow(Object.class),
-				ObjectSchema.EXTRA_FIELDS, JExpr._null());
-		return extraFields;
 	}
 	
 	/**
@@ -129,18 +119,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 		// First validate against the schema
 		JFieldVar allKeyNames = classType.fields().get(ObjectSchema.ALL_KEYS_NAME);
-		
-		JInvocation invocation = classType.owner().ref(ExtraFields.class).staticInvoke("createExtraFieldsMap")
-				.arg(param);
-		if(allKeyNames != null) {
-			invocation.arg(allKeyNames);
-		}
-		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
-		if (extraFields == null) {
-			throw new IllegalArgumentException("Failed to find the JFieldVar for property: '" + ObjectSchema.EXTRA_FIELDS + "' on class: "
-					+ classType.name());
-		}
-		body.assign(extraFields, invocation);
 		
 		JFieldRef conreteTypeRef = classType.owner().ref(ObjectSchema.class).staticRef("CONCRETE_TYPE");
         
@@ -692,8 +670,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JBlock body = method.body();
 		// Add the object type.
 		this.getClass().getName();
-		
-		createWriteExtraFields(classType, body, param);
 
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
@@ -853,12 +829,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					"Failed to find the JFieldVar for property: '"
 							+ propName + "' on class: " + classType.name());
 		return field;
-	}
-	
-	void createWriteExtraFields(JDefinedClass classType, JBlock body, JVar jsonObject) {
-		JFieldVar extraFields = classType.fields().get(ObjectSchema.EXTRA_FIELDS);
-		JBlock thenBlock = body._if(extraFields.ne(JExpr._null()))._then();
-		thenBlock.staticInvoke(classType.owner().ref(AdapterCollectionUtils.class), "writeToObject").arg(jsonObject).arg(extraFields);
 	}
 
 	private JExpression createEqNullCheck(JVar value, JExpression createExpresssionToSetFromArray) {
