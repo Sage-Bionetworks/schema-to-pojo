@@ -1,9 +1,10 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.ABImpl;
 import org.sagebionetworks.AllTypes;
 import org.sagebionetworks.InterfaceA;
@@ -180,7 +181,8 @@ public class AllTypesTest {
 		JSONObjectAdapter cloneAdapter = new JSONObjectAdapterImpl();
 		clone.writeToJSONObject(cloneAdapter);
 		String cloneJson = cloneAdapter.toJSONString();
-		assertEquals("{\"extra_field\":\"value\",\"stringProp\":\"somevalue\"}", cloneJson);
+		// extra field was ignored and not re-emitted
+		assertEquals("{\"stringProp\":\"somevalue\"}", cloneJson);
 	}
 
 	@Test

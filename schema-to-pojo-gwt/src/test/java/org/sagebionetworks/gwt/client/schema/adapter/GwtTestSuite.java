@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.sagebionetworks.schema.ExtraFields;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
@@ -542,32 +541,9 @@ public class GwtTestSuite extends GWTTestCase {
 		String totallyBadProperty = "cccc";
 		assertFalse(adapterObject.validatePatternProperty(pattern, totallyBadProperty));
 	}
+
 	
-	@Test
-	public void testExtraFieldsForGWT() throws JSONObjectAdapterException {
-		
-		adapterObject.put("keyOne", "valueOne");
-		adapterObject.put("keyTwo", "valueTwo");
-		adapterObject.put("extraKey", "extraValue");
-	
-		Map<String,Object> extraFields = ExtraFields.createExtraFieldsMap(adapterObject, "keyOne", "keyTwo");
-		assertNotNull(extraFields);
-		assertEquals(1, extraFields.size());
-		assertEquals("extraValue", extraFields.get("extraKey"));
-	}
-	
-	@Test
-	public void testExtraFieldsForGWTArray() throws JSONObjectAdapterException {
-		adapterObject.put("keyOne", "valueOne");
-		adapterObject.put("keyTwo", "valueTwo");
-		adapterArray.put(1, "extraValue");
-		adapterObject.put("extraKey", adapterArray);
-	
-		Map<String,Object> extraFields = ExtraFields.createExtraFieldsMap(adapterObject, "keyOne", "keyTwo");
-		assertNotNull(extraFields);
-		assertEquals(1, extraFields.size());
-		assertEquals(adapterArray, extraFields.get("extraKey"));
-	}
+
 	
 	@Test
 	public void testAdapterCollectionUtilsMapOfStringCollectionRoundTrip() throws JSONObjectAdapterException{

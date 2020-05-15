@@ -1,16 +1,19 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.ABImpl;
 import org.sagebionetworks.ABImpl2;
 import org.sagebionetworks.ABImpl2newversion;
 import org.sagebionetworks.InterfaceA;
-import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 import org.sagebionetworks.schema.adapter.org.json.JSONArrayAdapterImpl;
@@ -47,7 +50,7 @@ public class ExtraFieldsTest {
 	}
 
 	@Test
-	public void testRoundTripToOldVersion() throws JSONObjectAdapterException {
+	public void testToOldVersion() throws JSONObjectAdapterException {
 		ABImpl2newversion impl = new ABImpl2newversion();
 		impl.setFromMe2("from me2 value");
 		impl.setAlsoFromInterfaceA(123.456);
@@ -71,13 +74,6 @@ public class ExtraFieldsTest {
 		assertEquals(impl.getFromMe2(), clone.getFromMe2());
 		assertEquals(impl.getAlsoFromInterfaceA(), clone.getAlsoFromInterfaceA());
 		assertEquals(impl.getAlsoFromInterfaceB(), clone.getAlsoFromInterfaceB());
-
-		jsonString = EntityFactory.createJSONStringForEntity(clone);
-		jsonString = jsonString.replace("ABImpl2", "ABImpl2newversion");
-		ABImpl2newversion originalClone = EntityFactory.createEntityFromJSONString(jsonString, ABImpl2newversion.class);
-		assertNotNull(impl.getNewField());
-		assertNotNull(impl.getExtraFieldFromInterfaceB());
-		assertEquals(impl, originalClone);
 	}
 	
 	@Test
@@ -94,6 +90,8 @@ public class ExtraFieldsTest {
 		JSONObjectAdapterImpl clone = new JSONObjectAdapterImpl();
 		impl.writeToJSONObject(clone);
 		assertEquals("fromMe2", clone.get("fromMe2"));
-		assertEquals("[\"value one\"]", clone.get("someExtra").toString());
+		assertThrows(JSONObjectAdapterException.class, () ->
+			clone.get("someExtra")
+		);
 	}
 }

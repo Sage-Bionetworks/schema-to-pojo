@@ -28,12 +28,46 @@
 		<module>schema-to-pojo-gwt</module>
 		<module>schema-to-pojo-integration-tests</module>
 	</modules>
+	<properties>
+		<junit.jupiter.version>5.6.2</junit.jupiter.version>
+		<junit.vintage.version>5.6.2</junit.vintage.version>
+		<junit.platform.version>1.6.2</junit.platform.version>
+	</properties>
 	<dependencies>
+		<!--interface between junit5 and programmatic clients, such as IDEs and
+			build tools, for running tests -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.9</version>
-			<type>jar</type>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>${junit.platform.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--adds a subset of junit5 functionality to tests currently running under
+			junit4. should be REMOVED once fully converted to junit5 -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
+			<version>${junit.platform.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit5 engine -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit4 engine for backwards compatibility -->
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.vintage.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -68,7 +102,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.4.2</version>
+					<version>3.0.0-M4</version>
 				</plugin>
 				<!-- Build JavaDocs -->
 				<plugin>

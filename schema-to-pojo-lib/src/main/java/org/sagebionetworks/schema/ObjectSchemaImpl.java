@@ -77,12 +77,6 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	public static final String CONCRETE_TYPE = "concreteType";
 
 	/**
-	 * For the case where a POJO is created from a new version with additional fields, we want to preserve those
-	 * additional fields and re-emit them if necessary. For that we keep an optional list of JSONObjects
-	 */
-	public static final String EXTRA_FIELDS = "extraFieldsFromNewerVersion";
-	
-	/**
 	 * Error message for null adapter.
 	 */
 	public static final String OBJECT_ADAPTER_CANNOT_BE_NULL = "org.sagebionetworks.schema.adapter.JSONObjectAdapter cannot be null";

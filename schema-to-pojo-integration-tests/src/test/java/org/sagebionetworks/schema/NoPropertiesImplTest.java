@@ -1,8 +1,9 @@
 package org.sagebionetworks.schema;
 
-import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.NoPropertiesImpl;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
@@ -22,7 +23,7 @@ public class NoPropertiesImplTest {
 		noProps.initializeFromJSONObject(adapter);
 		JSONObjectAdapterImpl clone = new JSONObjectAdapterImpl();
 		noProps.writeToJSONObject(clone);
-		// extra property should be in the clone.
-		assertEquals("{\"foo\":\"bar\"}", clone.toJSONString());
+		// extra field was ignored and not re-emitted
+		assertEquals("{}", clone.toJSONString());
 	}
 }

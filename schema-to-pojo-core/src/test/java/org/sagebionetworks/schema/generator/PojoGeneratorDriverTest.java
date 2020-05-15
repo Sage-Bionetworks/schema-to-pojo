@@ -1,29 +1,21 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.ObjectSchemaImpl;
-import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
-import org.sagebionetworks.schema.generator.handler.schema03.HandlerFactoryImpl03;
 
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -35,6 +27,14 @@ import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
+import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
+import org.sagebionetworks.schema.generator.handler.schema03.HandlerFactoryImpl03;
 
 public class PojoGeneratorDriverTest {
 	
@@ -42,7 +42,7 @@ public class PojoGeneratorDriverTest {
 	ObjectSchema schema;
 	Stack<ObjectSchema> recursiveAnchors;
 	
-	@Before
+	@BeforeEach
 	public void before(){
 		driver = new PojoGeneratorDriver(new HandlerFactoryImpl03());
 		schema = new ObjectSchemaImpl();
@@ -51,17 +51,20 @@ public class PojoGeneratorDriverTest {
 		recursiveAnchors = new Stack<ObjectSchema>();
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testRegisterAllIdentifiedObjectSchemasDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
 		list.add(ObjectSchemaImpl.createNewWithId("one"));
 		list.add(ObjectSchemaImpl.createNewWithId("one"));
-		// This should fail due to the duplicate
-		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+
+		assertThrows(IllegalArgumentException.class, ()->
+			// This should fail due to the duplicate
+			PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list)
+		);
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testRegisterAllIdentifiedObjectSchemasNestedDuplicate() {
 		List<ObjectSchema> list = new ArrayList<ObjectSchema>();
 		// Create a duplicate
@@ -73,8 +76,10 @@ public class PojoGeneratorDriverTest {
 		root1.setItems(ObjectSchemaImpl.createNewWithId("child"));
 		// Add a child to each with a duplicate name
 		root2.setItems(ObjectSchemaImpl.createNewWithId("child"));
-		// This should fail due to the duplicate
-		PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list);
+		assertThrows(IllegalArgumentException.class, ()->
+			// This should fail due to the duplicate
+			PojoGeneratorDriver.registerAllIdentifiedObjectSchemas(list)
+		);
 	}
 	
 	@Test 
@@ -138,7 +143,7 @@ public class PojoGeneratorDriverTest {
 		assertEquals(referenced, replaced);
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testReplaceRefrenceMissRegistry() {
 		// This is not a reference so the replace should just return it.
 		String referenceId = new String("rootOne");
@@ -150,8 +155,10 @@ public class PojoGeneratorDriverTest {
 		
 		// Create a third self
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
-		// This should fail since the referenced is not in the register
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors);
+		assertThrows(IllegalArgumentException.class, ()->
+			// This should fail since the referenced is not in the register
+			PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors)
+		);
 	}
 	
 	@Test
@@ -460,13 +467,15 @@ public class PojoGeneratorDriverTest {
 		assertEquals(Object.class.getName(), type.fullName());
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testRecursivlyCreateAllTypesArrayNoType() throws ClassNotFoundException{
 		schema.setType(TYPE.ARRAY);
 		JCodeModel codeModel = new JCodeModel();
 		JPackage _package = codeModel._package("org.sample");
-		// should fail since the array type is not set
-		JType type = driver.createOrGetType(codeModel, schema);
+		assertThrows(IllegalArgumentException.class, ()->
+			// should fail since the array type is not set
+			driver.createOrGetType(codeModel, schema)
+		);
 	}
 	
 	@Test
@@ -703,15 +712,14 @@ public class PojoGeneratorDriverTest {
 				map.put(jsonEntity, impClass);
 			}
 		}
-		assertEquals("Should have implemented two interfaces",3, map.size());
+		assertEquals(3, map.size(),"Should have implemented two interfaces");
 		// Now get the fields from the object an confirm they are all there
 		Map<String, JFieldVar> fields = impl.fields();
 		assertNotNull(fields);
-		assertEquals(6*2, fields.size());
+		assertEquals(11, fields.size());
 		assertNotNull(fields.get("fromInterfaceA"));
 		assertNotNull(fields.get("alsoFromInterfaceB"));
 		assertNotNull(fields.get("fromMe"));
-		assertNotNull(fields.get(ObjectSchemaImpl.EXTRA_FIELDS));
 	}
 	
 	@Test
