@@ -473,7 +473,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
 		JClass enumClass = (JClass) field.type();
-		//TODO: enum
 		return getJavaEnumValue(enumClass, stringFromAdapter);
 	}
 	
@@ -532,7 +531,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-				//TODO:enum
 				return getJavaEnumValue(arrayTypeClass, stringFromAdapter);
 			}
 		}
@@ -575,7 +573,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonMap.invoke(methodName).arg(jsonKey);
-				//TODO:enum
 				return getJavaEnumValue(typeClass, stringFromAdapter);
 			}
 		}
@@ -611,7 +608,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
-				//TODO:enum
 				return getJavaEnumValue(typeClass, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
 			}
 		}
@@ -707,7 +703,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				if (propSchema.getEnum() != null) {
 					// Write the enum as a JSON string
 					valueToPut = enumGetJsonName(classType.owner(), field);
-					;
 				} else {
 					// This is just a string
 					valueToPut = assignPropertyToJSONString(

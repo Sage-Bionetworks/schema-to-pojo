@@ -38,7 +38,7 @@ class PropertyUtilsTest {
 	public void testGetPropertyReference_PropertyIsKeyword(){
 		String keywordProperty = "final";
 		JFieldVar field = jDefinedClass.field(JMod.PRIVATE, String.class,
-				JavaKeyword.determineJavaName(keywordProperty));
+				"_final");
 		// method under test
 		JFieldVar result = PropertyUtils.getPropertyReference(jDefinedClass, keywordProperty);
 		assertEquals(field, result);
