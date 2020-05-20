@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.generator.PropertyUtils;
 import org.sagebionetworks.schema.generator.handler.ToStringHandler;
 
 import com.sun.codemodel.JBlock;
@@ -88,21 +89,15 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 		
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-		for (String keyName : fieldMap.keySet()){
-			ObjectSchema nextProp = fieldMap.get(keyName);
+		for (Map.Entry<String, ObjectSchema> entry: fieldMap.entrySet()){
+			String keyName = entry.getKey();
+			ObjectSchema nextProp = entry.getValue();
 			
 			//all properties in the schema should be represented in the class as fields
-			JFieldVar field = classType.fields().get(keyName);
-			if (field == null)
-				throw new IllegalArgumentException(
-						"Failed to find the JFieldVar for property: '"
-								+ keyName + "' on class: " + classType.name());
+			JFieldVar field = PropertyUtils.getPropertyReference(classType, keyName);
 			
 			//check type for each property/field
-			if (nextProp.getType() == null)
-				throw new IllegalArgumentException("Property: '" + nextProp
-						+ "' has a null TYPE on class: " + classType.name());
-			TYPE type = nextProp.getType();
+			TYPE type = PropertyUtils.validateNonNullType(classType, nextProp);
 			
 			if(TYPE.NUMBER == type || 
 					TYPE.INTEGER == type || 
@@ -114,7 +109,7 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.STRING == type ||
 					TYPE.INTERFACE == type){
 				//add an assignment statements to the body
-				body.add(result.invoke("append").arg(keyName + "="));
+				body.add(result.invoke("append").arg(PropertyUtils.determineJavaFieldName(keyName) + "="));
 				body.add(result.invoke("append").arg(field));
 				body.add(result.invoke("append").arg(" "));
 			}else {

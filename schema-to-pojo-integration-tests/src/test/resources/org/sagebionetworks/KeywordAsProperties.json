@@ -1,0 +1,23 @@
+{
+	"properties":{
+		"null":{
+			"type":"boolean"
+		},
+		"boolean":{
+			"type":"string"
+		},
+		"enum":{
+			"type":"number"
+		},
+		"const":{
+			"type": "array",
+			"items": {
+				"type": "integer"
+			}
+		},
+		"nonKeyword":{
+			"type": "string"
+		}
+}
+	}
+}

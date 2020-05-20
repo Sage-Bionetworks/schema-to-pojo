@@ -5,16 +5,15 @@ import java.util.Map;
 
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.generator.PropertyUtils;
 import org.sagebionetworks.schema.generator.handler.HashAndEqualsHandler;
 
 import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JClass;
 import com.sun.codemodel.JConditional;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JOp;
@@ -62,21 +61,13 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		// Now add all fields 
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-		Iterator<String> keyIt = fieldMap.keySet().iterator();
-		while (keyIt.hasNext()) {
-			String propName = keyIt.next();
-			ObjectSchema propSchema = fieldMap.get(propName);
+		for (Map.Entry<String,ObjectSchema> entry : fieldMap.entrySet()) {
+			String propName = entry.getKey();
+			ObjectSchema propSchema = entry.getValue();
 			// Look up the field for this property
-			JFieldVar field = classType.fields().get(propName);
-			if (field == null)
-				throw new IllegalArgumentException(
-						"Failed to find the JFieldVar for property: '"
-								+ propName + "' on class: " + classType.name());
+			JFieldVar field = PropertyUtils.getPropertyReference(classType, propName);
 			// Now process this field
-			if (propSchema.getType() == null)
-				throw new IllegalArgumentException("Property: '" + propSchema
-						+ "' has a null TYPE on class: " + classType.name());
-			TYPE type = propSchema.getType();
+			TYPE type = PropertyUtils.validateNonNullType(classType, propSchema);
 
 			// For each type we need to setup the add expression
 			JExpression addExpression = null;
@@ -84,35 +75,6 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 			// If the object is not null then use hashCode() else, 0;
 			addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
 					field.invoke("hashCode"));
-//			if (TYPE.STRING == type || TYPE.ARRAY == type || TYPE.ANY == type
-//					|| TYPE.NULL == type || TYPE.OBJECT == type) {
-//				// If the object is not null then use hashCode() else, 0;
-//				addExpression = JOp.cond(field.eq(JExpr._null()), JExpr.lit(0),
-//						field.invoke("hashCode"));
-//			} else if (TYPE.NUMBER == type) {
-//				// Double requires special treatment
-//				// Create or initialized the temp
-//				JInvocation staticInvoke = classType.owner().ref(Double.class)
-//						.staticInvoke("doubleToLongBits").arg(field);
-//				if (temp == null) {
-//					// Declare it the first time
-//					temp = body.decl(JMod.NONE, classType.owner().LONG, "temp",
-//							staticInvoke);
-//				} else {
-//					// Assign it all other times
-//					body.assign(temp, staticInvoke);
-//				}
-//				addExpression = shiftXORCastLong(classType, temp);
-//			} else if (TYPE.INTEGER == type) {
-//				// Long requires special treatment
-//				addExpression = shiftXORCastLong(classType, field);
-//			} else if (TYPE.BOOLEAN == type) {
-//				// boolean is also special
-//				addExpression = JOp.cond(field, JExpr.lit(1231),
-//						JExpr.lit(1237));
-//			} else {
-//				throw new IllegalArgumentException("Unknown type: " + type);
-//			}
 			// Put it all together
 			body.assign(result, prime.mul(result).plus(addExpression));
 		}
@@ -159,21 +121,13 @@ public class HashAndEqualsHandlerImpl03 implements HashAndEqualsHandler {
 		
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-		Iterator<String> keyIt = fieldMap.keySet().iterator();
-		while (keyIt.hasNext()) {
-			String propName = keyIt.next();
-			ObjectSchema propSchema = fieldMap.get(propName);
+		for (Map.Entry<String, ObjectSchema> entry : fieldMap.entrySet()) {
+			String propName = entry.getKey();
+			ObjectSchema propSchema = entry.getValue();
 			// Look up the field for this property
-			JFieldVar field = classType.fields().get(propName);
-			if (field == null)
-				throw new IllegalArgumentException(
-						"Failed to find the JFieldVar for property: '"
-								+ propName + "' on class: " + classType.name());
+			JFieldVar field = PropertyUtils.getPropertyReference(classType, propName);
 			// Now process this field
-			if (propSchema.getType() == null)
-				throw new IllegalArgumentException("Property: '" + propSchema
-						+ "' has a null TYPE on class: " + classType.name());
-			TYPE type = propSchema.getType();
+			TYPE type = PropertyUtils.validateNonNullType(classType, propSchema);
 
 			// For all non-primitives we can use "hashCode"
 			// just use equals() for all objects

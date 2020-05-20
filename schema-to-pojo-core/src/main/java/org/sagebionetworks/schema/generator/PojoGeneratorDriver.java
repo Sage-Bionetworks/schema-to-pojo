@@ -85,24 +85,8 @@ public class PojoGeneratorDriver {
 			return classType;
 		}
 		// Process the properties
-		Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
-		Iterator<String> it = fieldMap.keySet().iterator();
-		while (it.hasNext()) {
-			String key = it.next();
-			ObjectSchema propertySchema = fieldMap.get(key);
-			// For nested sub-classes we need to make sure they have an id.
-			if(propertySchema.getId() == null){
-				if(propertySchema.getName() != null){
-					// Inherit the outer class package.
-					propertySchema.setId(schema.getPackageName()+"."+propertySchema.getName());
-				}
-			}
-			// Get type type for this property
-			JType propertyType = createOrGetType(codeModel, propertySchema);
-			// Create this property
-			factory.getPropertyHandler().createProperty(propertySchema,
-					classType, key, propertyType);
-		}
+		addProperties(codeModel, schema, classType);
+
 		if(TYPE.INTERFACE != schema.getType()){
 			// Add the JSON marshaling
 			factory.getJSONMArshalingHandler().addJSONMarshaling(schema, classType, ifg);
@@ -113,6 +97,27 @@ public class PojoGeneratorDriver {
 		}
 
 		return classType;
+	}
+
+	private void addProperties(JCodeModel codeModel, ObjectSchema schema, JDefinedClass classType) throws ClassNotFoundException {
+		Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
+		for (Map.Entry<String,ObjectSchema> entry : fieldMap.entrySet()) {
+			String propertyName = entry.getKey();
+			ObjectSchema propertySchema = entry.getValue();
+			// For nested sub-classes we need to make sure they have an id.
+			if (propertySchema.getId() == null) {
+				if (propertySchema.getName() != null) {
+					// Inherit the outer class package.
+					propertySchema.setId(schema.getPackageName() + "." + propertySchema.getName());
+				}
+			}
+			// Get type type for this property
+			JType propertyType = createOrGetType(codeModel, propertySchema);
+			// Create this property
+			String javaFieldName = PropertyUtils.determineJavaFieldName(propertyName);
+			factory.getPropertyHandler().createProperty(propertySchema,
+					classType, javaFieldName, propertyType);
+		}
 	}
 
 	/**

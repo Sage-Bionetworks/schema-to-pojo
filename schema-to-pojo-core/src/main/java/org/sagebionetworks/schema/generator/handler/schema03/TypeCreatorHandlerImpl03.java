@@ -188,14 +188,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JType stringType = newClass.owner()._ref(String.class);
 			JType stringArrayType = newClass.owner()._ref(String[].class);
 			Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
-			Iterator<String> keyIt = fieldMap.keySet().iterator();
 			List<JExpression> keyConstants = new LinkedList<JExpression>();
-			while (keyIt.hasNext()) {
+			for (String key : fieldMap.keySet()) {
 				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
-				String key = keyIt.next();
 				String name = ObjectSchemaImpl.getKeyConstantName(key);
 				JExpression value = JExpr.lit(key);
-				JFieldVar keyConst= newClass.field(mods, stringType , name, value);
+				JFieldVar keyConst = newClass.field(mods, stringType, name, value);
 				keyConstants.add(keyConst);
 			}
 			if(!keyConstants.isEmpty()) {
