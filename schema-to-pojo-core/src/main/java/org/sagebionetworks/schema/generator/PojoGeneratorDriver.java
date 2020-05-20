@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
@@ -114,7 +115,7 @@ public class PojoGeneratorDriver {
 			// Get type type for this property
 			JType propertyType = createOrGetType(codeModel, propertySchema);
 			// Create this property
-			String javaFieldName = PropertyUtils.determineJavaFieldName(propertyName);
+			String javaFieldName = JavaKeyword.determineJavaName(propertyName);
 			factory.getPropertyHandler().createProperty(propertySchema,
 					classType, javaFieldName, propertyType);
 		}

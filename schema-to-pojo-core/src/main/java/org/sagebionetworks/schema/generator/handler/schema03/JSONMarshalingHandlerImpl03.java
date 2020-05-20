@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
@@ -472,7 +473,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
 		JClass enumClass = (JClass) field.type();
-		return enumClass.staticInvoke("valueOf").arg(stringFromAdapter);
+		//TODO: enum
+		return getJavaEnumValue(enumClass, stringFromAdapter);
 	}
 	
 	/**
@@ -530,7 +532,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-				return arrayTypeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+				//TODO:enum
+				return getJavaEnumValue(arrayTypeClass, stringFromAdapter);
 			}
 		}
 		
@@ -553,7 +556,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
 		}
 	}
-	
+
+	private JInvocation getJavaEnumValue(JClass enumClass, JExpression stringValue) {
+		JInvocation javaStringValue = enumClass.owner().ref(JavaKeyword.class)
+				.staticInvoke("determineJavaName").arg(stringValue);
+		return enumClass.staticInvoke("valueOf").arg(javaStringValue);
+	}
+
 	protected JExpression createExpressionToGetFromMap(JVar adapter, JExpression jsonMap, JVar jsonKey, ObjectSchema typeSchema,
 			JClass typeClass) {
 		TYPE type = typeSchema.getType();
@@ -566,7 +575,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonMap.invoke(methodName).arg(jsonKey);
-				return typeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+				//TODO:enum
+				return getJavaEnumValue(typeClass, stringFromAdapter);
 			}
 		}
 		
@@ -601,7 +611,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
-				return typeClass.staticInvoke("valueOf").arg(JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
+				//TODO:enum
+				return getJavaEnumValue(typeClass, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
 			}
 		}
 		
@@ -695,7 +706,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JExpression valueToPut = null;
 				if (propSchema.getEnum() != null) {
 					// Write the enum as a JSON string
-					valueToPut = field.invoke("name");
+					valueToPut = enumGetJsonName(classType.owner(), field);
 					;
 				} else {
 					// This is just a string
@@ -826,7 +837,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
-				return value.invoke("name");
+				return enumGetJsonName(arrayTypeClass.owner(), value);
 			}
 		}
 		
@@ -856,7 +867,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JDefinedClass getTheClass = (JDefinedClass) typeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum) {
-				return value.invoke("name");
+				return enumGetJsonName(typeClass.owner(), value);
 			}
 		}
 
@@ -877,6 +888,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
 		}
+	}
+
+	private JInvocation enumGetJsonName(JCodeModel codeModel, JExpression value) {
+		return codeModel.ref(JavaKeyword.class).staticInvoke("determineJsonName").arg(value.invoke("name"));
 	}
 
 	/**

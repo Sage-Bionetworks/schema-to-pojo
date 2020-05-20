@@ -699,7 +699,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.contains("enumName = org.sample.SomeEnum.valueOf(adapter.getString(_KEY_ENUMNAME));"));
+		assertTrue(methodString.contains("enumName = org.sample.SomeEnum.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(adapter.getString(_KEY_ENUMNAME)));"));
 	}
 	
 	@Test
@@ -1176,7 +1176,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		// Is the primitive assigned correctly?
-		assertTrue(methodString.indexOf("adapter.put(_KEY_ENUMNAME, enumName.name());") > 0);
+		assertTrue(methodString.indexOf("adapter.put(_KEY_ENUMNAME, org.sagebionetworks.schema.JavaKeyword.determineJsonName(enumName.name()));") > 0);
 	}
 	
 	@Test
@@ -1685,7 +1685,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				.indexOf("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYWHOSEITEMISANENUM);") > 0);
 		assertTrue(methodString.indexOf("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {") > 0);
 		assertTrue(methodString
-				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));") > 0);
+				.indexOf("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(__jsonArray.getString(__i)))));") > 0);
 	}
 	
 	/**
@@ -1754,7 +1754,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				.contains("org.sagebionetworks.schema.adapter.JSONArrayAdapter __jsonArray = adapter.getJSONArray(_KEY_ARRAYWHOSEITEMISANENUM);"));
 		assertTrue(methodString.contains("for (int __i = 0; (__i<__jsonArray.length()); __i ++) {"));
 		assertTrue(methodString
-				.contains("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(__jsonArray.getString(__i))));"));
+				.contains("arrayWhoseItemIsAnEnum.add((__jsonArray.isNull(__i)?null:org.sample.Animals.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(__jsonArray.getString(__i)))));"));
 		
 		//check that everything was created correctly for the array without an enum
 		assertTrue(methodString.contains("arrayWhoseItemIsNotEnum = new java.util.ArrayList<java.lang.String>();"));
@@ -1811,7 +1811,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		
 		//make sure everything was created correctly
 		assertTrue(methodString.indexOf("org.sample.Animals __value = __it.next();") > 0);
-		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:__value.name()));") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:org.sagebionetworks.schema.JavaKeyword.determineJsonName(__value.name())));") > 0);
 	}
 	
 	/**
@@ -1874,7 +1874,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		//make sure everything is in order for the property that has an enum
 		assertTrue(methodString.indexOf("java.util.Iterator<org.sample.Animals> __it = arrayWhoseItemIsAnEnum.iterator();") > 0);
 		assertTrue(methodString.indexOf("org.sample.Animals __value = __it.next();") > 0);
-		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:__value.name()));") > 0);
+		assertTrue(methodString.indexOf("__array.put(__index, ((__value == null)?null:org.sagebionetworks.schema.JavaKeyword.determineJsonName(__value.name())));") > 0);
 		
 		//make sure everything is in order for the property that does not have an enum
 		assertTrue(methodString.indexOf("java.util.Iterator<java.lang.String> __it = arrayWhoseItemIsNotEnum.iterator();") > 0);
@@ -1952,8 +1952,8 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("if (__jsonMap.isNull(__keyObject)) {"));
 		assertTrue(methodString.contains("__value = null;"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonMap.getString(__keyObject));"));
-		assertTrue(methodString.contains("org.sample.Animals __key = org.sample.Animals.valueOf(((java.lang.String) __keyObject));"));
+		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(__jsonMap.getString(__keyObject)));"));
+		assertTrue(methodString.contains("org.sample.Animals __key = org.sample.Animals.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(((java.lang.String) __keyObject)));"));
 		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
 	}
 
@@ -2018,7 +2018,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("if (__entry.getValue() == null) {"));
 		assertTrue(methodString.contains("__map.putNull(__entry.getKey());"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__map.put(__entry.getKey(), __entry.getValue().name())"));
+		assertTrue(methodString.contains("__map.put(__entry.getKey(), org.sagebionetworks.schema.JavaKeyword.determineJsonName(__entry.getValue().name()))"));
 	}
 
 
@@ -2077,7 +2077,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("if (__jsonStringMap.isNull(__key)) {"));
 		assertTrue(methodString.contains("__value = null;"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(__jsonStringMap.getString(__key));"));
+		assertTrue(methodString.contains("__value = org.sample.Pets.valueOf(org.sagebionetworks.schema.JavaKeyword.determineJavaName(__jsonStringMap.getString(__key)));"));
 		assertTrue(methodString.contains("mapWhoseItemIsAnEnum.put(__key, __value);"));
 	}
 
@@ -2203,7 +2203,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("if (__entry.getValue() == null) {"));
 		assertTrue(methodString.contains("__map.putNull(__entry.getKey());"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__map.put(__entry.getKey(), __entry.getValue().name())"));
+		assertTrue(methodString.contains("__map.put(__entry.getKey(), org.sagebionetworks.schema.JavaKeyword.determineJsonName(__entry.getValue().name()))"));
 	}
 
 

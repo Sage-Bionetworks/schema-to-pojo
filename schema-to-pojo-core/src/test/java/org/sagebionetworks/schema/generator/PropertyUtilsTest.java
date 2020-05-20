@@ -8,9 +8,9 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
-import com.sun.codemodel.JType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
@@ -27,24 +27,6 @@ class PropertyUtilsTest {
 	}
 
 	@Test
-	void testDetermineJavaFieldName_NonKeyword() {
-		String nonKeyword = "foobar";
-		assertEquals(nonKeyword, PropertyUtils.determineJavaFieldName(nonKeyword));
-	}
-
-	@Test
-	void testDetermineJavaFieldName_Keyword() {
-		// just some examples of keywords. not comprehensive
-		assertEquals("_class", PropertyUtils.determineJavaFieldName("class"));
-		assertEquals("_static", PropertyUtils.determineJavaFieldName("static"));
-		assertEquals("_const", PropertyUtils.determineJavaFieldName("const"));
-		assertEquals("_boolean", PropertyUtils.determineJavaFieldName("boolean"));
-		assertEquals("_long", PropertyUtils.determineJavaFieldName("long"));
-		assertEquals("_enum", PropertyUtils.determineJavaFieldName("enum"));
-		assertEquals("_null", PropertyUtils.determineJavaFieldName("null"));
-	}
-
-	@Test
 	public void testGetPropertyReference_NoProperty(){
 		String error = assertThrows(IllegalArgumentException.class, () ->
 			// method under test
@@ -56,7 +38,7 @@ class PropertyUtilsTest {
 	public void testGetPropertyReference_PropertyIsKeyword(){
 		String keywordProperty = "final";
 		JFieldVar field = jDefinedClass.field(JMod.PRIVATE, String.class,
-				PropertyUtils.determineJavaFieldName(keywordProperty));
+				JavaKeyword.determineJavaName(keywordProperty));
 		// method under test
 		JFieldVar result = PropertyUtils.getPropertyReference(jDefinedClass, keywordProperty);
 		assertEquals(field, result);

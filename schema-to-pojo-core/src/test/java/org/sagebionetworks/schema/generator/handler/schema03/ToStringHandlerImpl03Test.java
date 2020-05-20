@@ -16,10 +16,10 @@ import com.sun.codemodel.JMod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.generator.PropertyUtils;
 
 public class ToStringHandlerImpl03Test {
 	ObjectSchema schema;
@@ -312,7 +312,7 @@ public class ToStringHandlerImpl03Test {
 		schema.putProperty(keywordPropertyName, keywordProperty);
 
 		//add field to sampleClass JDefinedClass
-		sampleClass.field(JMod.PRIVATE, sampleClass, PropertyUtils.determineJavaFieldName(keywordPropertyName));
+		sampleClass.field(JMod.PRIVATE, sampleClass, JavaKeyword.determineJavaName(keywordPropertyName));
 
 		//handle
 		ToStringHandlerImpl03 handler = new ToStringHandlerImpl03();

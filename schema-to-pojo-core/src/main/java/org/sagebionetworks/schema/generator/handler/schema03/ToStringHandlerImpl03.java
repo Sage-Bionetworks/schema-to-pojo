@@ -2,6 +2,7 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.util.Map;
 
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.TYPE;
 import org.sagebionetworks.schema.generator.PropertyUtils;
@@ -109,7 +110,7 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.STRING == type ||
 					TYPE.INTERFACE == type){
 				//add an assignment statements to the body
-				body.add(result.invoke("append").arg(PropertyUtils.determineJavaFieldName(keyName) + "="));
+				body.add(result.invoke("append").arg(JavaKeyword.determineJavaName(keyName) + "="));
 				body.add(result.invoke("append").arg(field));
 				body.add(result.invoke("append").arg(" "));
 			}else {

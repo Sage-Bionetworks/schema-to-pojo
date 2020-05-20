@@ -15,9 +15,19 @@
 				"type": "integer"
 			}
 		},
-		"nonKeyword":{
-			"type": "string"
+		"keywordEnum":{
+			"type": "string",
+			"name": "KeywordEnum",
+			"enum": [
+				{
+					"name": "null",
+					"description": "null"
+				},
+				{
+					"name": "final",
+					"description": "final"
+				}
+			]
 		}
-}
 	}
 }

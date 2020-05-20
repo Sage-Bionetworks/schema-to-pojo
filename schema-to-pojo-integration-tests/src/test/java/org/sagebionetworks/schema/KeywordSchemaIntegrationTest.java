@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.sagebionetworks.ABImpl;
 import org.sagebionetworks.ABImpl2;
 import org.sagebionetworks.KeywordAsProperties;
+import org.sagebionetworks.KeywordEnum;
 import org.sagebionetworks.StringKeyMap;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
@@ -24,7 +25,7 @@ public class KeywordSchemaIntegrationTest {
 		keywordAsProperties.set_const(Arrays.asList(1L,2L,3L));
 		keywordAsProperties.set_enum(3.2);
 		keywordAsProperties.set_null(true);
-		keywordAsProperties.setNonKeyword("normal key");
+		keywordAsProperties.setKeywordEnum(KeywordEnum._final);
 
 		// Now make the round trip
 		String jsonString = EntityFactory.createJSONStringForEntity(keywordAsProperties);
@@ -34,7 +35,7 @@ public class KeywordSchemaIntegrationTest {
 				"\"boolean\":\"not a boolean\"," +
 				"\"enum\":3.2," +
 				"\"const\":[1,2,3]," +
-				"\"nonKeyword\":\"normal key\"" +
+				"\"keywordEnum\":\"final\"" +
 				"}";
 		assertEquals(expectedJson, jsonString);
 
