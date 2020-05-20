@@ -56,11 +56,7 @@ public class KeywordTest {
 		SchemaToPojo.generatePojos(sampleFile, outputDir, null, factory, new StringBuilder());
 		// Make sure the file exists
 		File result = new File(outputDir, "KeywordAsProperties.java");
-		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
-		// Load the file string
-		String resultString = FileUtils.readToString(result);
-		System.out.println(resultString);
 	}
 
 }

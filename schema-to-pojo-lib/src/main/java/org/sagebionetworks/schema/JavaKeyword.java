@@ -24,7 +24,7 @@ public class JavaKeyword {
 	 */
 	public static String determineJsonName(String propertyName){
 		if( propertyName != null && !propertyName.isEmpty() && propertyName.startsWith(PREFIX)){
-			String withoutUnderscore = propertyName.substring(1);
+			String withoutUnderscore = propertyName.substring(PREFIX.length());
 			if (SourceVersion.isKeyword(withoutUnderscore) ){
 				return withoutUnderscore;
 			}
