@@ -14,7 +14,7 @@ import org.sagebionetworks.StringKeyMap;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 
-public class KeywordTest {
+public class KeywordSchemaIntegrationTest {
 
 	@Test
 	public void testRoundTrip() throws JSONObjectAdapterException {
@@ -29,7 +29,13 @@ public class KeywordTest {
 		// Now make the round trip
 		String jsonString = EntityFactory.createJSONStringForEntity(keywordAsProperties);
 		assertNotNull(jsonString);
-		String expectedJson = "{\"null\":true,\"boolean\":\"not a boolean\",\"enum\":3.2,\"const\":[1,2,3],\"nonKeyword\":\"normal key\"}";
+		String expectedJson = "{" +
+				"\"null\":true," +
+				"\"boolean\":\"not a boolean\"," +
+				"\"enum\":3.2," +
+				"\"const\":[1,2,3]," +
+				"\"nonKeyword\":\"normal key\"" +
+				"}";
 		assertEquals(expectedJson, jsonString);
 
 		// Clone it
@@ -39,7 +45,6 @@ public class KeywordTest {
 		assertEquals(expectedJson, EntityFactory.createJSONStringForEntity(clone));
 
 		assertEquals(keywordAsProperties, clone);
-		System.out.println(clone);
 	}
 }
 
