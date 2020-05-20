@@ -8,16 +8,17 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.sagebionetworks.schema.FORMAT;
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.AdapterCollectionUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.InstanceFactoryGenerator;
+import org.sagebionetworks.schema.generator.PropertyUtils;
 import org.sagebionetworks.schema.generator.handler.JSONMarshalingHandler;
 
 import com.sun.codemodel.ClassType;
@@ -124,26 +125,22 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-		Iterator<String> keyIt = fieldMap.keySet().iterator();
-		while (keyIt.hasNext()) {
-			String propName = keyIt.next();
-			ObjectSchema propSchema = fieldMap.get(propName);
+		for (Map.Entry<String, ObjectSchema> entry : fieldMap.entrySet()) {
+			String propName = entry.getKey();
+			ObjectSchema propSchema = entry.getValue();
 			// Look up the field for this property
-			JFieldVar field = getPropertyRefence(classType, propName);
+			JFieldVar field = PropertyUtils.getPropertyReference(classType, propName);
 			JFieldVar propNameConstant = getPropertyKeyConstantReference(classType, propName);
 
 			// Now process this field
-			if (propSchema.getType() == null)
-				throw new IllegalArgumentException("Property: '" + propSchema
-						+ "' has a null TYPE on class: " + classType.name());
-			TYPE type = propSchema.getType();
+			TYPE type = PropertyUtils.validateNonNullType(classType, propSchema);
 			if (type.isPrimitive()) {
 				body.assign(field,
 						param.invoke(type.getMethodName()).arg(propNameConstant));
 				continue;
 			}
 			// Add an if
-			
+
 			JConditional hasCondition = body._if(param.invoke("isNull").arg(
 					propNameConstant).not());
 			JBlock thenBlock = hasCondition._then();
@@ -152,18 +149,18 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (TYPE.STRING == type) {
 				// The format determines how JSON strings are read.
 				JExpression rhs = null;
-				if(propSchema.getEnum() != null){
+				if (propSchema.getEnum() != null) {
 					// Assign an enum
 					rhs = assignJSONStringToEnumProperty(param, propNameConstant, field);
 					thenBlock.assign(field, rhs);
-				}else{
+				} else {
 					// This is just a string.
 					rhs = assignJSONStringToProperty(classType.owner(),
 							param, propNameConstant, propSchema);
 					thenBlock.assign(field, rhs);
 				}
 
-			}else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
+			} else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type || TYPE.INTEGER == type) {
 				JClass typeClass = (JClass) field.type();
 				// Basic assign
 				thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke(type.getMethodName()).arg(propNameConstant)));
@@ -206,8 +203,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				loop.update(i.incr());
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
-				if(arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()){
-					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+				if (arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()) {
+					if (interfaceFactoryGenerator == null)
+						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
 					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(arrayTypeClass);
 					JConditional ifNull = loopBody._if(jsonArray.invoke("isNull").arg(i));
 					// if null
@@ -231,7 +229,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					ifNullElseBlock.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
 					// add the object to the list
 					ifNullElseBlock.add(field.invoke("add").arg(indexObject));
-				}else{
+				} else {
 					// concrete classes
 					loopBody.add(field.invoke("add").arg(
 							createIsNullCheck(jsonArray, i,
@@ -295,7 +293,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JVar key = loopBody.decl(keyTypeClass, VAR_PREFIX + "key",
 						createExpressionToGetKey(param, loop.var(), keyTypeSchema, keyTypeClass));
 				loopBody.add(field.invoke("put").arg(key).arg(value));
-			} else if (TYPE.MAP == type){
+			} else if (TYPE.MAP == type) {
 				// Determine the type of the key
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.getTypeParameters().size() != 2)
@@ -351,8 +349,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// First extract the type
 				// If we have a register then we need to use it
 				JClass typeClass = (JClass) field.type();
-				if(typeClass.isInterface() || typeClass.isAbstract()){
-					if(interfaceFactoryGenerator == null) throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
+				if (typeClass.isInterface() || typeClass.isAbstract()) {
+					if (interfaceFactoryGenerator == null)
+						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
 					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(typeClass);
 					// Use the register to create the class
 					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
@@ -360,7 +359,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(localAdapter.invoke("getString").arg(conreteTypeRef))));
 					thenBlock.add(field.invoke("initializeFromJSONObject").arg(localAdapter));
 
-				}else{
+				} else {
 					// We can just create a new type for this object.
 					thenBlock.assign(
 							field,
@@ -370,22 +369,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 
 			}
 			// throw an exception it this is a required fields
-			if (propSchema.isRequired() && propSchema.getDefault() == null) {				
+			if (propSchema.isRequired() && propSchema.getDefault() == null) {
 				hasCondition._else()
 						._throw(createIllegalArgumentExceptionPropertyNotNull(classType, propNameConstant));
 			} else {
 				//if propSchema has a default defined the property must
 				//be assigned to that default when  the adapter doesn't
 				//have a corresponding property
-				if (propSchema.getDefault() == null){
+				if (propSchema.getDefault() == null) {
 					// For non-require properties set the property to null
 					hasCondition._else().assign(field, JExpr._null());
-				}
-				else {
+				} else {
 					JExpression propShouldBe = assignDefaultProperty(propSchema);
 					hasCondition._else().assign(field, propShouldBe);
 				}
-				
+
 			}
 		}
         // Always return the param
@@ -475,7 +473,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		// The format determines how to treat a string.
 		JExpression stringFromAdapter = adapter.invoke(TYPE.STRING.getMethodName()).arg(propName);
 		JClass enumClass = (JClass) field.type();
-		return enumClass.staticInvoke("valueOf").arg(stringFromAdapter);
+		return getJavaEnumValue(enumClass, stringFromAdapter);
 	}
 	
 	/**
@@ -533,7 +531,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonArray.invoke(arrayType.getMethodName()).arg(index);
-				return arrayTypeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+				return getJavaEnumValue(arrayTypeClass, stringFromAdapter);
 			}
 		}
 		
@@ -556,7 +554,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			return JExpr._new(arrayTypeClass).arg(jsonArray.invoke("getJSONObject").arg(index));
 		}
 	}
-	
+
+	private JInvocation getJavaEnumValue(JClass enumClass, JExpression stringValue) {
+		JInvocation javaStringValue = enumClass.owner().ref(JavaKeyword.class)
+				.staticInvoke("determineJavaName").arg(stringValue);
+		return enumClass.staticInvoke("valueOf").arg(javaStringValue);
+	}
+
 	protected JExpression createExpressionToGetFromMap(JVar adapter, JExpression jsonMap, JVar jsonKey, ObjectSchema typeSchema,
 			JClass typeClass) {
 		TYPE type = typeSchema.getType();
@@ -569,7 +573,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
 				JExpression stringFromAdapter = jsonMap.invoke(methodName).arg(jsonKey);
-				return typeClass.staticInvoke("valueOf").arg(stringFromAdapter);
+				return getJavaEnumValue(typeClass, stringFromAdapter);
 			}
 		}
 		
@@ -604,7 +608,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
 				//here we know we are dealing with an enum
-				return typeClass.staticInvoke("valueOf").arg(JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
+				return getJavaEnumValue(typeClass, JExpr.cast(typeClass.owner()._ref(String.class), jsonValue));
 			}
 		}
 		
@@ -672,20 +676,15 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		this.getClass().getName();
 
 		// Now process each property
-		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
-		Iterator<String> keyIt = fieldMap.keySet().iterator();
-		while (keyIt.hasNext()) {
-			String propName = keyIt.next();
-			ObjectSchema propSchema = fieldMap.get(propName);
+		for (Map.Entry<String, ObjectSchema> entry : classSchema.getObjectFieldMap().entrySet()) {
+			String propName = entry.getKey();
+			ObjectSchema propSchema = entry.getValue();
 			// Look up the field for this property
-			JFieldVar field = getPropertyRefence(classType, propName);
+			JFieldVar field = PropertyUtils.getPropertyReference(classType, propName);
 			JFieldVar propNameConstant = getPropertyKeyConstantReference(classType, propName);
-			
+
 			// Now process this field
-			if (propSchema.getType() == null)
-				throw new IllegalArgumentException("Property: '" + propSchema
-						+ "' has a null TYPE on class: " + classType.name());
-			TYPE type = propSchema.getType();
+			TYPE type = PropertyUtils.validateNonNullType(classType, propSchema);
 			FORMAT format = propSchema.getFormat();
 
 			// Primitives are easy, just assign them
@@ -701,17 +700,17 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			if (TYPE.STRING == type) {
 				// call the set method using the field
 				JExpression valueToPut = null;
-				if(propSchema.getEnum() != null){
+				if (propSchema.getEnum() != null) {
 					// Write the enum as a JSON string
-					valueToPut = field.invoke("name");;
-				}else{
+					valueToPut = enumGetJsonName(classType.owner(), field);
+				} else {
 					// This is just a string
 					valueToPut = assignPropertyToJSONString(
 							classType.owner(), param, propSchema, field);
 				}
 				thenBlock.add(param.invoke("put").arg(propNameConstant)
 						.arg(valueToPut));
-			}else if (TYPE.INTEGER == type) {
+			} else if (TYPE.INTEGER == type) {
 				// Integers can be dates or longs
 				JExpression expr = assignPropertyToJSONLong(classType.owner(), propSchema, field);
 				// Basic assign
@@ -768,8 +767,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Create the new JSONArray
 				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONMapAdapter.class), VAR_PREFIX + "map",
 						param.invoke("createNewMap"));
-				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
-				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
+				JType mapEntry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
+				JForEach loop = thenBlock.forEach(mapEntry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();
 				JConditional ifNull = loopBody._if(loop.var().invoke("getValue").eq(JExpr._null()));
 				ifNull._then().add(map.invoke("putNull").arg(loop.var().invoke("getKey")));
@@ -792,8 +791,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Create the new JSONObject
 				JVar map = thenBlock.decl(JMod.NONE, classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "map",
 						param.invoke("createNew"));
-				JType entry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
-				JForEach loop = thenBlock.forEach(entry, VAR_PREFIX + "entry", field.invoke("entrySet"));
+				JType mapEntry = classType.owner().ref(Map.Entry.class).narrow(keyTypeClass, valueTypeClass);
+				JForEach loop = thenBlock.forEach(mapEntry, VAR_PREFIX + "entry", field.invoke("entrySet"));
 				JBlock loopBody = loop.body();
 				JConditional ifNull = loopBody._if(loop.var().invoke("getValue").eq(JExpr._null()));
 				ifNull._then().add(map.invoke("putNull").arg(loop.var().invoke("getKey")));
@@ -813,22 +812,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired()) {
 				hasCondition._else()
-				._throw(createIllegalArgumentExceptionPropertyNotNull(classType, propNameConstant));
+						._throw(createIllegalArgumentExceptionPropertyNotNull(classType, propNameConstant));
 			}
 		}
         // Always return the param
         body._return(param);
         return method;
 		
-	}
-
-	private JFieldVar getPropertyRefence(JDefinedClass classType, String propName) {
-		JFieldVar field = classType.fields().get(propName);
-		if (field == null)
-			throw new IllegalArgumentException(
-					"Failed to find the JFieldVar for property: '"
-							+ propName + "' on class: " + classType.name());
-		return field;
 	}
 
 	private JExpression createEqNullCheck(JVar value, JExpression createExpresssionToSetFromArray) {
@@ -842,7 +832,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JDefinedClass getTheClass = (JDefinedClass)arrayTypeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum){
-				return value.invoke("name");
+				return enumGetJsonName(arrayTypeClass.owner(), value);
 			}
 		}
 		
@@ -872,7 +862,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			JDefinedClass getTheClass = (JDefinedClass) typeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
 			if (ClassType.ENUM == shouldHaveEnum) {
-				return value.invoke("name");
+				return enumGetJsonName(typeClass.owner(), value);
 			}
 		}
 
@@ -893,6 +883,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// Now we need to create an object of the the type
 			return value.invoke("writeToJSONObject").arg(param.invoke("createNew"));
 		}
+	}
+
+	private JInvocation enumGetJsonName(JCodeModel codeModel, JExpression value) {
+		return codeModel.ref(JavaKeyword.class).staticInvoke("determineJsonName").arg(value.invoke("name"));
 	}
 
 	/**

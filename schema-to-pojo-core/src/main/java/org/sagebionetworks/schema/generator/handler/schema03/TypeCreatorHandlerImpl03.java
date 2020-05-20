@@ -2,13 +2,13 @@ package org.sagebionetworks.schema.generator.handler.schema03;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.sagebionetworks.schema.EnumValue;
+import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
@@ -188,14 +188,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JType stringType = newClass.owner()._ref(String.class);
 			JType stringArrayType = newClass.owner()._ref(String[].class);
 			Map<String, ObjectSchema> fieldMap = schema.getObjectFieldMap();
-			Iterator<String> keyIt = fieldMap.keySet().iterator();
 			List<JExpression> keyConstants = new LinkedList<JExpression>();
-			while (keyIt.hasNext()) {
+			for (String key : fieldMap.keySet()) {
 				int mods = JMod.PRIVATE | JMod.STATIC | JMod.FINAL;
-				String key = keyIt.next();
 				String name = ObjectSchemaImpl.getKeyConstantName(key);
 				JExpression value = JExpr.lit(key);
-				JFieldVar keyConst= newClass.field(mods, stringType , name, value);
+				JFieldVar keyConst = newClass.field(mods, stringType, name, value);
 				keyConstants.add(keyConst);
 			}
 			if(!keyConstants.isEmpty()) {
@@ -242,7 +240,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 			JDefinedClass enumClass = _package._enum(schema.getName());
 			// Generate the enum constants
 			for(EnumValue enumName: schema.getEnum()){
-				JEnumConstant enumConst = enumClass.enumConstant(enumName.getName());
+				String javaEnumName = JavaKeyword.determineJavaName(enumName.getName());
+				JEnumConstant enumConst = enumClass.enumConstant(javaEnumName);
 				if(enumName.getDescription() != null) {
 					JDocComment doc = enumConst.javadoc();
 					doc.add(enumName.getDescription());

@@ -1,18 +1,10 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.ObjectSchemaImpl;
-import org.sagebionetworks.schema.TYPE;
 
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCodeModel;
@@ -21,28 +13,27 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.JavaKeyword;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
+import org.sagebionetworks.schema.TYPE;
 
 public class ToStringHandlerImpl03Test {
 	ObjectSchema schema;
 	JCodeModel codeModel;
 	JDefinedClass sampleClass;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		schema = new ObjectSchemaImpl();
 		codeModel = new JCodeModel();
 		sampleClass = codeModel._class("ImASampleClass");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 	}
 	
@@ -282,7 +273,7 @@ public class ToStringHandlerImpl03Test {
 	}
 
 	/**
-	 * Tests that toString works for Boolean property.
+	 * Tests that toString works for StringKeyMaps property.
 	 * @throws Exception
 	 */
 	@Test
@@ -306,6 +297,33 @@ public class ToStringHandlerImpl03Test {
 		//verify everything was created correctly
 		assertTrue(methodString.indexOf("result.append(\"mapPropName=\");") > 0);
 		assertTrue(methodString.indexOf("result.append(mapPropName);") > 0);
+	}
+
+	/**
+	 * Tests that toString works for property names that are Java keywords.
+	 * @throws Exception
+	 */
+	@Test
+	public void testToStringForJavaKeywordPropertyNames() throws Exception {
+		// Add a boolean property to the schema
+		ObjectSchema keywordProperty = new ObjectSchemaImpl();
+		keywordProperty.setType(TYPE.STRING);
+		String keywordPropertyName = "enum";
+		schema.putProperty(keywordPropertyName, keywordProperty);
+
+		//add field to sampleClass JDefinedClass
+		sampleClass.field(JMod.PRIVATE, sampleClass, JavaKeyword.determineJavaName(keywordPropertyName));
+
+		//handle
+		ToStringHandlerImpl03 handler = new ToStringHandlerImpl03();
+		JMethod method = handler.addToString(schema, sampleClass);
+
+		//let's see the results
+		String methodString = declareToString(method);
+
+		//verify everything was created correctly
+		assertTrue(methodString.indexOf("result.append(\"_enum=\");") > 0);
+		assertTrue(methodString.indexOf("result.append(_enum);") > 0);
 	}
 
 	/**
