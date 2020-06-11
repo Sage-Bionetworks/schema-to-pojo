@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>schema-to-pojo</artifactId>
 		<groupId>org.sagebionetworks</groupId>
-		<version>0.6.1</version>
+		<version>0.6.2</version>
 	</parent>
 	<artifactId>schema-to-pojo-gwt</artifactId>
 	<packaging>jar</packaging>
@@ -13,10 +13,10 @@
 
 	<properties>
 		<!-- Convenience property to set the GWT version -->
-		<gwtVersion>2.4.0</gwtVersion>
+		<gwtVersion>2.8.2</gwtVersion>
 		<!-- GWT needs at least java 1.5 -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 	</properties>
 	<dependencies>
@@ -30,11 +30,19 @@
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
 			<version>${gwtVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
 			<version>${gwtVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>${gwtVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -55,7 +63,6 @@
 				they must be excluded. -->
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.6</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*GwtTest*.java</exclude>
@@ -66,10 +73,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<!-- GWT Maven Plugin -->
