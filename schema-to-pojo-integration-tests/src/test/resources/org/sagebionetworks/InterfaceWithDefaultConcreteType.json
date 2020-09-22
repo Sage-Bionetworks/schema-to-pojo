@@ -1,0 +1,9 @@
+{
+	"type": "interface",
+	"defaultConcreteType": "org.sagebionetworks.DefaultConcreteTypeImpl",
+	"properties": {
+		"someProperty": {
+			"type": "string"
+		}
+	}
+}

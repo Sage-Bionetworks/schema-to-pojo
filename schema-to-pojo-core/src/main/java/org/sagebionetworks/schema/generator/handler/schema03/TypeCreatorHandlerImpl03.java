@@ -12,9 +12,12 @@ import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.JSONDefaultConcreteType;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
+import com.sun.codemodel.JAnnotationUse;
+import com.sun.codemodel.JAnnotationValue;
 import com.sun.codemodel.JArray;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -167,6 +170,12 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				for(JType interfacesType: interfanceTypes){
 					newClass._implements((JClass)interfacesType);
 				}
+			}
+			if (schema.getDefaultConcreteType() != null) {
+				if (TYPE.INTERFACE != schema.getType()) {
+					throw new IllegalArgumentException("Only an interface can define a defaultConcreteType");
+				}
+				newClass.annotate(JSONDefaultConcreteType.class).param("value", schema.getDefaultConcreteType());
 			}
 			// add all of the key constants
 			addKeyConstants(schema, newClass);

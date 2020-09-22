@@ -111,9 +111,15 @@ public class SchemaToPojoTest {
 		System.out.println(result.getAbsolutePath());
 		assertTrue(result.exists());
 		
-		// Load the file string
-		String resultString = FileUtils.readToString(result);
-		System.out.println(resultString);
+		result = new File(outputDir, "InterfaceWithDefaultConcreteType.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
+		
+		System.out.println(FileUtils.readToString(result));
+		
+		result = new File(outputDir, "DefaultConcreteTypeImpl.java");
+		System.out.println(result.getAbsolutePath());
+		assertTrue(result.exists());
 	}
 
 	@Test

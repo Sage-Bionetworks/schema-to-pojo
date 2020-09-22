@@ -1,6 +1,7 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class EntityFactoryTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testCreateJSONStringForEntityNull() throws JSONObjectAdapterException{
 		// null is not allowed
-		String json = EntityFactory.createJSONStringForEntity(null);
+		EntityFactory.createJSONStringForEntity(null);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -44,7 +45,6 @@ public class EntityFactoryTest {
 		stub.setValue("This value should make a round trip");
 		String json = EntityFactory.createJSONStringForEntity(stub);
 		assertNotNull(json);
-		System.out.println(json);
 		// Make sure we can make a round trip
 		SimpleEntityStub clone = EntityFactory.createEntityFromJSONString(json, SimpleEntityStub.class);
 		assertNotNull(clone);
@@ -75,12 +75,27 @@ public class EntityFactoryTest {
 		stub.setValue("This value should make a round trip");
 		String json = EntityFactory.createJSONStringForEntity(stub);
 		assertNotNull(json);
-		System.out.println(json);
 		// Make sure we can use the interface as the type and that we get what we expect.
 		SimpleInterface clone = EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
 		assertNotNull(clone);
 		// The stub and clone should be the same
 		assertEquals(stub, clone);
+	}
+	
+	@Test
+	public void testCreateEntityFromJSONStringWithDefaultConcreteType() throws JSONObjectAdapterException{
+		
+		// A json string without concrete type, the interface is marked with the JSONDefaultConcreteType annotation
+		String json = "{\"value\":\"This value should make a round trip\"}";
+		
+		SimpleEntityStub expected = new SimpleEntityStub();
+		expected.setValue("This value should make a round trip");
+		
+		// Make sure we can use the interface even though a concrete type is not specified, using the annotation value
+		SimpleInterfaceWithDefaultConcreteType clone = EntityFactory.createEntityFromJSONString(json, SimpleInterfaceWithDefaultConcreteType.class);
+		
+		// The stub and clone should be the same
+		assertEquals(expected, clone);
 	}
 
 }

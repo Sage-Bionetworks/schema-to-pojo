@@ -164,6 +164,21 @@ public class TypeCreatorHandlerImpl03Test {
 	}
 	
 	@Test
+	public void testInterfanceWithDefaultConcreteType() throws ClassNotFoundException, JClassAlreadyExistsException{
+		schema.setType(TYPE.INTERFACE);
+		schema.setDefaultConcreteType("some.DefaultImpl");
+		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
+		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		assertNotNull(clazz);
+		assertTrue(clazz instanceof JDefinedClass);
+		JDefinedClass sampleClass = (JDefinedClass)clazz;
+		String classString = declareToString(sampleClass);
+		assertTrue(classString.indexOf("public interface Sample") > 0);
+		assertTrue(classString.indexOf("extends org.sagebionetworks.schema.adapter.JSONEntity") > 0);
+		assertTrue(classString.indexOf("JSONDefaultConcreteType(\"some.DefaultImpl\"") > 0);
+	}
+	
+	@Test
 	public void testStringFormatedDateTime() throws ClassNotFoundException{
 		// String formated as date-time
 		schema.setType(TYPE.STRING);

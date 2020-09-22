@@ -1,0 +1,6 @@
+{
+    "type":"interface",
+    "name":"InterfaceWithDefaultConcreteType",
+    "defaultConcreteType": "DefaultConcreteTypeImpl",
+    "properties":{ }
+}

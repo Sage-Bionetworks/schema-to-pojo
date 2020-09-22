@@ -970,4 +970,9 @@ public interface ObjectSchema extends JSONEntity {
 	 */
 	public void setIs$RecursiveRefInstance(boolean is$RecursiveRefInstance);
 
+	String getDefaultConcreteType();
+
+	void setDefaultConcreteType(String defaultConcreteType);
+	
+
 }

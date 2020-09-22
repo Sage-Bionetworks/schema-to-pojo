@@ -1,7 +1,6 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
 import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -11,7 +10,7 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
  * @author jmhill
  *
  */
-public class SimpleEntityStub implements SimpleInterface{
+public class SimpleEntityStub implements SimpleInterface, SimpleInterfaceWithDefaultConcreteType {
 	
 	private String value;
 	private String concreteType = SimpleEntityStub.class.getName();

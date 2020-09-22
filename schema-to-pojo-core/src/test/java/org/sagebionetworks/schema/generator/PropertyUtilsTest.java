@@ -1,6 +1,13 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
+import org.sagebionetworks.schema.TYPE;
 
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -8,12 +15,6 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.sagebionetworks.schema.JavaKeyword;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.ObjectSchemaImpl;
-import org.sagebionetworks.schema.TYPE;
 
 class PropertyUtilsTest {
 
@@ -66,7 +67,7 @@ class PropertyUtilsTest {
 				"pattern=null, minLength=null, maxLength=null, _enum=null, _default=null, title=null, " +
 				"description=null, format=null, divisibleBy=null, disallow=null, _extends=null, _implements=null, " +
 				"id=null, ref=null, schema=null, contentEncoding=null, links=null, $recursiveAnchor=null," +
-				" $recursiveRef=null, is$RecursiveRefInstance=false]' has a null TYPE on class: myTestClass", error);
+				" $recursiveRef=null, is$RecursiveRefInstance=false, _defaultConcreteType=null]' has a null TYPE on class: myTestClass", error);
 	}
 
 	@Test

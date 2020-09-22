@@ -108,7 +108,7 @@ public class PojoGeneratorDriverTest {
 	public void testReplaceRefrence() {
 		// This is not a reference so the replace should just return it.
 		ObjectSchema root1 = ObjectSchemaImpl.createNewWithId("rootOne");
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), root1, null);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceReference(new HashMap<String, ObjectSchema>(), root1, null);
 		assertEquals(root1, replaced);
 	}
 	
@@ -118,7 +118,7 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId("rootOne");
 		self.setRef(ObjectSchemaImpl.SELF_REFERENCE);
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(new HashMap<String, ObjectSchema>(), self, recursiveAnchors);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceReference(new HashMap<String, ObjectSchema>(), self, recursiveAnchors);
 		// Should be replaced with self
 		assertEquals(self, replaced);
 	}
@@ -138,7 +138,7 @@ public class PojoGeneratorDriverTest {
 		// Create a third self
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId("self");
 		
-		ObjectSchema replaced = PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors);
+		ObjectSchema replaced = PojoGeneratorDriver.replaceReference(registry, referenceToOther, recursiveAnchors);
 		// Should be replaced with referenced
 		assertEquals(referenced, replaced);
 	}
@@ -157,7 +157,7 @@ public class PojoGeneratorDriverTest {
 		ObjectSchema self = ObjectSchemaImpl.createNewWithId(new String("self"));
 		assertThrows(IllegalArgumentException.class, ()->
 			// This should fail since the referenced is not in the register
-			PojoGeneratorDriver.replaceRefrence(registry, referenceToOther, recursiveAnchors)
+			PojoGeneratorDriver.replaceReference(registry, referenceToOther, recursiveAnchors)
 		);
 	}
 	
@@ -844,6 +844,89 @@ public class PojoGeneratorDriverTest {
 		assertEquals(toCopy.getId(), clone.getId());
 		assertTrue(clone.is$RecursiveRefInstance());
 	}
+	
+	@Test
+	public void testcreateAllClassesWithDefaultConcreteType() throws ClassNotFoundException {
+		
+		List<ObjectSchema> schemas = new ArrayList<>();
+		
+		ObjectSchema interfaceWithDefault = new ObjectSchemaImpl();
+		interfaceWithDefault.setType(TYPE.INTERFACE);
+		interfaceWithDefault.setName("InterfaceWithDefaultConcreteType");
+		interfaceWithDefault.setId("org.example." + interfaceWithDefault.getName());
+		interfaceWithDefault.setDefaultConcreteType("org.example.DefaultImplementation");
+		
+		ObjectSchema interfaceRef = new ObjectSchemaImpl();
+		interfaceRef.setRef(interfaceWithDefault.getId());
+		
+		ObjectSchema defaultImplementation = new ObjectSchemaImpl();
+		defaultImplementation.setType(TYPE.OBJECT);
+		defaultImplementation.setName("DefaultImplementation");
+		defaultImplementation.setId("org.example." + defaultImplementation.getName());
+		defaultImplementation.setImplements(new ObjectSchema[] {interfaceRef});
+		
+		schemas.add(interfaceWithDefault);
+		schemas.add(defaultImplementation);
+		
+		JCodeModel codeModel = new JCodeModel();
+		
+		// Call under test
+		driver.createAllClasses(codeModel, schemas);
+	}
+	
+	@Test
+	public void testcreateAllClassesWithDefaultConcreteTypeNonExistingImpl() throws ClassNotFoundException {
+		
+		List<ObjectSchema> schemas = new ArrayList<>();
+		
+		ObjectSchema interfaceWithDefault = new ObjectSchemaImpl();
+		interfaceWithDefault.setType(TYPE.INTERFACE);
+		interfaceWithDefault.setName("InterfaceWithDefaultConcreteType");
+		interfaceWithDefault.setId("org.example." + interfaceWithDefault.getName());
+		interfaceWithDefault.setDefaultConcreteType("org.example.DefaultImplementation");
+		
+		schemas.add(interfaceWithDefault);
+		
+		JCodeModel codeModel = new JCodeModel();
+		
+		String errorMessage = assertThrows(IllegalStateException.class, () -> {			
+			// Call under test
+			driver.createAllClasses(codeModel, schemas);
+		}).getMessage();
+		
+		assertEquals("The schema of the defaultConcreteType org.example.DefaultImplementation defined on the InterfaceWithDefaultConcreteType interface is not defined", errorMessage);
+	}
+	
+	@Test
+	public void testcreateAllClassesWithDefaultConcreteTypeNonImplementingInterface() throws ClassNotFoundException {
+		
+		List<ObjectSchema> schemas = new ArrayList<>();
+		
+		ObjectSchema interfaceWithDefault = new ObjectSchemaImpl();
+		interfaceWithDefault.setType(TYPE.INTERFACE);
+		interfaceWithDefault.setName("InterfaceWithDefaultConcreteType");
+		interfaceWithDefault.setId("org.example." + interfaceWithDefault.getName());
+		interfaceWithDefault.setDefaultConcreteType("org.example.DefaultImplementation");
+		
+		// Define an existing implementation, but it does not implement the given interface
+		ObjectSchema defaultImplementation = new ObjectSchemaImpl();
+		defaultImplementation.setType(TYPE.OBJECT);
+		defaultImplementation.setName("DefaultImplementation");
+		defaultImplementation.setId("org.example." + defaultImplementation.getName());
+		
+		schemas.add(interfaceWithDefault);
+		schemas.add(defaultImplementation);
+		
+		JCodeModel codeModel = new JCodeModel();
+		
+		String errorMessage = assertThrows(IllegalStateException.class, () -> {			
+			// Call under test
+			driver.createAllClasses(codeModel, schemas);
+		}).getMessage();
+		
+		assertEquals("The defaultConcreteType org.example.DefaultImplementation does not implement the interface org.example.InterfaceWithDefaultConcreteType", errorMessage);
+	}
+	
 	/**
 	 * Helper to declare a model object to string.
 	 * @param toDeclare
