@@ -1,13 +1,14 @@
 package org.sagebionetworks.jstp20;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.DefaultConcreteTypeImpl;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;

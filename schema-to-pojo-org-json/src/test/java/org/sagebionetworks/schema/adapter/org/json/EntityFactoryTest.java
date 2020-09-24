@@ -1,42 +1,56 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 
 public class EntityFactoryTest {
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateJSONStringForEntityNull() throws JSONObjectAdapterException{
-		// null is not allowed
-		EntityFactory.createJSONStringForEntity(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			// null is not allowed
+			EntityFactory.createJSONStringForEntity(null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateJSONObjectForEntityNull() throws JSONObjectAdapterException{
-		EntityFactory.createJSONObjectForEntity(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createJSONObjectForEntity(null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONStringStringNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONString(null, SimpleEntityStub.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONString(null, SimpleEntityStub.class);
+		});
 	}
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONStringClassNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONString("{\"value\":\"This value should make a round trip\"}",null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONString("{\"value\":\"This value should make a round trip\"}",null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONObjectStringNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONObject(null, SimpleEntityStub.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONObject(null, SimpleEntityStub.class);
+		});
 	}
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONObjectClassNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONObject(new JSONObject(),null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONObject(new JSONObject(),null);
+		});
 	}
 	
 	@Test

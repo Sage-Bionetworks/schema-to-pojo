@@ -1,16 +1,18 @@
 package org.sagebionetworks.schema.generator.handler.schema03;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.FORMAT;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -34,7 +36,7 @@ public class TypeCreatorHandlerImpl03Test {
 	JType type;
 	ObjectSchema schema;
 
-	@Before
+	@BeforeEach
 	public void before() throws JClassAlreadyExistsException,
 			ClassNotFoundException {
 		codeModel = new JCodeModel();
@@ -267,7 +269,7 @@ public class TypeCreatorHandlerImpl03Test {
 	 * Enumerations must have a type of string.
 	 * @throws ClassNotFoundException
 	 */
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEnumerationNotString() throws ClassNotFoundException{
 		schema.setType(TYPE.BOOLEAN);
 		schema.setEnum(new EnumValue[]{
@@ -276,11 +278,14 @@ public class TypeCreatorHandlerImpl03Test {
 				new EnumValue("three")
 		});
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
-		// Create the class
-		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		
+		assertThrows(IllegalArgumentException.class, () -> {			
+			// Create the class
+			handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEnumerationNullName() throws ClassNotFoundException{
 		schema.setType(TYPE.STRING);
 		schema.setEnum(new EnumValue[]{
@@ -290,8 +295,11 @@ public class TypeCreatorHandlerImpl03Test {
 		});
 		schema.setName(null);
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
-		// Create the class
-		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			// Create the class
+			handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		});
 	}
 	
 	@Test
@@ -324,7 +332,7 @@ public class TypeCreatorHandlerImpl03Test {
 		assertTrue(classString.contains("two's description"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHandelCreateType_StringKeyMap_nullValue() throws ClassNotFoundException{
 		String title = "This is the title";
 		String description = "Add a description";
@@ -336,8 +344,11 @@ public class TypeCreatorHandlerImpl03Test {
 		schema.setValue(null);
 
 		TypeCreatorHandlerImpl03 handler = new TypeCreatorHandlerImpl03();
-		// Create the class
-		JType clazz = handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			// Create the class
+			handler.handelCreateType(codeModel, schema, codeModel._ref(Object.class), null, null, null, null);
+		});
 	}
 
 	@Test

@@ -1,17 +1,16 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.generator.handler.HandlerFactory;
 import org.sagebionetworks.schema.generator.handler.schema03.HandlerFactoryImpl03;
@@ -28,13 +27,13 @@ public class SchemaToPojoTest {
 		assertEquals("SomeFileName", result);
 	}
 
-	@Before
+	@BeforeEach
 	public void before() throws IOException {
 		// Create a temp directory for output
 		outputDir = FileUtils.createTempDirectory("output");
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		// Delete the output directory
 		FileUtils.recursivelyDeleteDirectory(outputDir);
@@ -46,8 +45,7 @@ public class SchemaToPojoTest {
 			JSONObjectAdapterException, ClassNotFoundException {
 		// Load form the sample file
 		File sampleFile = new File("src/test/resources/ExampleSchema.json");
-		assertTrue("Test file does not exist: " + sampleFile.getAbsolutePath(),
-				sampleFile.exists());
+		assertTrue(sampleFile.exists(), "Test file does not exist: " + sampleFile.getAbsolutePath());
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
@@ -72,8 +70,7 @@ public class SchemaToPojoTest {
 			JSONObjectAdapterException, ClassNotFoundException {
 		// Load form the sample file
 		File sampleFile = new File("src/test/resources");
-		assertTrue("Test file does not exist: " + sampleFile.getAbsolutePath(),
-				sampleFile.exists());
+		assertTrue(sampleFile.exists(), "Test file does not exist: " + sampleFile.getAbsolutePath());
 		// Create the class
 		HandlerFactory factory = new HandlerFactoryImpl03();
 		// Generate the class
