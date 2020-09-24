@@ -12,6 +12,7 @@ import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
+import org.sagebionetworks.schema.adapter.AdapterUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
@@ -120,8 +121,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 		// First validate against the schema
 		JFieldVar allKeyNames = classType.fields().get(ObjectSchema.ALL_KEYS_NAME);
-		
-		JFieldRef conreteTypeRef = classType.owner().ref(ObjectSchema.class).staticRef("CONCRETE_TYPE");
         
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
@@ -217,6 +216,10 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// first get the JSONObject for this array element
 					JVar indexAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
 							.invoke("getJSONObject").arg(i));
+					
+					// Extracts the concrete type value
+					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, indexAdapter, arrayTypeClass);
+					
 					// Create the object from the register
 					JVar indexObject = ifNullElseBlock.decl(
 							arrayTypeClass,
@@ -224,7 +227,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 							JExpr.cast(
 									arrayTypeClass,
 									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(indexAdapter.invoke("getString").arg(conreteTypeRef))));
+											.arg(concreteType)));
 					// Initialize the object from the adapter.
 					ifNullElseBlock.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
 					// add the object to the list
@@ -277,6 +280,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
 							jsonMap
 									.invoke("getJSONObject").arg(loop.var()));
+					
+					// Extracts the concrete type value
+					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, valueAdapter, valueTypeClass);
 
 					// Create the object from the register
 					ifNullElseBlock.assign(
@@ -284,7 +290,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 							JExpr.cast(
 									valueTypeClass,
 									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(valueAdapter.invoke("getString").arg(conreteTypeRef))));
+											.arg(concreteType)));
 					// Initialize the object from the adapter.
 					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
 				} else {
@@ -331,6 +337,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
 							jsonMap
 									.invoke("getJSONObject").arg(loop.var()));
+					
+					// Extracts the concrete type value
+					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, valueAdapter, valueTypeClass);
 
 					// Create the object from the register
 					ifNullElseBlock.assign(
@@ -338,7 +347,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 							JExpr.cast(
 									valueTypeClass,
 									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(valueAdapter.invoke("getString").arg(conreteTypeRef))));
+											.arg(concreteType)));
 					// Initialize the object from the adapter.
 					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
 				} else {
@@ -356,7 +365,12 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// Use the register to create the class
 					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
 							.invoke("getJSONObject").arg(propNameConstant));
-					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(localAdapter.invoke("getString").arg(conreteTypeRef))));
+					
+					// Extracts the concrete type value
+					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), thenBlock, localAdapter, typeClass);
+					
+					// Now
+					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(concreteType)));
 					thenBlock.add(field.invoke("initializeFromJSONObject").arg(localAdapter));
 
 				} else {
@@ -389,6 +403,15 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         // Always return the param
         body._return(param);
 		return method;
+	}
+	
+	private JVar getConcreteTypeVariableExpression(JCodeModel codeModel, JBlock block, JVar adapter, JClass clazz) {
+		return block.decl(codeModel.ref(String.class), VAR_PREFIX + ObjectSchema.CONCRETE_TYPE, 
+					codeModel.ref(AdapterUtils.class)
+					.staticInvoke("extractConcreteType")
+					.arg(adapter)
+					.arg(clazz.dotclass())
+		);
 	}
 
 	private JFieldVar getPropertyKeyConstantReference(JDefinedClass classType, String propName) {

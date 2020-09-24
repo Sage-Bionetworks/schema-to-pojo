@@ -4,6 +4,10 @@
         "interfaceField":{
             "type":"object",
             "$ref":"org.sagebionetworks.jstp20.SomeInterface"
+        },
+        "interfaceFieldWithDefaultConcreteType":{
+            "type":"object",
+            "$ref":"org.sagebionetworks.InterfaceWithDefaultConcreteType"
         }
     }
 }

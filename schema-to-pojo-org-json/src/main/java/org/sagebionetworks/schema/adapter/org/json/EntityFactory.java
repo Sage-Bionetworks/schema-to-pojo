@@ -1,8 +1,7 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
 import org.json.JSONObject;
-import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.adapter.JSONDefaultConcreteType;
+import org.sagebionetworks.schema.adapter.AdapterUtils;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -97,7 +96,7 @@ public class EntityFactory {
 		try {
 			T newInstance = null;
 			if(clazz.isInterface()){
-				String concreteType = extractConcreteType(adapter, clazz);
+				String concreteType = AdapterUtils.extractConcreteType(adapter, clazz);
 				// Use the concrete type to instanciate the object.
 				newInstance = (T)Class.forName(concreteType).newInstance();
 			}else{
@@ -108,20 +107,6 @@ public class EntityFactory {
 		} catch (Exception e) {
 			throw new JSONObjectAdapterException(e);
 		}
-	}
-	
-	private static <T> String extractConcreteType(JSONObjectAdapter adapter, Class<T> clazz) throws JSONObjectAdapterException {
-		if (adapter.has(ObjectSchema.CONCRETE_TYPE)) {
-			return adapter.getString(ObjectSchema.CONCRETE_TYPE);
-		}
-		
-		JSONDefaultConcreteType defaultConcreteType = clazz.getDeclaredAnnotation(JSONDefaultConcreteType.class);
-		
-		if (defaultConcreteType == null) {
-			throw new JSONObjectAdapterException("Missing " + ObjectSchema.CONCRETE_TYPE + " property, cannot discriminate the polymorphic type.");
-		}
-		
-		return defaultConcreteType.value();
 	}
 
 }

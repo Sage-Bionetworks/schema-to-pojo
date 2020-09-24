@@ -504,7 +504,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(_KEY_PROPNAME);"));
 		assertTrue(methodString
-				.contains("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__localAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+				.contains("java.lang.String __concreteType = org.sagebionetworks.schema.adapter.AdapterUtils.extractConcreteType(__localAdapter, org.sample.SampleInterface.class);"));
+		assertTrue(methodString
+				.contains("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("propName.initializeFromJSONObject(__localAdapter);"));
 	}
 	
@@ -552,7 +554,9 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);"));
 		assertTrue(methodString
-				.contains("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__indexAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+				.contains("java.lang.String __concreteType = org.sagebionetworks.schema.adapter.AdapterUtils.extractConcreteType(__indexAdapter, org.sample.SampleInterface.class);"));
+		assertTrue(methodString
+				.contains("org.sample.SampleInterface __indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("__indexObject.initializeFromJSONObject(__indexAdapter);"));
 		assertTrue(methodString.contains("arrayName.add(__indexObject);"));
 	}
@@ -2146,7 +2150,10 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("if (__jsonStringMap.isNull(__key)) {"));
 		assertTrue(methodString.contains("__value = null;"));
 		assertTrue(methodString.contains("} else {"));
-		assertTrue(methodString.contains("__value = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__valueAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)));"));
+		assertTrue(methodString.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __valueAdapter = __jsonStringMap.getJSONObject(__key);"));
+		assertTrue(methodString.contains("java.lang.String __concreteType = org.sagebionetworks.schema.adapter.AdapterUtils.extractConcreteType(__valueAdapter, org.sample.SampleInterface.class);"));
+		
+		assertTrue(methodString.contains("__value = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("__value.initializeFromJSONObject(__valueAdapter);"));
 
 		assertTrue(methodString.contains("mapWhoseItemIsAnInterface.put(__key, __value);"));

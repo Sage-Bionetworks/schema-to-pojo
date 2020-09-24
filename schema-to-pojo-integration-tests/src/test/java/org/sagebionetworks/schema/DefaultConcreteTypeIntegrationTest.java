@@ -18,20 +18,18 @@ public class DefaultConcreteTypeIntegrationTest {
 		instance.setSomeProperty("Some Property");
 		instance.setSomeOtherProperty("Some Other Property");
 		
-		String jsonString = EntityFactory.createJSONStringForEntity(instance);
-		
 		String expectedJson = "{" 
 				+ "\"someProperty\":\"Some Property\","
 				+ "\"someOtherProperty\":\"Some Other Property\"" 
 				+ "}";
+		
+		String jsonString = EntityFactory.createJSONStringForEntity(instance);
 		
 		assertEquals(expectedJson, jsonString);
 		
 		InterfaceWithDefaultConcreteType result = EntityFactory.createEntityFromJSONString(jsonString, InterfaceWithDefaultConcreteType.class);
 	
 		assertEquals(DefaultConcreteTypeImpl.class, result.getClass());
-		
-		DefaultConcreteTypeImpl defaultImpl = (DefaultConcreteTypeImpl) result;
 		
 	}
 
