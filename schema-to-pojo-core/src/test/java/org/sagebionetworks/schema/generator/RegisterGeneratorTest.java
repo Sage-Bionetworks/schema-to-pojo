@@ -1,16 +1,16 @@
 package org.sagebionetworks.schema.generator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.EnumValue;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
@@ -20,9 +20,11 @@ import org.sagebionetworks.schema.adapter.JSONEntity;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JFieldRef;
 import com.sun.codemodel.JFormatter;
 import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 
 /**
@@ -34,7 +36,8 @@ import com.sun.codemodel.JPackage;
 public class RegisterGeneratorTest {
 	
 	List<ObjectSchema> list;
-	@Before
+	
+	@BeforeEach
 	public void before(){
 		list = new ArrayList<ObjectSchema>();
 		ObjectSchema schema = new ObjectSchemaImpl(TYPE.OBJECT);
@@ -186,6 +189,59 @@ public class RegisterGeneratorTest {
 //		System.out.println(writer.toString());
 		assertTrue(value.indexOf("Note: This class was auto-generated, and should not be directly modified") > 0);
 		assertTrue(value.indexOf("private java.util.Map<java.lang.String, java.lang.Integer> map;") > 0);
+	}
+	
+	@Test
+	public void testCreateGetDefaultConcreteTypeMethodWithNoDefault() throws JClassAlreadyExistsException {
+		JCodeModel model = new JCodeModel();
+		JPackage _package = model._package("org.sample");
+		JDefinedClass testClass = _package._class("Test");
+		
+		JMethod method = RegisterGenerator.createGetDefaultConcreteTypeMethod(model, testClass, JSONEntity.class.getName());
+		
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String value = writer.toString();
+		assertTrue(value.indexOf("The default concrete type implementing the interface if present, null otherwise") > 0);
+		assertTrue(value.indexOf("public java.lang.String getDefaultConcreteType() {") > 0);
+		assertTrue(value.indexOf("return null;") > 0);
+	}
+	
+	@Test
+	public void testCreateGetDefaultConcreteTypeMethodWithNullInterface() throws JClassAlreadyExistsException {
+		JCodeModel model = new JCodeModel();
+		JPackage _package = model._package("org.sample");
+		JDefinedClass testClass = _package._class("Test");
+		
+		JMethod method = RegisterGenerator.createGetDefaultConcreteTypeMethod(model, testClass, null);
+		
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String value = writer.toString();
+		assertTrue(value.indexOf("The default concrete type implementing the interface if present, null otherwise") > 0);
+		assertTrue(value.indexOf("public java.lang.String getDefaultConcreteType() {") > 0);
+		assertTrue(value.indexOf("return null;") > 0);
+	}
+	
+	@Test
+	public void testCreateGetDefaultConcreteTypeMethodWithDefault() throws JClassAlreadyExistsException {
+		JCodeModel model = new JCodeModel();
+		JPackage _package = model._package("org.sample");
+		JDefinedClass testClass = _package._class("Test");
+		JDefinedClass testInterface = _package._interface("InterfaceWithDefault");
+		testInterface.field(JMod.NONE, String.class, ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME, JExpr.lit("some.value"));
+		
+		JMethod method = RegisterGenerator.createGetDefaultConcreteTypeMethod(model, testClass, testInterface.fullName());
+		
+		StringWriter writer = new StringWriter();
+		JFormatter formatter = new JFormatter(writer);
+		method.declare(formatter);
+		String value = writer.toString();
+		assertTrue(value.indexOf("The default concrete type implementing the interface if present, null otherwise") > 0);
+		assertTrue(value.indexOf("public java.lang.String getDefaultConcreteType() {") > 0);
+		assertTrue(value.indexOf("return org.sample.InterfaceWithDefault._DEFAULT_CONCRETE_TYPE;") > 0);
 	}
 
 	@Test
