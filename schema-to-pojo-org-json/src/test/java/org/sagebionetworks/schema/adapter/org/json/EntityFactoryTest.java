@@ -99,7 +99,7 @@ public class EntityFactoryTest {
 	@Test
 	public void testCreateEntityFromJSONStringWithDefaultConcreteType() throws JSONObjectAdapterException{
 		
-		// A json string without concrete type, the interface is marked with the JSONDefaultConcreteType annotation
+		// A json string without concrete type, the interface has a _DEFAULT_CONCRETE_TYPE field
 		String json = "{\"value\":\"This value should make a round trip\"}";
 		
 		SimpleEntityStub expected = new SimpleEntityStub();
@@ -110,6 +110,22 @@ public class EntityFactoryTest {
 		
 		// The stub and clone should be the same
 		assertEquals(expected, clone);
+	}
+	
+	@Test
+	public void testCreateEntityFromJSONStringWithMissingConcreteType() throws JSONObjectAdapterException {
+		
+		// A json string without concrete type, 
+		String json = "{\"value\":\"This value should make a round trip\"}";
+		
+		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {			
+			// Call under test
+			EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
+		});
+
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type "
+				+ "org.sagebionetworks.schema.adapter.org.json.SimpleInterface", ex.getCause().getMessage());
+
 	}
 
 }

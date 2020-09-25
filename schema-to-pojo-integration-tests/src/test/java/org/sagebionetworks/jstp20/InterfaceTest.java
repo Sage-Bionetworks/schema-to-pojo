@@ -3,6 +3,7 @@ package org.sagebionetworks.jstp20;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,6 +40,21 @@ public class InterfaceTest {
 	}
 	
 	@Test
+	public void testInterfaceWithMissingConcreteType() throws IOException, JSONObjectAdapterException, ClassNotFoundException {		
+		
+		// The interfaceField should have a concreteType since it's defined as a SomeInterface that does not have a default concrete type
+		String json = "{\"interfaceField\":{\"fromOne\":\"123\"}}";
+		
+		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {
+			// Call under test
+			EntityFactory.createEntityFromJSONString(json, HasInterfaceField.class);
+		});
+		
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", ex.getCause().getMessage());
+		
+	}
+	
+	@Test
 	public void testInterfaceFieldWithDefaultConcreteType() throws JSONObjectAdapterException {
 		HasInterfaceField pojo = new HasInterfaceField();
 		
@@ -49,10 +65,12 @@ public class InterfaceTest {
 		
 		String expectedJson = "{\"interfaceFieldWithDefaultConcreteType\":{\"someProperty\":\"Some Property\"}}";
 		
+		// Call under test
 		String json = EntityFactory.createJSONStringForEntity(pojo);
 		
 		assertEquals(expectedJson, json);
 		
+		// Call under test
 		HasInterfaceField clonePojo = EntityFactory.createEntityFromJSONString(json, HasInterfaceField.class);
 
 		assertEquals(pojo, clonePojo);
@@ -84,7 +102,20 @@ public class InterfaceTest {
 	}
 	
 	@Test
-	public void testArrayOfInterfacesWithDefatulConcreteType() throws JSONObjectAdapterException {
+	public void testArrayOfInterfacesWithMissingConcreteType() throws JSONObjectAdapterException {
+		String json = "{\"list\":[{\"concreteType\":\"org.sagebionetworks.jstp20.OneImpl\",\"fromOne\":\"123\"},{\"fromOne\":\"456\"}]}";
+		
+		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {
+			// Call under test
+			EntityFactory.createEntityFromJSONString(json, HasListOfInterface.class);
+		});
+		
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", ex.getCause().getMessage());
+		
+	}
+	
+	@Test
+	public void testArrayOfInterfacesWithDefatultConcreteType() throws JSONObjectAdapterException {
 		HasListOfInterface pojo = new HasListOfInterface();
 		DefaultConcreteTypeImpl one = new DefaultConcreteTypeImpl();
 		one.setSomeProperty("Some Property One");

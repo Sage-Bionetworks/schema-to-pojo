@@ -503,7 +503,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Is the primitive assigned correctly?
 		assertTrue(methodString
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __localAdapter = adapter.getJSONObject(_KEY_PROPNAME);"));
-		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createPropertyCannotBeNullMessage(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE));"));
+		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createMissingConcreteTypeMessage(org.sample.SampleInterface.class));"));
 		assertTrue(methodString.contains("__concreteType = __localAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE);"));
 		assertTrue(methodString.contains("propName = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("propName.initializeFromJSONObject(__localAdapter);"));
@@ -554,7 +554,7 @@ public class JSONMarshalingHandlerImpl03Test {
 				.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __indexAdapter = __jsonArray.getJSONObject(__i);"));
 		assertTrue(methodString.contains("org.sample.SampleInterface __indexObject;"));
 		assertTrue(methodString.contains("if (__indexAdapter.isNull(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)) {"));
-		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createPropertyCannotBeNullMessage(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE));"));
+		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createMissingConcreteTypeMessage(org.sample.SampleInterface.class));"));
 		assertTrue(methodString.contains("__concreteType = __indexAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE);"));
 		assertTrue(methodString.contains("__indexObject = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("__indexObject.initializeFromJSONObject(__indexAdapter);"));
@@ -2152,7 +2152,7 @@ public class JSONMarshalingHandlerImpl03Test {
 		assertTrue(methodString.contains("} else {"));
 		assertTrue(methodString.contains("org.sagebionetworks.schema.adapter.JSONObjectAdapter __valueAdapter = __jsonStringMap.getJSONObject(__key);"));
 		assertTrue(methodString.contains("if (__valueAdapter.isNull(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE)) {"));
-		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createPropertyCannotBeNullMessage(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE));"));
+		assertTrue(methodString.contains("throw new java.lang.IllegalArgumentException(org.sagebionetworks.schema.ObjectSchemaImpl.createMissingConcreteTypeMessage(org.sample.SampleInterface.class));"));
 		assertTrue(methodString.contains("__concreteType = __valueAdapter.getString(org.sagebionetworks.schema.ObjectSchema.CONCRETE_TYPE);"));
 		assertTrue(methodString.contains("__value = ((org.sample.SampleInterface) org.sample.SampleInterfaceInstanceFactory.singleton().newInstance(__concreteType));"));
 		assertTrue(methodString.contains("__value.initializeFromJSONObject(__valueAdapter);"));

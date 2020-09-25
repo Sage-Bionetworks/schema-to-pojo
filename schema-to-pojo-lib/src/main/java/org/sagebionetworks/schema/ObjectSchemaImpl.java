@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -116,6 +117,19 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		builder.append(propertyName);
 		builder.append("' is required and cannot be null");
 		return builder.toString();
+	}
+
+	/**
+	 * Creates an error message: "Missing 'concreteType' property, cannot discriminate polymorphic type <type>"
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static String createMissingConcreteTypeMessage(Class<? extends JSONEntity> clazz) {
+		return new StringBuilder("Missing '")
+				.append(CONCRETE_TYPE)
+				.append("' property, cannot discriminate polymorphic type ")
+				.append(clazz.getName()).toString();
 	}
 
 	/*

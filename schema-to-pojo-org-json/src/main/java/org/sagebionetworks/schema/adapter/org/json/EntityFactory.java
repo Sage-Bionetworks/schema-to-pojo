@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -121,7 +122,7 @@ public class EntityFactory {
 			Field defaultConcreteTypeField = clazz.getDeclaredField(ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME);
 			return (String) defaultConcreteTypeField.get(clazz);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new JSONObjectAdapterException("Missing " + ObjectSchema.CONCRETE_TYPE + " property, cannot discriminate the polymorphic type.", e);
+			throw new JSONObjectAdapterException(ObjectSchemaImpl.createMissingConcreteTypeMessage(clazz), e);
 		}
 	}
 

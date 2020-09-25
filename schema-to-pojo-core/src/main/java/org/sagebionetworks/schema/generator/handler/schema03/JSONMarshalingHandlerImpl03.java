@@ -97,7 +97,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         JFieldRef staticMessageRef = classType.owner().ref(ObjectSchema.class).staticRef("OBJECT_ADAPTER_CANNOT_BE_NULL");
         // Make sure the parameter is not null
         body._if(param.eq(JExpr._null()))
-        	._then()._throw(createIllegalArgumentException(classType, staticMessageRef));
+        	._then()._throw(createIllegalArgumentException(classType.owner(), staticMessageRef));
         
         // Now invoke the init method
         body.invoke(initializeMethod).arg(param);
@@ -390,7 +390,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		
 		// No default concrete type field defined on the interface, throw
 		if (defaultConcreteTypeField == null) {
-			ifNullBlock._throw(createIllegalArgumentExceptionPropertyNotNull(codeModel, concreteTypeRef));
+			JInvocation staticCall = codeModel.ref(ObjectSchemaImpl.class).staticInvoke("createMissingConcreteTypeMessage").arg(clazz.dotclass());
+			ifNullBlock._throw(createIllegalArgumentException(codeModel, staticCall));
 		} else {
 			ifNullBlock.assign(concreteTypeVar, clazz.staticRef(defaultConcreteTypeField));
 		}
@@ -667,7 +668,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
         JFieldRef staticMessageRef = classType.owner().ref(ObjectSchema.class).staticRef("OBJECT_ADAPTER_CANNOT_BE_NULL");
         // Make sure the parameter is not null
         body._if(param.eq(JExpr._null()))
-        	._then()._throw(createIllegalArgumentException(classType, staticMessageRef));
+        	._then()._throw(createIllegalArgumentException(classType.owner(), staticMessageRef));
         
         return method;
 	}
@@ -904,19 +905,20 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @param message
 	 * @return
 	 */
-	private JInvocation createIllegalArgumentException(JDefinedClass classType, JExpression message){
-		return JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(message);
+	private JInvocation createIllegalArgumentException(JCodeModel codeModel, JExpression message){
+		return JExpr._new(codeModel.ref(IllegalArgumentException.class)).arg(message);
 	}
 	
 	/**
 	 * Create an IllegalArgumentException for "property cannot be null"
+	 * 
 	 * @param classType
 	 * @param propConstRef Reference to the property constant name.
 	 * @return
 	 */
 	private JInvocation createIllegalArgumentExceptionPropertyNotNull(JCodeModel codeModel, JExpression propName){
 		JInvocation staticCall = codeModel.ref(ObjectSchemaImpl.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propName);
-		return JExpr._new(codeModel.ref(IllegalArgumentException.class)).arg(staticCall);
+		return createIllegalArgumentException(codeModel, staticCall);
 	}
 
 	/**
