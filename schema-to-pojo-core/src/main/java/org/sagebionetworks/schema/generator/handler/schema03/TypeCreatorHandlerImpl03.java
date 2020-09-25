@@ -12,12 +12,9 @@ import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.JSONDefaultConcreteType;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.generator.handler.TypeCreatorHandler;
 
-import com.sun.codemodel.JAnnotationUse;
-import com.sun.codemodel.JAnnotationValue;
 import com.sun.codemodel.JArray;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -171,11 +168,8 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 					newClass._implements((JClass)interfacesType);
 				}
 			}
-			if (schema.getDefaultConcreteType() != null) {
-				if (TYPE.INTERFACE != schema.getType()) {
-					throw new IllegalArgumentException("Only an interface can define a defaultConcreteType");
-				}
-				newClass.annotate(JSONDefaultConcreteType.class).param("value", schema.getDefaultConcreteType());
+			if (schema.getDefaultConcreteType() != null && !newClass.isInterface()) {
+				throw new IllegalArgumentException("Only an interface can define a defaultConcreteType");
 			}
 			// add all of the key constants
 			addKeyConstants(schema, newClass);
@@ -215,6 +209,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				}
 				// the array of all names.
 				newClass.field(mods, stringArrayType , ObjectSchema.ALL_KEYS_NAME, value);
+			}
+		} else {
+			// We add the default concrete type constant only if supplied
+			if (schema.getDefaultConcreteType() != null) {
+				newClass.field(JMod.NONE, String.class, ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME, JExpr.lit(schema.getDefaultConcreteType()));
 			}
 		}
 	}

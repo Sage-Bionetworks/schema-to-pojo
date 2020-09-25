@@ -12,7 +12,6 @@ import org.sagebionetworks.schema.JavaKeyword;
 import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.TYPE;
-import org.sagebionetworks.schema.adapter.AdapterUtils;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONMapAdapter;
@@ -119,9 +118,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		JVar param = method.params().get(0);
 		JBlock body = method.body();
 		
-		// First validate against the schema
-		JFieldVar allKeyNames = classType.fields().get(ObjectSchema.ALL_KEYS_NAME);
-        
 		// Now process each property
 		Map<String, ObjectSchema> fieldMap = classSchema.getObjectFieldMap();
 		for (Map.Entry<String, ObjectSchema> entry : fieldMap.entrySet()) {
@@ -203,9 +199,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JBlock loopBody = loop.body();
 				// Handle abstract classes and interfaces
 				if (arrayTypeClass.isInterface() || arrayTypeClass.isAbstract()) {
-					if (interfaceFactoryGenerator == null)
-						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
-					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(arrayTypeClass);
 					JConditional ifNull = loopBody._if(jsonArray.invoke("isNull").arg(i));
 					// if null
 					JBlock ifNulThenBlock = ifNull._then();
@@ -214,22 +207,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 					// else add(value)
 					JBlock ifNullElseBlock = ifNull._else();
 					// first get the JSONObject for this array element
-					JVar indexAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
+					JVar adapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "indexAdapter", jsonArray
 							.invoke("getJSONObject").arg(i));
 					
-					// Extracts the concrete type value
-					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, indexAdapter, arrayTypeClass);
+					JVar indexObject = ifNullElseBlock.decl(arrayTypeClass, VAR_PREFIX + "indexObject");
 					
-					// Create the object from the register
-					JVar indexObject = ifNullElseBlock.decl(
-							arrayTypeClass,
-							VAR_PREFIX + "indexObject",
-							JExpr.cast(
-									arrayTypeClass,
-									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(concreteType)));
-					// Initialize the object from the adapter.
-					ifNullElseBlock.add(indexObject.invoke("initializeFromJSONObject").arg(indexAdapter));
+					initializeFieldFromFactoryGenerator(classType.owner(), ifNullElseBlock, indexObject, interfaceFactoryGenerator, arrayTypeClass, adapter);
+					
 					// add the object to the list
 					ifNullElseBlock.add(field.invoke("add").arg(indexObject));
 				} else {
@@ -273,26 +257,12 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// else
 				JBlock ifNullElseBlock = ifNull._else();
 				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
-					if (interfaceFactoryGenerator == null)
-						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
-					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
-					// first get the JSONObject for this array element
-					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
-							jsonMap
-									.invoke("getJSONObject").arg(loop.var()));
 					
-					// Extracts the concrete type value
-					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, valueAdapter, valueTypeClass);
-
-					// Create the object from the register
-					ifNullElseBlock.assign(
-							value,
-							JExpr.cast(
-									valueTypeClass,
-									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(concreteType)));
-					// Initialize the object from the adapter.
-					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+					JVar adapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter", 
+							jsonMap.invoke("getJSONObject").arg(loop.var()));
+					
+					initializeFieldFromFactoryGenerator(classType.owner(), ifNullElseBlock, value, interfaceFactoryGenerator, valueTypeClass, adapter);
+					
 				} else {
 					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
 				}
@@ -330,26 +300,12 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// else
 				JBlock ifNullElseBlock = ifNull._else();
 				if (valueTypeClass.isInterface() || valueTypeClass.isAbstract()) {
-					if (interfaceFactoryGenerator == null)
-						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
-					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(valueTypeClass);
-					// first get the JSONObject for this array element
-					JVar valueAdapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
-							jsonMap
-									.invoke("getJSONObject").arg(loop.var()));
 					
-					// Extracts the concrete type value
-					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), ifNullElseBlock, valueAdapter, valueTypeClass);
-
-					// Create the object from the register
-					ifNullElseBlock.assign(
-							value,
-							JExpr.cast(
-									valueTypeClass,
-									createRegister.staticInvoke("singleton").invoke("newInstance")
-											.arg(concreteType)));
-					// Initialize the object from the adapter.
-					ifNullElseBlock.add(value.invoke("initializeFromJSONObject").arg(valueAdapter));
+					JVar adapter = ifNullElseBlock.decl(classType.owner()._ref(JSONObjectAdapter.class), VAR_PREFIX + "valueAdapter",
+							jsonMap.invoke("getJSONObject").arg(loop.var()));
+					
+					initializeFieldFromFactoryGenerator(valueTypeClass.owner(), ifNullElseBlock, value, interfaceFactoryGenerator, valueTypeClass, adapter);
+					
 				} else {
 					ifNullElseBlock.assign(value, createExpressionToGetFromMap(param, jsonMap, loop.var(), valueTypeSchema, valueTypeClass));
 				}
@@ -359,33 +315,21 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// If we have a register then we need to use it
 				JClass typeClass = (JClass) field.type();
 				if (typeClass.isInterface() || typeClass.isAbstract()) {
-					if (interfaceFactoryGenerator == null)
-						throw new IllegalArgumentException("A InterfaceFactoryGenerator is need to create interfaces or abstract classes.");
-					JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(typeClass);
-					// Use the register to create the class
-					JVar localAdapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
+					
+					JVar adapter = thenBlock.decl(classType.owner().ref(JSONObjectAdapter.class), VAR_PREFIX + "localAdapter", param
 							.invoke("getJSONObject").arg(propNameConstant));
 					
-					// Extracts the concrete type value
-					JVar concreteType = getConcreteTypeVariableExpression(classType.owner(), thenBlock, localAdapter, typeClass);
-					
-					// Now
-					thenBlock.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(concreteType)));
-					thenBlock.add(field.invoke("initializeFromJSONObject").arg(localAdapter));
-
+					initializeFieldFromFactoryGenerator(classType.owner(), thenBlock, field, interfaceFactoryGenerator, typeClass, adapter);
 				} else {
 					// We can just create a new type for this object.
-					thenBlock.assign(
-							field,
-							JExpr._new(typeClass).arg(
-									param.invoke("getJSONObject").arg(propNameConstant)));
+					thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke("getJSONObject").arg(propNameConstant)));
 				}
 
 			}
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired() && propSchema.getDefault() == null) {
 				hasCondition._else()
-						._throw(createIllegalArgumentExceptionPropertyNotNull(classType, propNameConstant));
+						._throw(createIllegalArgumentExceptionPropertyNotNull(classType.owner(), propNameConstant));
 			} else {
 				//if propSchema has a default defined the property must
 				//be assigned to that default when  the adapter doesn't
@@ -405,13 +349,57 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		return method;
 	}
 	
-	private JVar getConcreteTypeVariableExpression(JCodeModel codeModel, JBlock block, JVar adapter, JClass clazz) {
-		return block.decl(codeModel.ref(String.class), VAR_PREFIX + ObjectSchema.CONCRETE_TYPE, 
-					codeModel.ref(AdapterUtils.class)
-					.staticInvoke("extractConcreteType")
-					.arg(adapter)
-					.arg(clazz.dotclass())
-		);
+	/**
+	 * Creates a block that initializes the given field in the given block using the provided {@link InstanceFactoryGenerator}, 
+	 * fetching the concrete type from the adapter. If the concrete type value is not present falls back to the default concrete
+	 * type defined on the interface if such default is present, otherwise will throw
+	 * 
+	 * @param codeModel
+	 * @param block
+	 * @param field
+	 * @param interfaceFactoryGenerator
+	 * @param clazz
+	 * @param adapter
+	 */
+	private void initializeFieldFromFactoryGenerator(JCodeModel codeModel, JBlock block, JVar field, 
+			InstanceFactoryGenerator interfaceFactoryGenerator, JClass clazz, JVar adapter) {
+		if (!(clazz instanceof JDefinedClass)) {
+			throw new IllegalArgumentException("The class " + clazz + " is not defined.");
+		}
+		
+		if (interfaceFactoryGenerator == null) {
+			throw new IllegalArgumentException("A InterfaceFactoryGenerator is needed to create interfaces or abstract classes.");
+		}
+		
+		JDefinedClass createRegister = interfaceFactoryGenerator.getFactoryClass(clazz);
+		
+		// Static reference to the CONCRETE_TYPE constant in ObjectSchema
+		JFieldRef concreteTypeRef = codeModel.ref(ObjectSchema.class).staticRef("CONCRETE_TYPE");
+		
+		// Defines a null variable with the concrete type value
+		JVar concreteTypeVar = block.decl(codeModel.ref(String.class), VAR_PREFIX + ObjectSchema.CONCRETE_TYPE, JExpr._null());
+		
+		// Checks if the concrete type value is present in the adapter
+		JConditional concreteTypeConditional = block._if(adapter.invoke("isNull").arg(concreteTypeRef));
+		
+		JBlock ifNullBlock = concreteTypeConditional._then();
+		
+		JDefinedClass definedClass = (JDefinedClass) clazz;
+		
+		JFieldVar defaultConcreteTypeField = definedClass.fields().get(ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME);
+		
+		// No default concrete type field defined on the interface, throw
+		if (defaultConcreteTypeField == null) {
+			ifNullBlock._throw(createIllegalArgumentExceptionPropertyNotNull(codeModel, concreteTypeRef));
+		} else {
+			ifNullBlock.assign(concreteTypeVar, clazz.staticRef(defaultConcreteTypeField));
+		}
+		
+		// If the concrete type value is present assigns it from the adapter
+		concreteTypeConditional._else().assign(concreteTypeVar, adapter.invoke("getString").arg(concreteTypeRef));
+		
+		block.assign(field, JExpr.cast(field.type(), createRegister.staticInvoke("singleton").invoke("newInstance").arg(concreteTypeVar)));
+		block.add(field.invoke("initializeFromJSONObject").arg(adapter));
 	}
 
 	private JFieldVar getPropertyKeyConstantReference(JDefinedClass classType, String propName) {
@@ -625,7 +613,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		TYPE type = typeSchema.getType();
 		FORMAT format = typeSchema.getFormat();
 		//check if our array type is an enum
-		String methodName = type.getMethodName();
 		if (!typeClass.isPrimitive() && !typeClass.fullName().equals("java.lang.String") && typeClass instanceof JDefinedClass) {
 			JDefinedClass getTheClass = (JDefinedClass) typeClass;
 			ClassType shouldHaveEnum = getTheClass.getClassType();
@@ -739,7 +726,6 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Basic assign
 				thenBlock.add(param.invoke("put").arg(propNameConstant).arg(expr));
 			} else if (TYPE.BOOLEAN == type || TYPE.NUMBER == type) {
-				JClass typeClass = (JClass) field.type();
 				// Basic assign
 				thenBlock.add(param.invoke("put").arg(propNameConstant).arg(field));
 			} else if (TYPE.ARRAY == type) {
@@ -835,7 +821,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired()) {
 				hasCondition._else()
-						._throw(createIllegalArgumentExceptionPropertyNotNull(classType, propNameConstant));
+						._throw(createIllegalArgumentExceptionPropertyNotNull(classType.owner(), propNameConstant));
 			}
 		}
         // Always return the param
@@ -928,9 +914,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 	 * @param propConstRef Reference to the property constant name.
 	 * @return
 	 */
-	private JInvocation createIllegalArgumentExceptionPropertyNotNull(JDefinedClass classType, JFieldVar propConstRef){
-		JInvocation staticCall = classType.owner().ref(ObjectSchemaImpl.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propConstRef);
-		return JExpr._new(classType.owner().ref(IllegalArgumentException.class)).arg(staticCall);
+	private JInvocation createIllegalArgumentExceptionPropertyNotNull(JCodeModel codeModel, JExpression propName){
+		JInvocation staticCall = codeModel.ref(ObjectSchemaImpl.class).staticInvoke("createPropertyCannotBeNullMessage").arg(propName);
+		return JExpr._new(codeModel.ref(IllegalArgumentException.class)).arg(staticCall);
 	}
 
 	/**

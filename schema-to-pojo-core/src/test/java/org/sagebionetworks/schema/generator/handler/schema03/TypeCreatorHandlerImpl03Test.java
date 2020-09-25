@@ -177,7 +177,7 @@ public class TypeCreatorHandlerImpl03Test {
 		String classString = declareToString(sampleClass);
 		assertTrue(classString.indexOf("public interface Sample") > 0);
 		assertTrue(classString.indexOf("extends org.sagebionetworks.schema.adapter.JSONEntity") > 0);
-		assertTrue(classString.indexOf("JSONDefaultConcreteType(\"some.DefaultImpl\"") > 0);
+		assertTrue(classString.indexOf("_DEFAULT_CONCRETE_TYPE = \"some.DefaultImpl\";") > 0);
 	}
 	
 	@Test
