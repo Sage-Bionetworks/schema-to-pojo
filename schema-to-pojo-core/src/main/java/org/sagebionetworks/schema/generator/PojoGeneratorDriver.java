@@ -85,15 +85,9 @@ public class PojoGeneratorDriver {
 									+ " defined on the " + schema.getName() + " interface is not defined");
 				}
 
-				StringBuilder fullyQualifiedName = new StringBuilder();
+				String fullyQualifiedName = schema.getId();
 				
-				if (schema.getPackageName() != null && !schema.getPackageName().isEmpty()) {
-					fullyQualifiedName.append(schema.getPackageName()).append(".");
-				}
-				
-				fullyQualifiedName.append(schema.getName());
-
-				JDefinedClass interfaceType = codeModel._getClass(fullyQualifiedName.toString());
+				JDefinedClass interfaceType = codeModel._getClass(fullyQualifiedName);
 				
 				if (interfaceType == null) {
 					throw new IllegalStateException("The schema for the " + schema.getName() + " interface is not defined");
