@@ -1,7 +1,10 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
+import java.lang.reflect.Field;
+
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
+import org.sagebionetworks.schema.ObjectSchemaImpl;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -91,15 +94,15 @@ public class EntityFactory {
 	 * @return
 	 * @throws JSONObjectAdapterException
 	 */
+	@SuppressWarnings("unchecked")
 	private static <T extends JSONEntity> T createEntityFromAdapter(Class<? extends T> clazz, JSONObjectAdapter adapter) throws JSONObjectAdapterException {
 		// Now create a new instance of the class
 		try {
 			T newInstance = null;
 			if(clazz.isInterface()){
-				// we need to determine the concrete type
-				String concreteType = adapter.getString(ObjectSchema.CONCRETE_TYPE);
-				// Use the concrete type to instanciate the object.
-				newInstance = (T)Class.forName(concreteType).newInstance();
+				String concreteType = extractConcreteType(adapter, clazz);
+				// Use the concrete type to instantiate the object.
+				newInstance = (T) Class.forName(concreteType).newInstance();
 			}else{
 				newInstance = clazz.newInstance();
 			}
@@ -107,6 +110,19 @@ public class EntityFactory {
 			return newInstance;
 		} catch (Exception e) {
 			throw new JSONObjectAdapterException(e);
+		}
+	}
+	
+	private static <T extends JSONEntity> String extractConcreteType(JSONObjectAdapter adapter, Class<? extends T> clazz) throws JSONObjectAdapterException {
+		if (!adapter.isNull(ObjectSchema.CONCRETE_TYPE)) {
+			return adapter.getString(ObjectSchema.CONCRETE_TYPE);
+		}
+		
+		try {
+			Field defaultConcreteTypeField = clazz.getDeclaredField(ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME);
+			return (String) defaultConcreteTypeField.get(clazz);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new JSONObjectAdapterException(ObjectSchemaImpl.createMissingConcreteTypeMessage(clazz), e);
 		}
 	}
 

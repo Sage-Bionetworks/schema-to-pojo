@@ -63,8 +63,41 @@ public class PojoGeneratorDriver {
 			// Create each POJO
 			createPOJO(codeModel, schema, interfaceFactoryGenerator);
 		}
+		// Validate the defaultConcreteTypes
+		validateDefaultConcreteTypes(codeModel, list);
+		
 		// Last step is to build the factories.
 		interfaceFactoryGenerator.buildFactories();
+	}
+	
+	static void validateDefaultConcreteTypes(JCodeModel codeModel, List<ObjectSchema> schemas) {
+		schemas.stream()
+			// Consider only interfaces with the the default concrete type
+			.filter((schema) -> 
+				TYPE.INTERFACE == schema.getType() && schema.getDefaultConcreteType() != null
+			)
+			.forEach((schema) -> {
+				
+				JDefinedClass concreteType = codeModel._getClass(schema.getDefaultConcreteType());
+				
+				if (concreteType == null) {
+					throw new IllegalStateException("The schema of the defaultConcreteType " + schema.getDefaultConcreteType()
+									+ " defined on the " + schema.getName() + " interface is not defined");
+				}
+
+				String fullyQualifiedName = schema.getId();
+				
+				JDefinedClass interfaceType = codeModel._getClass(fullyQualifiedName);
+				
+				if (interfaceType == null) {
+					throw new IllegalStateException("The schema for the " + schema.getName() + " interface is not defined");
+				}
+				
+				if (!interfaceType.isAssignableFrom(concreteType)) {
+					throw new IllegalStateException("The defaultConcreteType " + schema.getDefaultConcreteType() + " does not implement the interface " + fullyQualifiedName);
+				}
+				
+			});
 	}
 	
 	/**
@@ -217,7 +250,7 @@ public class PojoGeneratorDriver {
 		List<ObjectSchema> results = new ArrayList<ObjectSchema>();
 		for(ObjectSchema schema: list){
 			// If this schema is a reference then replace it.
-			schema = replaceRefrence(map, schema, recursiveAnchors);
+			schema = replaceReference(map, schema, recursiveAnchors);
 			results.add(schema);
 			// Replace all references in this schema
 			recursiveFindAndReplaceAllReferencesSchemas(map, schema, recursiveAnchors);
@@ -261,28 +294,28 @@ public class PojoGeneratorDriver {
 		}
 		// Items
 		if(schema.getItems() != null){
-			schema.setItems(replaceRefrence(map, schema.getItems(), recursiveAnchors));
+			schema.setItems(replaceReference(map, schema.getItems(), recursiveAnchors));
 		}
 		// Key
 		if (schema.getKey() != null) {
-			schema.setKey(replaceRefrence(map, schema.getKey(), recursiveAnchors));
+			schema.setKey(replaceReference(map, schema.getKey(), recursiveAnchors));
 		}
 		// Value
 		if (schema.getValue() != null) {
-			schema.setValue(replaceRefrence(map, schema.getValue(), recursiveAnchors));
+			schema.setValue(replaceReference(map, schema.getValue(), recursiveAnchors));
 		}
 		// AdditionItems
 		if(schema.getAdditionalItems() != null){
-			schema.setAdditionalItems(replaceRefrence(map, schema.getAdditionalItems(), recursiveAnchors));
+			schema.setAdditionalItems(replaceReference(map, schema.getAdditionalItems(), recursiveAnchors));
 		}
 		// Extends
 		if(schema.getExtends() != null){
-			schema.setExtends(replaceRefrence(map, schema.getExtends(), recursiveAnchors));
+			schema.setExtends(replaceReference(map, schema.getExtends(), recursiveAnchors));
 		}
 		// Implements
 		if(schema.getImplements() != null){
 			for(int i=0; i<schema.getImplements().length; i++){
-				schema.getImplements()[i] = replaceRefrence(map, schema.getImplements()[i], recursiveAnchors);
+				schema.getImplements()[i] = replaceReference(map, schema.getImplements()[i], recursiveAnchors);
 			}
 		}
 	}
@@ -300,7 +333,7 @@ public class PojoGeneratorDriver {
 		while(it.hasNext()){
 			String key = it.next();
 			ObjectSchema schema = toCheck.get(key);
-			schema = replaceRefrence(registry, schema, recursiveAnchors);
+			schema = replaceReference(registry, schema, recursiveAnchors);
 			newMap.put(key, schema);
 		}
 		return newMap;
@@ -313,7 +346,7 @@ public class PojoGeneratorDriver {
 	 * @param self
 	 * @return
 	 */
-	protected static ObjectSchema replaceRefrence(Map<String, ObjectSchema> registry, ObjectSchema toCheck, Stack<ObjectSchema> recursiveAnchors) {
+	protected static ObjectSchema replaceReference(Map<String, ObjectSchema> registry, ObjectSchema toCheck, Stack<ObjectSchema> recursiveAnchors) {
 		// Nothing to do if it is not a reference.
 		if (toCheck.getRef() == null && toCheck.get$recursiveRef() == null) {
 			return toCheck;

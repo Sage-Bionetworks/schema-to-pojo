@@ -69,9 +69,10 @@ public class EffectiveSchemaUtil {
 		JSONObjectAdapter adapter = schema.writeToJSONObject(new JSONObjectAdapterImpl());
 		adapter = new JSONObjectAdapterImpl(adapter.toJSONString());
 		ObjectSchema copy = new ObjectSchemaImpl(adapter);
-		// Clear the extends and and implements
+		// Clear the extends, implements and default concrete type
 		copy.setExtends(null);
 		copy.setImplements(null);
+		copy.setDefaultConcreteType(null);
 
 		//flatten out the properties for the current schema
 		LinkedHashMap<String, ObjectSchema> flattenedProperties = (LinkedHashMap<String, ObjectSchema>) schema.getObjectFieldMap();

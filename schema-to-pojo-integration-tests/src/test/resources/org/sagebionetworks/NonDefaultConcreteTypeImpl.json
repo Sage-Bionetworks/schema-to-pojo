@@ -1,0 +1,13 @@
+{
+    "type":"object",
+    "implements":[
+        {
+            "$ref":"org.sagebionetworks.InterfaceWithDefaultConcreteType"
+        }
+    ],
+    "properties": {
+    	"someOtherProperty": {
+    		"type": "string"
+    	}
+    }
+}

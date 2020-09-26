@@ -6,8 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
+import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -67,6 +69,7 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	public static final String JSON_LINKS = "links";
 	public static final String JSON_RECURSIVE_ANCHOR = "$recursiveAnchor";
 	public static final String JSON_RECURSIVE_REF = "$recursiveRef";
+	public static final String JSON_DEFAULT_CONCRETE_TYPE = "defaultConcreteType";
 	
 	/**
 	 * For the case where a POJO's fields types are an interfaces or abstract class,
@@ -114,6 +117,19 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		builder.append(propertyName);
 		builder.append("' is required and cannot be null");
 		return builder.toString();
+	}
+
+	/**
+	 * Creates an error message: "Missing 'concreteType' property, cannot discriminate polymorphic type <type>"
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static String createMissingConcreteTypeMessage(Class<? extends JSONEntity> clazz) {
+		return new StringBuilder("Missing '")
+				.append(CONCRETE_TYPE)
+				.append("' property, cannot discriminate polymorphic type ")
+				.append(clazz.getName()).toString();
 	}
 
 	/*
@@ -525,6 +541,13 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	 * return false.
 	 */
 	private boolean is$RecursiveRefInstance = false;
+	
+	/*
+	 * This is a custom field that is not part of the spec. It is used to
+	 * indicate which default concrete type can be used in its absence when
+	 * defined on an interface.
+	 */
+	private String _defaultConcreteType;
 	
 	
 	
@@ -1671,6 +1694,7 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((uniqueItems == null) ? 0 : uniqueItems.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + Objects.hashCode(_defaultConcreteType);
 		return result;
 	}
 
@@ -1846,6 +1870,11 @@ public class ObjectSchemaImpl implements ObjectSchema {
 				return false;
 		} else if (!value.equals(other.value))
 			return false;
+		if (_defaultConcreteType == null) {
+			if (other._defaultConcreteType != null)
+				return false;
+		} else if (!_defaultConcreteType.equals(other._defaultConcreteType)) 
+			return false;
 		return true;
 	}
 
@@ -1863,7 +1892,7 @@ public class ObjectSchemaImpl implements ObjectSchema {
 				+ ", _extends=" + _extends + ", _implements=" + Arrays.toString(_implements) + ", id=" + id + ", ref="
 				+ ref + ", schema=" + schema + ", contentEncoding=" + contentEncoding + ", links="
 				+ Arrays.toString(links) + ", $recursiveAnchor=" + $recursiveAnchor + ", $recursiveRef=" + $recursiveRef
-				+ ", is$RecursiveRefInstance=" + is$RecursiveRefInstance + "]";
+				+ ", is$RecursiveRefInstance=" + is$RecursiveRefInstance  + ", _defaultConcreteType=" + _defaultConcreteType + "]";
 	}
 
 	@Override
@@ -2075,6 +2104,9 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		if(this.$recursiveRef != null) {
 			copy.put(JSON_RECURSIVE_REF, this.$recursiveRef);
 		}
+		if(this._defaultConcreteType != null) {
+			copy.put(JSON_DEFAULT_CONCRETE_TYPE, this._defaultConcreteType);
+		}
 		return copy;
 	}
 
@@ -2230,7 +2262,7 @@ public class ObjectSchemaImpl implements ObjectSchema {
 			JSONObjectAdapter in) throws JSONObjectAdapterException {
 		// Again, using linked hash map for predictable iteration order.
 		LinkedHashMap<String, ObjectSchema> map = new LinkedHashMap<String, ObjectSchema>();
-		Iterator it = in.keys();
+		Iterator<String> it = in.keys();
 		while (it.hasNext()) {
 			String key = (String) it.next();
 			JSONObjectAdapter adapter = in.getJSONObject(key);
@@ -2391,6 +2423,9 @@ public class ObjectSchemaImpl implements ObjectSchema {
 		if (adapter.has(JSON_RECURSIVE_REF)){
 			this.$recursiveRef = adapter.getString(JSON_RECURSIVE_REF);
 		}
+		if (adapter.has(JSON_DEFAULT_CONCRETE_TYPE)) {
+			this._defaultConcreteType = adapter.getString(JSON_DEFAULT_CONCRETE_TYPE);
+		}
 		return adapter;
 	}
 
@@ -2521,5 +2556,15 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	@Override
 	public void setIs$RecursiveRefInstance(boolean is$RecursiveRefInstance) {
 		this.is$RecursiveRefInstance = is$RecursiveRefInstance;
+	}
+	
+	@Override
+	public String getDefaultConcreteType() {
+		return _defaultConcreteType;
+	}
+	
+	@Override
+	public void setDefaultConcreteType(String defaultConcreteType) {
+		this._defaultConcreteType = defaultConcreteType;
 	}
 }

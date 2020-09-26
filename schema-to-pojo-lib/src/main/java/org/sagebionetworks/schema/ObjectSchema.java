@@ -32,6 +32,11 @@ public interface ObjectSchema extends JSONEntity {
 	 */
 	public static final String KEY_PREFIX = "_KEY_";
 	
+	/**
+	 * Name of the constant field that will contain the default concrete type for interfaces if supplied
+	 */
+	public static final String DEFAULT_CONCRETE_TYPE_NAME = "_DEFAULT_CONCRETE_TYPE";
+	
 	public String get$recursiveRef();
 
 	public void set$recursiveRef(String $recursiveRef);
@@ -969,5 +974,10 @@ public interface ObjectSchema extends JSONEntity {
 	 * @param is$RecursiveRefInstance
 	 */
 	public void setIs$RecursiveRefInstance(boolean is$RecursiveRefInstance);
+
+	String getDefaultConcreteType();
+
+	void setDefaultConcreteType(String defaultConcreteType);
+	
 
 }

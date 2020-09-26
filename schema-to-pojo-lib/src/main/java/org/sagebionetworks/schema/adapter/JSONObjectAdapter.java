@@ -3,8 +3,6 @@ package org.sagebionetworks.schema.adapter;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.sagebionetworks.schema.FORMAT;
-
 
 /**
  * There are at least two different types of JSONObjets that our clients depend on.

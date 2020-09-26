@@ -1,41 +1,56 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 
 public class EntityFactoryTest {
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateJSONStringForEntityNull() throws JSONObjectAdapterException{
-		// null is not allowed
-		String json = EntityFactory.createJSONStringForEntity(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			// null is not allowed
+			EntityFactory.createJSONStringForEntity(null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateJSONObjectForEntityNull() throws JSONObjectAdapterException{
-		EntityFactory.createJSONObjectForEntity(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createJSONObjectForEntity(null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONStringStringNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONString(null, SimpleEntityStub.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONString(null, SimpleEntityStub.class);
+		});
 	}
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONStringClassNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONString("{\"value\":\"This value should make a round trip\"}",null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONString("{\"value\":\"This value should make a round trip\"}",null);
+		});
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONObjectStringNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONObject(null, SimpleEntityStub.class);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONObject(null, SimpleEntityStub.class);
+		});
 	}
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testCreateEntityFromJSONObjectClassNull() throws JSONObjectAdapterException{
-		EntityFactory.createEntityFromJSONObject(new JSONObject(),null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			EntityFactory.createEntityFromJSONObject(new JSONObject(),null);
+		});
 	}
 	
 	@Test
@@ -44,7 +59,6 @@ public class EntityFactoryTest {
 		stub.setValue("This value should make a round trip");
 		String json = EntityFactory.createJSONStringForEntity(stub);
 		assertNotNull(json);
-		System.out.println(json);
 		// Make sure we can make a round trip
 		SimpleEntityStub clone = EntityFactory.createEntityFromJSONString(json, SimpleEntityStub.class);
 		assertNotNull(clone);
@@ -75,12 +89,43 @@ public class EntityFactoryTest {
 		stub.setValue("This value should make a round trip");
 		String json = EntityFactory.createJSONStringForEntity(stub);
 		assertNotNull(json);
-		System.out.println(json);
 		// Make sure we can use the interface as the type and that we get what we expect.
 		SimpleInterface clone = EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
 		assertNotNull(clone);
 		// The stub and clone should be the same
 		assertEquals(stub, clone);
+	}
+	
+	@Test
+	public void testCreateEntityFromJSONStringWithDefaultConcreteType() throws JSONObjectAdapterException{
+		
+		// A json string without concrete type, the interface has a _DEFAULT_CONCRETE_TYPE field
+		String json = "{\"value\":\"This value should make a round trip\"}";
+		
+		SimpleEntityStub expected = new SimpleEntityStub();
+		expected.setValue("This value should make a round trip");
+		
+		// Make sure we can use the interface even though a concrete type is not specified, using the annotation value
+		SimpleInterfaceWithDefaultConcreteType clone = EntityFactory.createEntityFromJSONString(json, SimpleInterfaceWithDefaultConcreteType.class);
+		
+		// The stub and clone should be the same
+		assertEquals(expected, clone);
+	}
+	
+	@Test
+	public void testCreateEntityFromJSONStringWithMissingConcreteType() throws JSONObjectAdapterException {
+		
+		// A json string without concrete type, 
+		String json = "{\"value\":\"This value should make a round trip\"}";
+		
+		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {			
+			// Call under test
+			EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
+		});
+
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type "
+				+ "org.sagebionetworks.schema.adapter.org.json.SimpleInterface", ex.getCause().getMessage());
+
 	}
 
 }

@@ -168,6 +168,9 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 					newClass._implements((JClass)interfacesType);
 				}
 			}
+			if (schema.getDefaultConcreteType() != null && !newClass.isInterface()) {
+				throw new IllegalArgumentException("Only an interface can define a defaultConcreteType");
+			}
 			// add all of the key constants
 			addKeyConstants(schema, newClass);
 			// Add all of the comments
@@ -206,6 +209,11 @@ public class TypeCreatorHandlerImpl03 implements TypeCreatorHandler {
 				}
 				// the array of all names.
 				newClass.field(mods, stringArrayType , ObjectSchema.ALL_KEYS_NAME, value);
+			}
+		} else {
+			// We add the default concrete type constant only if supplied
+			if (schema.getDefaultConcreteType() != null) {
+				newClass.field(JMod.NONE, String.class, ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME, JExpr.lit(schema.getDefaultConcreteType()));
 			}
 		}
 	}

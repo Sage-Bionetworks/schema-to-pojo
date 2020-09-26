@@ -66,6 +66,9 @@ public class RegisterGenerator {
 		// Create the singleton
 		createSingleton(codeModel, regClass);
 		
+		// Add the default concrete type method
+		createGetDefaultConcreteTypeMethod(codeModel, regClass, interfaceFullName);
+		
 		// Add the auto-generated title
 		// Add the comments to the class
 		JDocComment docs = regClass.javadoc();
@@ -163,7 +166,39 @@ public class RegisterGenerator {
 		return method;
 	}
 	
-	private static JType getInterfaceClass(JCodeModel codeModel, String fullName){
+	/**
+	 * Creates a method that returns the default concrete type from the interface
+	 * 
+	 * @param codeModel
+	 * @param regClass
+	 * @param interfaceFullName
+	 */
+	protected static JMethod createGetDefaultConcreteTypeMethod(JCodeModel codeModel, JDefinedClass regClass, String interfaceFullName) {
+		JMethod method = regClass.method(JMod.PUBLIC, String.class, "getDefaultConcreteType");
+		
+		method.javadoc().addReturn().add("The default concrete type implementing the interface if present, null otherwise");
+		
+		JBlock body = method.body();
+		
+		if (interfaceFullName == null) {
+			body._return(JExpr._null());
+		} else {		
+			JDefinedClass interfaceClazz = getInterfaceClass(codeModel, interfaceFullName);
+			
+			JFieldVar defaultConcreteTypeField = interfaceClazz.fields().get(ObjectSchema.DEFAULT_CONCRETE_TYPE_NAME);
+			
+			// No default concrete type
+			if (defaultConcreteTypeField == null) {
+				body._return(JExpr._null());
+			} else {
+				body._return(interfaceClazz.staticRef(defaultConcreteTypeField));
+			}
+		}
+		
+		return method;
+	}
+	
+	private static JDefinedClass getInterfaceClass(JCodeModel codeModel, String fullName){
 		try {
 			return codeModel._class(fullName);
 		} catch (JClassAlreadyExistsException e) {

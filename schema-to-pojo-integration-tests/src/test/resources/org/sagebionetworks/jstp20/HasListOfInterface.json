@@ -7,6 +7,13 @@
             "items": {
                 "$ref": "org.sagebionetworks.jstp20.SomeInterface"
             }
+        },
+        "listWithDefaultConcreteType":{
+            "type":"array",
+            "uniqueItems": false,
+            "items": {
+                "$ref": "org.sagebionetworks.InterfaceWithDefaultConcreteType"
+            }
         }
     }
 }
