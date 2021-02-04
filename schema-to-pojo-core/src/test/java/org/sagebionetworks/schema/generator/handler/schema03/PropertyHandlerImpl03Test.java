@@ -180,7 +180,7 @@ public class PropertyHandlerImpl03Test {
 		 assertNotNull("Failed to find the setter method", setName);
 		 // It should be public
 		 assertEquals(JMod.PUBLIC, setName.mods().getValue());
-		 assertEquals(codeModel.VOID, setName.type());
+		 assertEquals(sampleClass, setName.type());
 		 assertNotNull(setName.params());
 		 assertEquals(1, setName.params().size());
 	}
@@ -205,7 +205,7 @@ public class PropertyHandlerImpl03Test {
 		 assertNotNull("Failed to find the setter method", setName);
 		 // It should be public
 		 assertEquals(JMod.PUBLIC, setName.mods().getValue());
-		 assertEquals(codeModel.VOID, setName.type());
+		 assertEquals(sampleInterfance, setName.type());
 		 assertNotNull(setName.params());
 		 assertEquals(1, setName.params().size());
 		 StringWriter writer = new StringWriter();
@@ -213,7 +213,7 @@ public class PropertyHandlerImpl03Test {
 		 setName.declare(formatter);
 		 System.out.println(writer.toString());
 		 String methodString = writer.toString();
-		 assertTrue(methodString.indexOf("public void setName(java.lang.String name);") > 0);;
+		 assertTrue(methodString.indexOf("public org.sample.SampleInterface setName(java.lang.String name);") > 0);;
 	}
 	
 	@Test

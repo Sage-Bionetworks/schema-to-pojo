@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.junit.Test;
 import org.sagebionetworks.ABImpl;
+import org.sagebionetworks.InterfaceB;
 import org.sagebionetworks.schema.adapter.JSONAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
@@ -70,5 +71,21 @@ public class ABImplTest {
 
 		assertEquals(impl, clone);
 	}
+
+	/**
+	 * Tests that setter can be chained together in a single line
+	 */
+	@Test
+	public void testSetterChaining(){
+		ABImpl impl = new ABImpl()
+				.setFromMe("from me value")
+				.setFromInterfaceA("from A value")
+				.setFromInterfaceB("from B value");
+
+		assertEquals("from me value" , impl.getFromMe());
+		assertEquals("from A value", impl.getFromInterfaceA());
+		assertEquals("from B value", impl.getFromInterfaceB());
+	}
+
 
 }
