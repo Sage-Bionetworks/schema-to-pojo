@@ -83,7 +83,7 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 	 */
 	private void createSetter(ObjectSchema propertySchema, JDefinedClass classType, String propertyName, JType propertyType, JFieldVar field){
 		String methodName = setterName(propertyName);
-		JMethod method = classType.method(JMod.PUBLIC, classType.owner().VOID, methodName);
+		JMethod method = classType.method(JMod.PUBLIC, classType, methodName);
 		// Add the parameter
 		JVar param = method.param(propertyType, propertyName);
 		// Create a method body if this is not an interface
@@ -98,6 +98,7 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 	        	conditional._then()._throw(invoke);
 	        }
 	        body.assign(JExpr._this().ref(field), param);
+	        body._return(JExpr._this());
 		}
         // Add the java doc
         JDocComment doc = method.javadoc();
@@ -138,7 +139,7 @@ public class PropertyHandlerImpl03 implements PropertyHandler {
 	protected static String setterName(String name){
 		return methodName("set", name);
 	}
-	
+
 	/**
 	 * Build both the getter and setter name
 	 * @param prefix
