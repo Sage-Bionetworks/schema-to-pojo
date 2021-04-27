@@ -1,34 +1,34 @@
 {
-	"description":"JSON schema for Dataset POJO",
-    "properties":{
-        "eulaId":{
-            "type":"string",
-            "description":"The id of the EULA for this dataset",
-        },
-        "diseases":{
-        	"name":"diseasesN",
-            "type":"array",
-           	"description":"The list of diseases for this dataset",
-            "items":{
-                "description":"JSON schema for Disease Data POJO",
-    			"name": "DiseaseNames",
-    			"type":"string",
-    			"id":"DiseaseNames2",
-    			"enum":[
-    				{
-    					"name":"Alzheimers"
-    				},
-    				{
-    					"name":"Asthma"
-    				},
-    				{
-    					"name":"Autism"
-    				},
-    				{
-    					"name":"Cancer",
-    				}
-    			]
-            }
-        }
-    }
+	"description": "JSON schema for Dataset POJO",
+	"properties": {
+		"eulaId": {
+			"type": "string",
+			"description": "The id of the EULA for this dataset"
+		},
+		"diseases": {
+			"name": "diseasesN",
+			"type": "array",
+			"description": "The list of diseases for this dataset",
+			"items": {
+				"description": "JSON schema for Disease Data POJO",
+				"name": "DiseaseNames",
+				"type": "string",
+				"id": "DiseaseNames2",
+				"enum": [
+					{
+						"name": "Alzheimers"
+					},
+					{
+						"name": "Asthma"
+					},
+					{
+						"name": "Autism"
+					},
+					{
+						"name": "Cancer"
+					}
+				]
+			}
+		}
+	}
 }

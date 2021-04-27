@@ -5,8 +5,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -371,5 +374,141 @@ public class JSONObjectAdapterImplTest {
 		ObjectSchema clone = new ObjectSchemaImpl();
 		clone.initializeFromJSONObject(new JSONObjectAdapterImpl(resultJson));
 		assertEquals(clone, schema);
+	}
+	
+	@Test
+	public void testGetWithInvalidObject() throws JSONObjectAdapterException {
+		Nested invalidValue = new Nested("contained value");
+		JSONObject wrapped = new JSONObject();
+		this.propertyKey = "invalidKey";
+		wrapped.put(propertyKey, invalidValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		String message = assertThrows(JSONObjectAdapterException.class, ()->{
+			// call under test
+			adapter.get(propertyKey);
+		}).getMessage();
+		assertEquals("Unsupported value type: 'class org.sagebionetworks.schema.adapter.org.json.Nested' for key: 'invalidKey'", message);
+	}
+	
+	@Test
+	public void testGetWithString() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = "some string";
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testGetWithInteger() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = new Integer(123);
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testGetWithLong() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = Long.MAX_VALUE;
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testGetWithDouble() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = new Double(123.456);
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testGetWithBoolean() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = Boolean.FALSE;
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testGetWithDate() throws JSONObjectAdapterException {
+		JSONObject wrapped = new JSONObject();
+		Object inputValue = new Date(123);
+		wrapped.put(propertyKey, inputValue);
+		adapter = new JSONObjectAdapterImpl(wrapped);
+		// call under test
+		Object value = adapter.get(propertyKey);
+		assertEquals(inputValue, value);
+	}
+	
+	@Test
+	public void testPutObjectWithString() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		Object value = "some string";
+		// call under test
+		adapter.putObject(propertyKey, value);
+		assertEquals(value, adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithInteger() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		Object value = Integer.MAX_VALUE;
+		// call under test
+		adapter.putObject(propertyKey, value);
+		assertEquals(value, adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithLong() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		Object value = Long.MAX_VALUE;
+		// call under test
+		adapter.putObject(propertyKey, value);
+		assertEquals(value, adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithDouble() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		Object value = new Double(123.456);
+		// call under test
+		adapter.putObject(propertyKey, value);
+		assertEquals(value, adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithDate() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		Date value = new Date(123);
+		// call under test
+		adapter.putObject(propertyKey, value);
+		assertEquals(value.getTime(), adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithNonPrimitiveObject() {
+		adapter = new JSONObjectAdapterImpl();
+		Object value = new ByteArrayInputStream("some data".getBytes(StandardCharsets.UTF_8));
+		String message = assertThrows(JSONObjectAdapterException.class, ()->{
+			// call under test
+			adapter.putObject(propertyKey, value);
+		}).getMessage();
+		assertEquals("Unsupported value of type: 'java.io.ByteArrayInputStream' for key: 'propKey'", message);
 	}
 }

@@ -320,6 +320,9 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 							.invoke("getJSONObject").arg(propNameConstant));
 					
 					initializeFieldFromFactoryGenerator(classType.owner(), thenBlock, field, interfaceFactoryGenerator, typeClass, adapter);
+				} else if (Object.class.getName().equals(typeClass.fullName())) {
+					// this is an object
+					thenBlock.assign(field, param.invoke("get").arg(propNameConstant));
 				} else {
 					// We can just create a new type for this object.
 					thenBlock.assign(field, JExpr._new(typeClass).arg(param.invoke("getJSONObject").arg(propNameConstant)));
@@ -812,12 +815,20 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				// Now set the new JSONObject
 				thenBlock.add(param.invoke("put").arg(field.name()).arg(map));
 			} else {
-				// All others are treated as objects.
-				thenBlock.add(param
-						.invoke("put")
-						.arg(propNameConstant)
-						.arg(field.invoke("writeToJSONObject").arg(
-								param.invoke("createNew"))));
+				
+				JClass typeClass = (JClass) field.type();
+				if (Object.class.getName().equals(typeClass.fullName())) {
+					// this is an object
+					thenBlock.add(param.invoke("putObject").arg(propNameConstant).arg(field));
+				} else {
+					// All others are treated as objects.
+					thenBlock.add(param
+							.invoke("put")
+							.arg(propNameConstant)
+							.arg(field.invoke("writeToJSONObject").arg(
+									param.invoke("createNew"))));
+				}
+
 			}
 			// throw an exception it this is a required fields
 			if (propSchema.isRequired()) {

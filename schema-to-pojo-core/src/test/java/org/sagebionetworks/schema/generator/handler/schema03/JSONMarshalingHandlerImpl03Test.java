@@ -524,9 +524,29 @@ public class JSONMarshalingHandlerImpl03Test {
 		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
 		// Now get the string and check it.
 		String methodString = declareToString(constructor);
-		System.out.println(methodString);
+//		System.out.println(methodString);
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("propName = new Sample(adapter.getJSONObject(_KEY_PROPNAME));") > 0);
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromWithObject() throws JClassAlreadyExistsException, ClassNotFoundException {
+		// Set the property type to be the same as the object
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		propertySchema.setType(TYPE.OBJECT);
+		String propName = "objectValue";
+		schema.putProperty(propName, propertySchema);
+		// Make sure this field exits
+		sampleClass.field(JMod.PRIVATE, Object.class, propName);
+		addKeyConstant(sampleClass, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		// call under test
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		assertTrue(methodString.contains("objectValue = adapter.get(_KEY_OBJECTVALUE);"));
 	}
 	
 	@Test
@@ -942,6 +962,25 @@ public class JSONMarshalingHandlerImpl03Test {
 		// Is the primitive assigned correctly?
 		assertTrue(methodString.indexOf("adapter.put(_KEY_PROPNAME, propName.writeToJSONObject(adapter.createNew()));") > 0);
 //		printClassToConsole(sampleClass);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectWithNonJsonObjectProperty() throws JClassAlreadyExistsException, ClassNotFoundException {
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		propertySchema.setType(TYPE.OBJECT);
+		String propName = "objectValue";
+		schema.putProperty(propName, propertySchema);
+		sampleClass.field(JMod.PRIVATE, Object.class, propName);
+		addKeyConstant(sampleClass, propName);
+		
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// call under test
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+
+		printClassToConsole(sampleClass);
+		String methodString = declareToString(constructor);
+//		System.out.println(methodString);
+		assertTrue(methodString.indexOf("adapter.putObject(_KEY_OBJECTVALUE, objectValue);") > 0);
 	}
 	
 	@Test

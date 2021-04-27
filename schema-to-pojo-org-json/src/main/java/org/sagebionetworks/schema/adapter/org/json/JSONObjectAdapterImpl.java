@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,13 +58,19 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 	public Object get(String key) throws JSONObjectAdapterException {
 		try {
 			Object result = wrapped.get(key);
-			if(JSONObject.NULL == result) return null;
-			if(result instanceof JSONObject){
+			if (JSONObject.NULL == result) {
+				return null;
+			} else if (result instanceof JSONObject) {
 				return new JSONObjectAdapterImpl((JSONObject) result);
-			}else if(result instanceof JSONArray){
+			} else if (result instanceof JSONArray) {
 				return new JSONArrayAdapterImpl((JSONArray) result);
+			} else if (result instanceof String || result instanceof Integer || result instanceof Long
+					|| result instanceof Boolean || result instanceof Date || result instanceof Double) {
+				return result;
+			} else {
+				throw new JSONObjectAdapterException(
+						String.format("Unsupported value type: '%s' for key: '%s'", result.getClass(), key));
 			}
-			return result;
 		} catch (JSONException e) {
 			throw new JSONObjectAdapterException(e);
 		}
@@ -366,6 +370,35 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 			return Base64.decodeBase64(base64String.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			throw new JSONObjectAdapterException(e);
+		}
+	}
+	
+	/**
+	 * Put a generic object into the JSON
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	@Override
+	public JSONObjectAdapter putObject(String key, Object value) throws JSONObjectAdapterException {
+		if (value == null) {
+			return putNull(key);
+		} else if (value instanceof String) {
+			return put(key, (String) value);
+		} else if (value instanceof Integer) {
+			return put(key, (Integer) value);
+		} else if (value instanceof Long) {
+			return put(key, (Long) value);
+		} else if (value instanceof Boolean) {
+			return put(key, (Boolean) value);
+		} else if (value instanceof Double) {
+			return put(key, (Double) value);
+		} else if (value instanceof Date) {
+			return put(key, (Date) value);
+		} else {
+			throw new JSONObjectAdapterException(
+					String.format("Unsupported value of type: '%s' for key: '%s'", value.getClass().getName(), key));
 		}
 	}
 
