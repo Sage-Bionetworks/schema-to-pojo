@@ -74,6 +74,14 @@ public interface JSONArrayAdapter extends JSONAdapter{
     public JSONObjectAdapter getJSONObject(int index)throws JSONObjectAdapterException ;
     
     public Object get(int index)throws JSONObjectAdapterException ;
+    
+    /**
+     * Get a primitive object from the given index.
+     * @param index
+     * @return
+     * @throws JSONObjectAdapterException
+     */
+    public Object getObject(int index)throws JSONObjectAdapterException ;
 
     /**
      * 
@@ -95,6 +103,15 @@ public interface JSONArrayAdapter extends JSONAdapter{
 	public JSONArrayAdapter put(int index, Boolean value) throws JSONObjectAdapterException;
     
 	public JSONArrayAdapter put(int index, Integer value) throws JSONObjectAdapterException;
+	
+	/**
+	 * Put a primitive object at the given index.
+	 * @param index
+	 * @param value
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public JSONArrayAdapter putObject(int index, Object value) throws JSONObjectAdapterException;
     
     /**
      * Dates put here will be FORMAT.UTC_MILLISEC

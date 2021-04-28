@@ -1,13 +1,17 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
+import java.util.LinkedList;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -17,7 +21,7 @@ public class JSONArrayAdapterImplTest {
 	JSONArrayAdapter adapter = null;
 	int index = 0;
 	
-	@Before
+	@BeforeEach
 	public void befor(){
 		// This is a test for the JSONObjectAdapterImpl
 		adapter = new JSONArrayAdapterImpl();
@@ -178,14 +182,117 @@ public class JSONArrayAdapterImplTest {
 		assertEquals(dateValue, clone);
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testDateNull() throws JSONObjectAdapterException{
-		adapter.put(0, (Date)null);
+		assertThrows(IllegalArgumentException.class, ()->{
+			adapter.put(0, (Date)null);
+		});
 	}
 	
-	@Test (expected=JSONObjectAdapterException.class)
+	@Test
 	public void testDateNullValue() throws JSONObjectAdapterException{
-		Date value = adapter.getDate(0);
+		assertThrows(JSONObjectAdapterException.class, ()->{
+			adapter.getDate(0);
+		});
 	}
 	
+	@Test
+	public void testGetPutObjectWithString() throws JSONObjectAdapterException {
+		Object value = "a string";
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithInteger() throws JSONObjectAdapterException {
+		Object value = Integer.MAX_VALUE;
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithLong() throws JSONObjectAdapterException {
+		Object value = Long.MAX_VALUE;
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithBoolean() throws JSONObjectAdapterException {
+		Object value = Boolean.TRUE;
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithDouble() throws JSONObjectAdapterException {
+		Object value = new Double(123.456);
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithDate() throws JSONObjectAdapterException {
+		Date value = new Date(123);
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value.getTime(), result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithNull() throws JSONObjectAdapterException {
+		Object value = null;
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetObjectWithInvalid() throws JSONObjectAdapterException {
+		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+		int index = 0;
+		adapter.put(index, value);
+		String message = assertThrows(JSONObjectAdapterException.class, ()->{
+			// call under test
+			adapter.getObject(index);
+		}).getMessage();
+		assertEquals("Unsupported value of type: 'org.json.JSONObject' for index: '0'", message);
+	}
+	
+	@Test
+	public void testPutObjectWithInvalid() throws JSONObjectAdapterException {
+		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+		int index = 0;
+		String message = assertThrows(JSONObjectAdapterException.class, ()->{
+			// call under test
+			adapter.putObject(index, value);
+		}).getMessage();
+		assertEquals("Unsupported value of type: 'org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl' for index: '0'", message);
+	}
 }

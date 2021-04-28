@@ -558,6 +558,8 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 		}else if(TYPE.STRING == arrayType){
 			JExpression stringExper = jsonArray.invoke(arrayType.getMethodName()).arg(index);
 			return convertStringAsNeeded(arrayTypeClass.owner(), adapter, arrayFormat, stringExper);
+		}else if(Object.class.getName().equals(arrayTypeClass.fullName())){
+			return jsonArray.invoke("getObject").arg(index);
 		}else if(TYPE.ARRAY == arrayType){
 			throw new IllegalArgumentException("Arrays of Arrays are currently not supported");
 		} else if (TYPE.TUPLE_ARRAY_MAP == arrayType) {
@@ -758,8 +760,13 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 				JWhileLoop loop = thenBlock._while(it.invoke("hasNext"));
 				JBlock loopBody = loop.body();
 				JVar value = loopBody.decl(arrayTypeClass, VAR_PREFIX + "value", it.invoke("next"));
-				loopBody.add(array.invoke("put").arg(index)
-						.arg(createEqNullCheck(value, createExpresssionToSetFromArray(arrayTypeSchema, arrayTypeClass, value, param))));
+				if(Object.class.getName().equals(arrayTypeClass.fullName())) {
+					// for List<Object> we use putObject 
+					loopBody.add(array.invoke("putObject").arg(index).arg(value));
+				}else {
+					loopBody.add(array.invoke("put").arg(index)
+							.arg(createEqNullCheck(value, createExpresssionToSetFromArray(arrayTypeSchema, arrayTypeClass, value, param))));
+				}
 				loopBody.directStatement(VAR_PREFIX + "index++;");
 				// Now set the new array
 				thenBlock.add(param.invoke("put").arg(propNameConstant).arg(array));
@@ -857,7 +864,7 @@ public class JSONMarshalingHandlerImpl03 implements JSONMarshalingHandler{
 			}
 		}
 		
-		if(arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType){
+		if (arrayType.isPrimitive() || TYPE.NUMBER == arrayType || TYPE.BOOLEAN == arrayType) {
 			return value;
 		}if(TYPE.STRING == arrayType){
 			JExpression stringValue = value;

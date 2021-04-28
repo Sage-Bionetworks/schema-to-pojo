@@ -531,7 +531,6 @@ public class JSONMarshalingHandlerImpl03Test {
 	
 	@Test
 	public void testCreateMethodInitializeFromWithObject() throws JClassAlreadyExistsException, ClassNotFoundException {
-		// Set the property type to be the same as the object
 		ObjectSchema propertySchema = new ObjectSchemaImpl();
 		propertySchema.setType(TYPE.OBJECT);
 		String propName = "objectValue";
@@ -547,6 +546,25 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 		System.out.println(methodString);
 		assertTrue(methodString.contains("objectValue = adapter.get(_KEY_OBJECTVALUE);"));
+	}
+	
+	@Test
+	public void testCreateMethodInitializeFromWithObjectArray() throws JClassAlreadyExistsException, ClassNotFoundException {
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		propertySchema.setType(TYPE.ARRAY);
+		propertySchema.setItems(new ObjectSchemaImpl(TYPE.OBJECT));
+		String propName = "objectArray";
+		schema.putProperty(propName, propertySchema);
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Object.class), propName);
+		addKeyConstant(sampleClass, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		InstanceFactoryGenerator ifg = new InstanceFactoryGenerator(codeModel, Arrays.asList(schema));
+		// call under test
+		JMethod constructor = handler.createMethodInitializeFromJSONObject(schema, sampleClass, ifg);
+		// Now get the string and check it.
+		String methodString = declareToString(constructor);
+		System.out.println(methodString);
+		assertTrue(methodString.contains("objectArray.add((__jsonArray.isNull(__i)?null:__jsonArray.getObject(__i)));"));
 	}
 	
 	@Test
@@ -981,6 +999,24 @@ public class JSONMarshalingHandlerImpl03Test {
 		String methodString = declareToString(constructor);
 //		System.out.println(methodString);
 		assertTrue(methodString.indexOf("adapter.putObject(_KEY_OBJECTVALUE, objectValue);") > 0);
+	}
+	
+	@Test
+	public void testWriteToJSONObjectWithNonJsonObjectArray() throws JClassAlreadyExistsException, ClassNotFoundException {
+		ObjectSchema propertySchema = new ObjectSchemaImpl();
+		propertySchema.setType(TYPE.ARRAY);
+		propertySchema.setItems(new ObjectSchemaImpl(TYPE.OBJECT));
+		String propName = "objectArray";
+		schema.putProperty(propName, propertySchema);
+		sampleClass.field(JMod.PRIVATE, codeModel.ref(List.class).narrow(Object.class), propName);
+		addKeyConstant(sampleClass, propName);
+		JSONMarshalingHandlerImpl03 handler = new JSONMarshalingHandlerImpl03();
+		// call under test
+		JMethod constructor = handler.createWriteToJSONObject(schema, sampleClass);
+
+		printClassToConsole(sampleClass);
+		String methodString = declareToString(constructor);
+		assertTrue(methodString.indexOf("__array.putObject(__index, __value);") > 0);
 	}
 	
 	@Test

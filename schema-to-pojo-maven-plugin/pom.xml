@@ -82,12 +82,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.4</version>
-					<configuration>
-						<mojoDependencies>
-							<param>schema-to-pojo-maven-plugin</param>
-						</mojoDependencies>
-					</configuration>
+					<version>3.6.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

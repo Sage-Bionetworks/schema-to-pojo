@@ -3,6 +3,8 @@ package org.sagebionetworks.schema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.sagebionetworks.ObjectValue;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -57,5 +59,51 @@ public class ObjectValueTest {
 			original.writeToJSONObject(adapter);
 		}).getMessage();
 		assertEquals("Unsupported value of type: 'org.sagebionetworks.ObjectValue' for key: 'objectValue'", message);
+	}
+	
+	
+	@Test
+	public void testObjectValueWithArrayOfBooleans() throws JSONObjectAdapterException {
+		ObjectValue original = new ObjectValue();
+		original.setObjectArray(Arrays.asList(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+		String json = EntityFactory.createJSONStringForEntity(original);
+		ObjectValue result = EntityFactory.createEntityFromJSONString(json, ObjectValue.class);
+		assertEquals(original, result);
+	}
+	
+	@Test
+	public void testObjectValueWithArrayOfStrings() throws JSONObjectAdapterException {
+		ObjectValue original = new ObjectValue();
+		original.setObjectArray(Arrays.asList("one", "two"));
+		String json = EntityFactory.createJSONStringForEntity(original);
+		ObjectValue result = EntityFactory.createEntityFromJSONString(json, ObjectValue.class);
+		assertEquals(original, result);
+	}
+	
+	@Test
+	public void testObjectValueWithArrayOfIntgers() throws JSONObjectAdapterException {
+		ObjectValue original = new ObjectValue();
+		original.setObjectArray(Arrays.asList(123, 456));
+		String json = EntityFactory.createJSONStringForEntity(original);
+		ObjectValue result = EntityFactory.createEntityFromJSONString(json, ObjectValue.class);
+		assertEquals(original, result);
+	}
+	
+	@Test
+	public void testObjectValueWithArrayOfLongs() throws JSONObjectAdapterException {
+		ObjectValue original = new ObjectValue();
+		original.setObjectArray(Arrays.asList(Long.MAX_VALUE, Long.MAX_VALUE-1));
+		String json = EntityFactory.createJSONStringForEntity(original);
+		ObjectValue result = EntityFactory.createEntityFromJSONString(json, ObjectValue.class);
+		assertEquals(original, result);
+	}
+	
+	@Test
+	public void testObjectValueWithArrayOfDoubles() throws JSONObjectAdapterException {
+		ObjectValue original = new ObjectValue();
+		original.setObjectArray(Arrays.asList(new Double(123.456), new Double(789.123)));
+		String json = EntityFactory.createJSONStringForEntity(original);
+		ObjectValue result = EntityFactory.createEntityFromJSONString(json, ObjectValue.class);
+		assertEquals(original, result);
 	}
 }
