@@ -1,0 +1,14 @@
+{
+	"type": "object",
+	"properties": {
+		"objectValue": {
+			"type": "object"
+		},
+		"objectArray": {
+			"type": "array",
+			"items": {
+				"type": "object"
+			}
+		}
+	}
+}

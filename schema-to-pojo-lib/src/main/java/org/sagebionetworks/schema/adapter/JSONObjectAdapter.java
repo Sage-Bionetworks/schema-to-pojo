@@ -30,6 +30,12 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
      */
 	public String getString(String key) throws JSONObjectAdapterException;
 	
+	/**
+	 * Get a Java for the given key.
+	 * @param key
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
 	public Object get(String key) throws JSONObjectAdapterException;
 	
 	public JSONObjectAdapter put(String key, boolean value) throws JSONObjectAdapterException;
@@ -67,6 +73,15 @@ public interface JSONObjectAdapter extends JSONAdapter, ValidateProperty {
 	public JSONObjectAdapter put(String key, JSONArrayAdapter value) throws JSONObjectAdapterException;
 	
 	public JSONObjectAdapter put(String key, JSONMapAdapter value) throws JSONObjectAdapterException;
+	
+	/**
+	 * Put a generic object into the JSON
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	JSONObjectAdapter putObject(String key, Object value) throws JSONObjectAdapterException;
 	
     /**
      * Get the long value associated with a key. If the number value is too

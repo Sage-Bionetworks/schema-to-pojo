@@ -316,4 +316,31 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 			throw new JSONObjectAdapterException(e);
 		}
 	}
+	
+	/**
+	 * Put a generic object into the JSON
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	@Override
+	public JSONObjectAdapter putObject(String key, Object value) throws JSONObjectAdapterException {
+		if(value == null) {
+			return putNull(key);
+		}else if(value instanceof String) {
+			return put(key, (String)value);
+		}else if(value instanceof Integer) {
+			return put(key, (Integer)value);
+		}else if(value instanceof Long) {
+			return put(key, (Long)value);
+		}else if(value instanceof Boolean) {
+			return put(key, (Boolean)value);
+		}else if(value instanceof Double) {
+			return put(key, (Double)value);
+		}else if(value instanceof Date) {
+			return put(key, (Date)value);
+		}
+		throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for key: '%s'", value.getClass().getName(), key));
+	}
 }

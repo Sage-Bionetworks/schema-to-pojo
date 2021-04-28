@@ -1,111 +1,102 @@
 {
-    "type":"object",
-    "properties":{
-        "stringProp":{
-            "type":"string"
-        },
-        "longProp":{
-            "type":"integer"
-        },
-        "stringAsDate":{
-            "type":"string",
-            "format":"date-time"
-        },
-        "longAsDate":{
-            "type":"integer",
-            "format":"utc-millisec"
-        },
-        "doubleProp":{
-            "type":"number"
-        },
-        "booleanProp":{
-            "type":"boolean"
-        },
-        "listOfStrings":{
-            "type":"array",
-            "items":{
-                "type":"string"
-            }
-        },
-        "setOfStrings":{
-            "type":"array",
-            "uniqueItems":true,
-            "items":{
-                "type":"string"
-            }
-        },
-        "dateList":{
-            "type":"array",
-            "items":{
-                "type":"string",
-                "format":"date-time",
-                
-            },
-            "description":"This is an example of a list of dates",
-            "title":"Date List",
-            
-        },
-        "dateList2":{
-            "type":"array",
-            "items":{
-                "type":"integer",
-                "format":"utc-millisec",
-                
-            },
-            "description":"This is an example of a list of dates",
-            "title":"Date List",
-            
-        },
-        "longList":{
-            "type":"array",
-            "items":{
-                "type":"integer",
-                
-            },
-            
-        },
-        "doubleList":{
-            "type":"array",
-            "items":{
-                "type":"number",
-                
-            },
-            
-        },
-        "stringIntegerMap":{
-            "type":"map",
-	        "key":{
-	            "type":"string"
-	        },
-	        "value":{
-	            "type":"integer"
-	        },
-        },
-        "enumBooleanMap":{
-            "type":"map",
-	        "key":{
-	            "type":"string",
-	        	"name":"PetType",
-	            "id":"org.sagebionetworks.PetType",
-	            "enum":[
-	            	 {
-	            	 	"name":"CAT",
-	            	 	"description":"Cats are better than dogs"
-	            	 },
-	            	 {
-	            	 	"name":"DOG",
-	            	 	"description":"nothing to say"
-	            	 },
-	            	 {
-	            	 	"name":"FISH",
-	            	 	"description":"Cats eat fish"
-	            	 }
-            	],
-	        },
-	        "value":{
-	            "type":"boolean",
-	        },
-        },
-        
-    }
+	"type": "object",
+	"properties": {
+		"stringProp": {
+			"type": "string"
+		},
+		"longProp": {
+			"type": "integer"
+		},
+		"stringAsDate": {
+			"type": "string",
+			"format": "date-time"
+		},
+		"longAsDate": {
+			"type": "integer",
+			"format": "utc-millisec"
+		},
+		"doubleProp": {
+			"type": "number"
+		},
+		"booleanProp": {
+			"type": "boolean"
+		},
+		"listOfStrings": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			}
+		},
+		"setOfStrings": {
+			"type": "array",
+			"uniqueItems": true,
+			"items": {
+				"type": "string"
+			}
+		},
+		"dateList": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"format": "date-time"
+			},
+			"description": "This is an example of a list of dates",
+			"title": "Date List"
+		},
+		"dateList2": {
+			"type": "array",
+			"items": {
+				"type": "integer",
+				"format": "utc-millisec"
+			},
+			"description": "This is an example of a list of dates",
+			"title": "Date List"
+		},
+		"longList": {
+			"type": "array",
+			"items": {
+				"type": "integer"
+			}
+		},
+		"doubleList": {
+			"type": "array",
+			"items": {
+				"type": "number"
+			}
+		},
+		"stringIntegerMap": {
+			"type": "map",
+			"key": {
+				"type": "string"
+			},
+			"value": {
+				"type": "integer"
+			}
+		},
+		"enumBooleanMap": {
+			"type": "map",
+			"key": {
+				"type": "string",
+				"name": "PetType",
+				"id": "org.sagebionetworks.PetType",
+				"enum": [
+					{
+						"name": "CAT",
+						"description": "Cats are better than dogs"
+					},
+					{
+						"name": "DOG",
+						"description": "nothing to say"
+					},
+					{
+						"name": "FISH",
+						"description": "Cats eat fish"
+					}
+				]
+			},
+			"value": {
+				"type": "boolean"
+			}
+		}
+	}
 }

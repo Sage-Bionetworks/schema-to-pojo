@@ -254,5 +254,31 @@ public class JSONArrayGwt extends GwtAdapterFactory implements JSONArrayAdapter 
 		}
 	}
 
+	@Override
+	public Object getObject(int index) throws JSONObjectAdapterException {
+		return get(index);
+	}
+
+	@Override
+	public JSONArrayAdapter putObject(int index, Object value) throws JSONObjectAdapterException {
+		if (value == null) {
+			return putNull(index);
+		} else if (value instanceof String) {
+			return put(index, (String) value);
+		} else if (value instanceof Integer) {
+			return put(index, (Integer) value);
+		} else if (value instanceof Long) {
+			return put(index, (Long) value);
+		} else if (value instanceof Boolean) {
+			return put(index, (Boolean) value);
+		} else if (value instanceof Double) {
+			return put(index, (Double) value);
+		} else if (value instanceof Date) {
+			return put(index, (Date) value);
+		} else {
+			throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for index: '%s'",
+					value.getClass().getName(), index));
+		}
+	}
 
 }
