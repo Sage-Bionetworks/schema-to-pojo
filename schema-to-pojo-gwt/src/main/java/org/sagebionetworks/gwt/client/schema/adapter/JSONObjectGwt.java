@@ -341,6 +341,6 @@ public class JSONObjectGwt extends GwtAdapterFactory implements JSONObjectAdapte
 		}else if(value instanceof Date) {
 			return put(key, (Date)value);
 		}
-		throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for key: '%s'", value.getClass().getName(), key));
+		throw new JSONObjectAdapterException("Unsupported value of type: '"+value.getClass().getName()+"' for key: '"+key+"'");
 	}
 }

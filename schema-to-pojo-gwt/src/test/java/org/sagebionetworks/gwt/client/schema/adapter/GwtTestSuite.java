@@ -740,4 +740,138 @@ public class GwtTestSuite extends GWTTestCase {
 		Date clone = DateUtils.convertStringToDate(FORMAT.UTC_MILLISEC, dateString);
 		assertEquals(now, clone);
 	}
+	
+	@Test
+	public void testArrayPutObjectWithError() throws JSONObjectAdapterException {
+		try {
+			// call under test
+			adapterArray.putObject(0, new HashSet());
+		}catch(JSONObjectAdapterException e) {
+			assertEquals("Unsupported value of type: 'java.util.HashSet' for index: '0'", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testArrayPutObjectWithString() throws JSONObjectAdapterException {
+		Object value = "someString";
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testArrayPutObjectWithNull() throws JSONObjectAdapterException {
+		Object value = null;
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testArrayPutObjectWithInteger() throws JSONObjectAdapterException {
+		Object value = new Integer(1);
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(new Double(1.0), result);
+	}
+	
+	@Test
+	public void testArrayPutObjectWithLong() throws JSONObjectAdapterException {
+		Object value = new Long(1);
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(new Double(1.0), result);
+	}
+	
+	@Test
+	public void testArrayPutObjectWithDouble() throws JSONObjectAdapterException {
+		Object value = new Double(1.2);
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testArrayPutObjectWithBoolean() throws JSONObjectAdapterException {
+		Object value = Boolean.TRUE;
+		// call under test
+		adapterArray.putObject(0, value);
+		Object result = adapterArray.getObject(0);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testputObjectWithError() throws JSONObjectAdapterException {
+		try {
+			// call under test
+			adapterObject.putObject("someKey", new HashSet());
+		}catch(JSONObjectAdapterException e) {
+			assertEquals("Unsupported value of type: 'java.util.HashSet' for key: 'someKey'", e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testPutObjectWithString() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = "someString";
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testPutObjectWithNull() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = null;
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testPutObjectWithInteger() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = new Integer(1);
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(new Double(1.0), result);
+	}
+	
+	@Test
+	public void testPutObjectWithLong() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = new Long(1);
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(new Double(1.0), result);
+	}
+	
+	@Test
+	public void testPutObjectWithDouble() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = new Double(1.2);
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testPutObjectWithBoolean() throws JSONObjectAdapterException {
+		String key = "someKey";
+		Object value = Boolean.TRUE;
+		// call under test
+		adapterObject.putObject(key, value);
+		Object result = adapterObject.get(key);
+		assertEquals(value, result);
+	}
 }
