@@ -1,6 +1,10 @@
 package org.sagebionetworks.schema.adapter.org.json;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -84,6 +88,59 @@ public class EntityFactory {
 		// First create an adapter with the datat
 		JSONObjectAdapter adapter = new JSONObjectAdapterImpl(jsonEntity);
 		return createEntityFromAdapter(clazz, adapter); 
+	}
+
+	/**
+	 * Read the provided JSON array string into a list of JSONEntites.
+	 * 
+	 * @param <T>
+	 * @param json  Must be a JSON array.
+	 * @param clazz
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static <T extends JSONEntity> ArrayList<T> readFromJSONArrayString(String json,
+			Class<? extends T> clazz) throws JSONObjectAdapterException {
+		if (json == null) {
+			throw new IllegalArgumentException("json cannot be null");
+		}
+		if (clazz == null) {
+			throw new IllegalArgumentException("JSONEntity class cannot be null");
+		}
+		JSONArrayAdapterImpl array = new JSONArrayAdapterImpl(json);
+		ArrayList<T> list = new ArrayList<T>(array.length());
+		for (int i = 0; (i < array.length()); i++) {
+			T item = (array.isNull(i)) ? null : createEntityFromAdapter(clazz, array.getJSONObject(i));
+			list.add(item);
+		}
+		return list;
+	}
+	
+	/**
+	 * Write the given collection of JSONEntites to JSON array string.
+	 * 
+	 * @param list
+	 * @return
+	 * @throws JSONObjectAdapterException
+	 */
+	public static String writeToJSONArrayString(Collection<? extends JSONEntity> list)
+			throws JSONObjectAdapterException {
+		if (list == null) {
+			throw new IllegalArgumentException("list cannot be null");
+		}
+		JSONArrayAdapterImpl adapter = new JSONArrayAdapterImpl();
+		int i = 0;
+		Iterator<? extends JSONEntity> it = list.iterator();
+		while (it.hasNext()) {
+			JSONEntity item = it.next();
+			if (item == null) {
+				adapter.putNull(i);
+			} else {
+				adapter.put(i, item.writeToJSONObject(new JSONObjectAdapterImpl()));
+			}
+			i++;
+		}
+		return adapter.toJSONString();
 	}
 
 	/**
