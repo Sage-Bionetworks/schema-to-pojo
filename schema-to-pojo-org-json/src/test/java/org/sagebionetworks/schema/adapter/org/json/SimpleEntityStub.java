@@ -37,9 +37,15 @@ public class SimpleEntityStub implements SimpleInterface, SimpleInterfaceWithDef
 		return value;
 	}
 
+	public SimpleEntityStub withValue(String value) {
+		this.value = value;
+		return this;
+	}
+	
 	public void setValue(String value) {
 		this.value = value;
 	}
+	
 	
 	public String getConcreteType(){
 		return this.concreteType;
@@ -49,6 +55,11 @@ public class SimpleEntityStub implements SimpleInterface, SimpleInterfaceWithDef
 		this.concreteType = type;
 	}
 
+	public SimpleEntityStub withConcreteType(String type){
+		this.concreteType = type;
+		return this;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
