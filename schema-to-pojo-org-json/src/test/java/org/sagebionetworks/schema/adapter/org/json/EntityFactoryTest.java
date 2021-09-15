@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.sagebionetworks.schema.ObjectSchema;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
@@ -220,5 +221,19 @@ public class EntityFactoryTest {
 			EntityFactory.readFromJSONArrayString("[]", clazz);
 		}).getMessage();
 		assertEquals("JSONEntity class cannot be null", message);
+	}
+	
+	/**
+	 * Test added for PLFM-6906
+	 * @throws JSONObjectAdapterException
+	 */
+	@Test
+	public void testCreateEntityFromJSONStringWithClassNotFound() throws JSONObjectAdapterException {
+		JSONObject jsonEntity = new JSONObject();
+		jsonEntity.put(ObjectSchema.CONCRETE_TYPE, "not.a.real.class");
+		String message = assertThrows(IllegalArgumentException.class, ()->{
+			EntityFactory.createEntityFromJSONObject(jsonEntity, SimpleInterface.class);
+		}).getMessage();
+		assertEquals("Unknown concreteType : 'not.a.real.class'", message);
 	}
 }

@@ -45,12 +45,12 @@ public class InterfaceTest {
 		// The interfaceField should have a concreteType since it's defined as a SomeInterface that does not have a default concrete type
 		String json = "{\"interfaceField\":{\"fromOne\":\"123\"}}";
 		
-		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {
+		String message = assertThrows(IllegalArgumentException.class, () -> {
 			// Call under test
 			EntityFactory.createEntityFromJSONString(json, HasInterfaceField.class);
-		});
+		}).getMessage();
 		
-		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", ex.getCause().getMessage());
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", message);
 		
 	}
 	
@@ -105,12 +105,12 @@ public class InterfaceTest {
 	public void testArrayOfInterfacesWithMissingConcreteType() throws JSONObjectAdapterException {
 		String json = "{\"list\":[{\"concreteType\":\"org.sagebionetworks.jstp20.OneImpl\",\"fromOne\":\"123\"},{\"fromOne\":\"456\"}]}";
 		
-		JSONObjectAdapterException ex = assertThrows(JSONObjectAdapterException.class, () -> {
+		String message = assertThrows(IllegalArgumentException.class, () -> {
 			// Call under test
 			EntityFactory.createEntityFromJSONString(json, HasListOfInterface.class);
-		});
+		}).getMessage();
 		
-		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", ex.getCause().getMessage());
+		assertEquals("Missing 'concreteType' property, cannot discriminate polymorphic type org.sagebionetworks.jstp20.SomeInterface", message);
 		
 	}
 	

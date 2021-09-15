@@ -159,12 +159,18 @@ public class EntityFactory {
 			if(clazz.isInterface()){
 				String concreteType = extractConcreteType(adapter, clazz);
 				// Use the concrete type to instantiate the object.
-				newInstance = (T) Class.forName(concreteType).newInstance();
+				try {
+					newInstance = (T) Class.forName(concreteType).newInstance();
+				} catch (ClassNotFoundException e) {
+					throw new IllegalArgumentException(String.format("Unknown %s : '%s'",ObjectSchema.CONCRETE_TYPE, concreteType), e);
+				}
 			}else{
 				newInstance = clazz.newInstance();
 			}
 			newInstance.initializeFromJSONObject(adapter);
 			return newInstance;
+		}  catch (IllegalArgumentException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new JSONObjectAdapterException(e);
 		}
