@@ -141,6 +141,21 @@ public class EntityFactoryTest {
 	}
 	
 	@Test
+	public void testCreateEntityFromJSONStringWithUnexpectedConcreteType() throws JSONObjectAdapterException {
+
+		// A json string without concrete type,
+		String json = "{\"value\":\"some value\", \"concreteType\": \"java.lang.String\"}";
+
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+			// Call under test
+			EntityFactory.createEntityFromJSONString(json, SimpleInterface.class);
+		});
+
+		assertEquals("Unexpected concreteType: \"java.lang.String\" is not of type \"org.sagebionetworks.schema.adapter.org.json.SimpleInterface\"", ex.getMessage());
+
+	}
+	
+	@Test
 	public void testWriteAndReadJSONArrayString() throws JSONObjectAdapterException {
 		List<SimpleEntityStub> list = Arrays.asList(new SimpleEntityStub().withValue("1"), null,
 				new SimpleEntityStub().withValue("2"));

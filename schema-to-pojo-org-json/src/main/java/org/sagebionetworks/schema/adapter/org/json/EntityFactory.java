@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.json.JSONObject;
 import org.sagebionetworks.schema.ObjectSchema;
@@ -156,20 +155,25 @@ public class EntityFactory {
 		// Now create a new instance of the class
 		try {
 			T newInstance = null;
-			if(clazz.isInterface()){
+			if (clazz.isInterface()) {
 				String concreteType = extractConcreteType(adapter, clazz);
+				Class<T> newInstanceClass;
 				// Use the concrete type to instantiate the object.
 				try {
-					newInstance = (T) Class.forName(concreteType).newInstance();
+					newInstanceClass = (Class<T>) Class.forName(concreteType);
 				} catch (ClassNotFoundException e) {
-					throw new IllegalArgumentException(String.format("Unknown %s : '%s'",ObjectSchema.CONCRETE_TYPE, concreteType), e);
+					throw new IllegalArgumentException(String.format("Unknown %s : '%s'", ObjectSchema.CONCRETE_TYPE, concreteType), e);
 				}
-			}else{
+				if (!clazz.isAssignableFrom(newInstanceClass)) {
+					throw new IllegalArgumentException(String.format("Unexpected concreteType: \"%s\" is not of type \"%s\"", concreteType, clazz.getName()));
+				}
+				newInstance = newInstanceClass.newInstance();
+			} else {
 				newInstance = clazz.newInstance();
 			}
 			newInstance.initializeFromJSONObject(adapter);
 			return newInstance;
-		}  catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new JSONObjectAdapterException(e);
