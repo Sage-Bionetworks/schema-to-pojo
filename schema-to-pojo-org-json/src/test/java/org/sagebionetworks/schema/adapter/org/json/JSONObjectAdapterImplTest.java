@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -499,6 +500,26 @@ public class JSONObjectAdapterImplTest {
 		// call under test
 		adapter.putObject(propertyKey, value);
 		assertEquals(value.getTime(), adapter.get(propertyKey));
+	}
+	
+	@Test
+	public void testPutObjectWithJSONArray() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		JSONArrayAdapter value = new JSONArrayAdapterImpl(new JSONArray("[1,2,3]"));
+		// call under test
+		adapter.putObject(propertyKey, value);
+		Object result = adapter.get(propertyKey);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testPutObjectWithJSONObject() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		JSONObjectAdapter value = new JSONObjectAdapterImpl("{\"a\":true}");
+		// call under test
+		adapter.putObject(propertyKey, value);
+		Object result = adapter.get(propertyKey);
+		assertEquals(value, result);
 	}
 	
 	@Test

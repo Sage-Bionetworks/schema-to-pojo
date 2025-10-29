@@ -234,7 +234,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 
 	@Override
 	public boolean equals(Object obj) {
-		return wrapped.equals(obj);
+		return wrapped.equals(obj instanceof JSONArrayAdapterImpl? ((JSONArrayAdapterImpl)obj).wrapped: obj );
 	}
 
 	@Override
@@ -290,12 +290,17 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 		Object result = wrapped.get(index);
 		if (JSONObject.NULL == result) {
 			return null;
+		} else if (result instanceof JSONObject) {
+			return new JSONObjectAdapterImpl((JSONObject) result);
+		} else if (result instanceof JSONArray) {
+			return new JSONArrayAdapterImpl((JSONArray) result);
 		} else if (result instanceof String || result instanceof Integer || result instanceof Long
-				|| result instanceof Boolean || result instanceof Date || result instanceof Double) {
+				|| result instanceof Boolean || result instanceof Date || result instanceof Double
+				|| result instanceof JSONArray || result instanceof JSONObject) {
 			return result;
 		} else {
-			throw new JSONObjectAdapterException(
-					String.format("Unsupported value of type: '%s' for index: '%s'", result.getClass().getName(), index));
+			throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for index: '%s'",
+					result.getClass().getName(), index));
 		}
 	}
 
@@ -315,6 +320,10 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 			return put(index, (Double) value);
 		} else if (value instanceof Date) {
 			return put(index, (Date) value);
+		}else if (value instanceof JSONArrayAdapter) {
+			return put(index, (JSONArrayAdapter) value);
+		}else if (value instanceof JSONObjectAdapter) {
+			return put(index, (JSONObjectAdapter) value);
 		} else {
 			throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for index: '%s'",
 					value.getClass().getName(), index));

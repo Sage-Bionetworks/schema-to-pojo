@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
-import java.util.LinkedList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -274,25 +273,25 @@ public class JSONArrayAdapterImplTest {
 	}
 	
 	@Test
-	public void testGetObjectWithInvalid() throws JSONObjectAdapterException {
-		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+	public void testGetPutObjectWithJsonArray() throws JSONObjectAdapterException {
+		Object value = new JSONArrayAdapterImpl("[1,3,2]");
 		int index = 0;
-		adapter.put(index, value);
-		String message = assertThrows(JSONObjectAdapterException.class, ()->{
-			// call under test
-			adapter.getObject(index);
-		}).getMessage();
-		assertEquals("Unsupported value of type: 'org.json.JSONObject' for index: '0'", message);
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
 	}
 	
 	@Test
-	public void testPutObjectWithInvalid() throws JSONObjectAdapterException {
-		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+	public void testGetPutObjectWithJsonObject() throws JSONObjectAdapterException {
+		Object value = new JSONObjectAdapterImpl("{\"a\":true}");
 		int index = 0;
-		String message = assertThrows(JSONObjectAdapterException.class, ()->{
-			// call under test
-			adapter.putObject(index, value);
-		}).getMessage();
-		assertEquals("Unsupported value of type: 'org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl' for index: '0'", message);
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
 	}
+
 }
