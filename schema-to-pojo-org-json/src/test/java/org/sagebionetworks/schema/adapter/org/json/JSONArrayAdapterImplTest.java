@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
-import java.util.LinkedList;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
@@ -274,25 +275,47 @@ public class JSONArrayAdapterImplTest {
 	}
 	
 	@Test
-	public void testGetObjectWithInvalid() throws JSONObjectAdapterException {
-		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+	public void testGetPutObjectWithJsonArrayAdapter() throws JSONObjectAdapterException {
+		Object value = new JSONArrayAdapterImpl("[1,3,2]");
 		int index = 0;
-		adapter.put(index, value);
-		String message = assertThrows(JSONObjectAdapterException.class, ()->{
-			// call under test
-			adapter.getObject(index);
-		}).getMessage();
-		assertEquals("Unsupported value of type: 'org.json.JSONObject' for index: '0'", message);
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
 	}
 	
 	@Test
-	public void testPutObjectWithInvalid() throws JSONObjectAdapterException {
-		JSONObjectAdapterImpl value = new JSONObjectAdapterImpl();
+	public void testGetPutObjectWithJSONArray() throws JSONObjectAdapterException {
+		JSONArray value = new JSONArray("[1,3,2]");
 		int index = 0;
-		String message = assertThrows(JSONObjectAdapterException.class, ()->{
-			// call under test
-			adapter.putObject(index, value);
-		}).getMessage();
-		assertEquals("Unsupported value of type: 'org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl' for index: '0'", message);
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(new JSONArrayAdapterImpl(value), result);
 	}
+	
+	@Test
+	public void testGetPutObjectWithJsonObjectAdapter() throws JSONObjectAdapterException {
+		Object value = new JSONObjectAdapterImpl("{\"a\":true}");
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithJSONObject() throws JSONObjectAdapterException {
+		JSONObject value = new JSONObject("{\"a\":true}");
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(new JSONObjectAdapterImpl(value), result);
+	}
+
 }

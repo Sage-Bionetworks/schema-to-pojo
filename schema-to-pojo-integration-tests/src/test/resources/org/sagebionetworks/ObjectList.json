@@ -1,0 +1,11 @@
+{
+	"type": "object",
+	"properties": {
+		"cellValues": {
+			"type": "array",
+			"items": {
+				"type": "object"
+			}
+		}
+	}
+}
