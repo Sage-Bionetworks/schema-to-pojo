@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
@@ -273,7 +275,7 @@ public class JSONArrayAdapterImplTest {
 	}
 	
 	@Test
-	public void testGetPutObjectWithJsonArray() throws JSONObjectAdapterException {
+	public void testGetPutObjectWithJsonArrayAdapter() throws JSONObjectAdapterException {
 		Object value = new JSONArrayAdapterImpl("[1,3,2]");
 		int index = 0;
 		// call under test
@@ -284,7 +286,18 @@ public class JSONArrayAdapterImplTest {
 	}
 	
 	@Test
-	public void testGetPutObjectWithJsonObject() throws JSONObjectAdapterException {
+	public void testGetPutObjectWithJSONArray() throws JSONObjectAdapterException {
+		JSONArray value = new JSONArray("[1,3,2]");
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(new JSONArrayAdapterImpl(value), result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithJsonObjectAdapter() throws JSONObjectAdapterException {
 		Object value = new JSONObjectAdapterImpl("{\"a\":true}");
 		int index = 0;
 		// call under test
@@ -292,6 +305,17 @@ public class JSONArrayAdapterImplTest {
 		// call under test
 		Object result = adapter.getObject(index);
 		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testGetPutObjectWithJSONObject() throws JSONObjectAdapterException {
+		JSONObject value = new JSONObject("{\"a\":true}");
+		int index = 0;
+		// call under test
+		adapter.putObject(index, value);
+		// call under test
+		Object result = adapter.getObject(index);
+		assertEquals(new JSONObjectAdapterImpl(value), result);
 	}
 
 }

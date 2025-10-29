@@ -503,7 +503,7 @@ public class JSONObjectAdapterImplTest {
 	}
 	
 	@Test
-	public void testPutObjectWithJSONArray() throws JSONObjectAdapterException {
+	public void testPutObjectWithJSONArrayAdapter() throws JSONObjectAdapterException {
 		adapter = new JSONObjectAdapterImpl();
 		JSONArrayAdapter value = new JSONArrayAdapterImpl(new JSONArray("[1,2,3]"));
 		// call under test
@@ -513,13 +513,33 @@ public class JSONObjectAdapterImplTest {
 	}
 	
 	@Test
-	public void testPutObjectWithJSONObject() throws JSONObjectAdapterException {
+	public void testPutObjectWithJSONArray() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		JSONArray value = new JSONArray("[1,2,3]");
+		// call under test
+		adapter.putObject(propertyKey, value);
+		Object result = adapter.get(propertyKey);
+		assertEquals(new JSONArrayAdapterImpl(value), result);
+	}
+	
+	@Test
+	public void testPutObjectWithJSONObjectAdapter() throws JSONObjectAdapterException {
 		adapter = new JSONObjectAdapterImpl();
 		JSONObjectAdapter value = new JSONObjectAdapterImpl("{\"a\":true}");
 		// call under test
 		adapter.putObject(propertyKey, value);
 		Object result = adapter.get(propertyKey);
 		assertEquals(value, result);
+	}
+	
+	@Test
+	public void testPutObjectWithJSONObject() throws JSONObjectAdapterException {
+		adapter = new JSONObjectAdapterImpl();
+		JSONObject value = new JSONObject("{\"a\":true}");
+		// call under test
+		adapter.putObject(propertyKey, value);
+		Object result = adapter.get(propertyKey);
+		assertEquals(new JSONObjectAdapterImpl(value), result);
 	}
 	
 	@Test

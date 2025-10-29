@@ -398,9 +398,13 @@ public class JSONObjectAdapterImpl extends AdapterFactoryImpl implements JSONObj
 			return put(key, (Date) value);
 		} else if (value instanceof JSONArrayAdapter) {
 			return put(key, (JSONArrayAdapter) value);
-		}  else if (value instanceof JSONObjectAdapter) {
+		} else if (value instanceof JSONObjectAdapter) {
 			return put(key, (JSONObjectAdapter) value);
-		}else {
+		} else if (value instanceof JSONArray) {
+			return put(key, new JSONArrayAdapterImpl((JSONArray) value));
+		} else if (value instanceof JSONObject) {
+			return put(key, new JSONObjectAdapterImpl((JSONObject) value));
+		} else {
 			throw new JSONObjectAdapterException(
 					String.format("Unsupported value of type: '%s' for key: '%s'", value.getClass().getName(), key));
 		}

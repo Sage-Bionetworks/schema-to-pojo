@@ -295,8 +295,7 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 		} else if (result instanceof JSONArray) {
 			return new JSONArrayAdapterImpl((JSONArray) result);
 		} else if (result instanceof String || result instanceof Integer || result instanceof Long
-				|| result instanceof Boolean || result instanceof Date || result instanceof Double
-				|| result instanceof JSONArray || result instanceof JSONObject) {
+				|| result instanceof Boolean || result instanceof Date || result instanceof Double) {
 			return result;
 		} else {
 			throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for index: '%s'",
@@ -324,7 +323,11 @@ public class JSONArrayAdapterImpl extends AdapterFactoryImpl implements JSONArra
 			return put(index, (JSONArrayAdapter) value);
 		}else if (value instanceof JSONObjectAdapter) {
 			return put(index, (JSONObjectAdapter) value);
-		} else {
+		} else if (value instanceof JSONObject) {
+			return put(index, new JSONObjectAdapterImpl((JSONObject)value));
+		}else if (value instanceof JSONArray) {
+			return put(index, new JSONArrayAdapterImpl((JSONArray)value));
+		}  else {
 			throw new JSONObjectAdapterException(String.format("Unsupported value of type: '%s' for index: '%s'",
 					value.getClass().getName(), index));
 		}
