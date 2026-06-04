@@ -1,0 +1,30 @@
+{
+	"type": "object",
+	"$recursiveAnchor": true,
+	"description": "A recursive root containing an inline named object whose properties recurse back to the root. Exercises that an inline named OBJECT (declaring its own name/id and properties, not a $ref) is generated as a complete class with fields and marshaling, and that both array-of-$recursiveRef and direct-$recursiveRef slots inside it resolve to the anchor type.",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"compound": {
+			"type": "object",
+			"name": "InlineNamedRecursiveCompound",
+			"id": "org.sagebionetworks.InlineNamedRecursiveCompound",
+			"description": "An inline named object nested inside the recursive root.",
+			"properties": {
+				"children": {
+					"type": "array",
+					"items": {
+						"$recursiveRef": "#"
+					}
+				},
+				"single": {
+					"$recursiveRef": "#"
+				},
+				"label": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

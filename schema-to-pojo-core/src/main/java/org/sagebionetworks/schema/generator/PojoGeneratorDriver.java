@@ -58,8 +58,14 @@ public class PojoGeneratorDriver {
 		// We are now ready to start creating the classes
 		// First create the package
 		JPackage _package = codeModel._package("");
+		// An inline named object (a property that declares its own name/id and properties rather
+		// than using a $ref to a root schema) is only ever turned into a class shell by
+		// createOrGetType during its parent's addProperties; the field + marshaling pass below
+		// runs once per schema, so without collecting these here they would compile to an empty
+		// class. Gather them up-front so each gets a complete POJO exactly once.
+		List<ObjectSchema> allToGenerate = collectAllSchemasToGenerate(list);
 		// Now recursively process all of the schema objects
-		for(ObjectSchema schema: list){
+		for(ObjectSchema schema: allToGenerate){
 			// Create each POJO
 			createPOJO(codeModel, schema, interfaceFactoryGenerator);
 		}
@@ -70,6 +76,63 @@ public class PojoGeneratorDriver {
 		interfaceFactoryGenerator.buildFactories();
 	}
 	
+	/**
+	 * Build the full list of schemas that need a complete POJO: every root schema, plus every
+	 * inline named OBJECT schema reachable from a root. An inline named object is a property whose
+	 * schema declares its own {@code name}/{@code id} and {@code properties} instead of using a
+	 * {@code $ref} to a root schema; {@link #createOrGetType} gives it a class shell, but the field
+	 * and marshaling handlers only run via {@link #createPOJO}, so it must be generated here too.
+	 *
+	 * <p>De-duplicates by id so a type referenced from several places is generated once. Recursive
+	 * reference instances (the copy a {@code $recursiveRef} resolves to, which carries the anchor's
+	 * id) are skipped &mdash; the anchor itself is already a root schema.</p>
+	 *
+	 * @param roots the root schemas, post-preprocessing
+	 * @return the roots followed by any inline named object schemas, each appearing once
+	 */
+	static List<ObjectSchema> collectAllSchemasToGenerate(List<ObjectSchema> roots) {
+		LinkedHashMap<String, ObjectSchema> byId = new LinkedHashMap<String, ObjectSchema>();
+		List<ObjectSchema> ordered = new ArrayList<ObjectSchema>();
+		for (ObjectSchema root : roots) {
+			ordered.add(root);
+			if (root.getId() != null) {
+				byId.put(root.getId(), root);
+			}
+		}
+		for (ObjectSchema root : roots) {
+			collectInlineNamedObjects(root, byId, ordered);
+		}
+		return ordered;
+	}
+
+	/**
+	 * Recursively collect inline named OBJECT schemas reachable from {@code schema}, adding each new
+	 * one (by id) to {@code byId} and {@code ordered}.
+	 */
+	private static void collectInlineNamedObjects(ObjectSchema schema,
+			LinkedHashMap<String, ObjectSchema> byId, List<ObjectSchema> ordered) {
+		Iterator<ObjectSchema> it = schema.getSubSchemaIterator();
+		while (it.hasNext()) {
+			ObjectSchema sub = it.next();
+			boolean isInlineNamedObject = sub.getId() != null
+					&& TYPE.OBJECT == sub.getType()
+					&& sub.getProperties() != null
+					&& sub.getEnum() == null
+					&& !sub.is$RecursiveRefInstance()
+					&& !byId.containsKey(sub.getId());
+			if (isInlineNamedObject) {
+				byId.put(sub.getId(), sub);
+				ordered.add(sub);
+			}
+			// Recurse regardless: a non-collected node (array wrapper, map, already-seen type) may
+			// still contain inline named objects deeper in the tree. A recursive-ref instance is the
+			// one place we must not descend — it is a copy of the anchor and would loop forever.
+			if (!sub.is$RecursiveRefInstance()) {
+				collectInlineNamedObjects(sub, byId, ordered);
+			}
+		}
+	}
+
 	static void validateDefaultConcreteTypes(JCodeModel codeModel, List<ObjectSchema> schemas) {
 		schemas.stream()
 			// Consider only interfaces with the the default concrete type
