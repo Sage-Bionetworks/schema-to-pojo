@@ -9,7 +9,7 @@ import org.sagebionetworks.schema.TYPE;
 public class PropertyUtils {
 
 	public static JFieldVar getPropertyReference(JDefinedClass classType, String propName) {
-		String fieldName = JavaKeyword.determineJavaName(propName);
+		String fieldName = JavaKeyword.determineJavaPropertyName(propName);
 		JFieldVar field = classType.fields().get(fieldName);
 		if (field == null)
 			throw new IllegalArgumentException(
