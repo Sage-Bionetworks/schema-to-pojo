@@ -110,7 +110,7 @@ public class ToStringHandlerImpl03 implements ToStringHandler {
 					TYPE.STRING == type ||
 					TYPE.INTERFACE == type){
 				//add an assignment statements to the body
-				body.add(result.invoke("append").arg(JavaKeyword.determineJavaName(keyName) + "="));
+				body.add(result.invoke("append").arg(JavaKeyword.determineJavaPropertyName(keyName) + "="));
 				body.add(result.invoke("append").arg(field));
 				body.add(result.invoke("append").arg(" "));
 			}else {

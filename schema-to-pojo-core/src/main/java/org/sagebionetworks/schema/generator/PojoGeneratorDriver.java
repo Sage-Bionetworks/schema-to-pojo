@@ -211,7 +211,7 @@ public class PojoGeneratorDriver {
 			// Get type type for this property
 			JType propertyType = createOrGetType(codeModel, propertySchema);
 			// Create this property
-			String javaFieldName = JavaKeyword.determineJavaName(propertyName);
+			String javaFieldName = JavaKeyword.determineJavaPropertyName(propertyName);
 			factory.getPropertyHandler().createProperty(propertySchema,
 					classType, javaFieldName, propertyType);
 		}

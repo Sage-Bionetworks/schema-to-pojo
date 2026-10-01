@@ -60,4 +60,37 @@ class JavaKeywordTest {
 		assertEquals("enum", JavaKeyword.determineJsonName("_enum"));
 		assertEquals("null", JavaKeyword.determineJsonName("_null"));
 	}
+
+	@Test
+	void testDetermineJavaPropertyNameWithNullOrEmpty() {
+		assertNull(JavaKeyword.determineJavaPropertyName(null));
+		assertEquals("", JavaKeyword.determineJavaPropertyName(""));
+	}
+
+	@Test
+	void testDetermineJavaPropertyNameWithLegalIdentifier() {
+		// Every property name already in use must pass through untouched, including the
+		// leading-underscore system fields (_score, _source) and the Java-keyword escape.
+		assertEquals("foobar", JavaKeyword.determineJavaPropertyName("foobar"));
+		assertEquals("_score", JavaKeyword.determineJavaPropertyName("_score"));
+		assertEquals("match_phrase_prefix", JavaKeyword.determineJavaPropertyName("match_phrase_prefix"));
+		assertEquals("size2", JavaKeyword.determineJavaPropertyName("size2"));
+		assertEquals("_class", JavaKeyword.determineJavaPropertyName("class"));
+	}
+
+	@Test
+	void testDetermineJavaPropertyNameWithHyphen() {
+		assertEquals("normalizationProcessor",
+				JavaKeyword.determineJavaPropertyName("normalization-processor"));
+		assertEquals("scoreRankerProcessor",
+				JavaKeyword.determineJavaPropertyName("score-ranker-processor"));
+	}
+
+	@Test
+	void testDetermineJavaPropertyNameWithLeadingIllegalCharacter() {
+		// A digit is a legal identifier part but not a legal start, so it is dropped rather than
+		// producing an identifier that cannot compile.
+		assertEquals("abc", JavaKeyword.determineJavaPropertyName("1abc"));
+		assertEquals("aB", JavaKeyword.determineJavaPropertyName("-a-b"));
+	}
 }

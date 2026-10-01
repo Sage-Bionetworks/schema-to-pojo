@@ -1,0 +1,10 @@
+{
+	"properties":{
+		"normalization-processor":{
+			"type":"string"
+		},
+		"nested-keywords":{
+			"$ref":"org.sagebionetworks.KeywordAsProperties"
+		}
+	}
+}

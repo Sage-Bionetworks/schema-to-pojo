@@ -102,7 +102,9 @@ public class ObjectSchemaImpl implements ObjectSchema {
 	public static String getKeyConstantName(String propertyName) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(KEY_PREFIX);
-		builder.append(propertyName.toUpperCase());
+		// Only the constant's NAME is sanitized; its value stays the verbatim JSON key, so a property
+		// whose key is not a legal Java identifier still serializes under its original name.
+		builder.append(JavaKeyword.determineJavaPropertyName(propertyName).toUpperCase());
 		return builder.toString();
 	}
 	
